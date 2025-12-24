@@ -1,0 +1,61 @@
+# PLAN CONTEXT
+
+---
+
+**Plan Name**: {PlanName}
+**Plan File**: {Slice}/{PlanName}.plan (resides at slice root)
+**Tasks Inventory**: {Slice}/{PlanName}.plan.Tasks.inventory
+**Related Task**: {Link to .task that initiated this plan}
+**Owner**: {Role}
+
+## Objective
+
+{What this plan should achieve}
+
+## Context
+
+- Current state: {bullets}
+- Constraints: {bullets}
+- Assumptions: {bullets}
+
+## Decisions
+
+- D1: {Decision} — Rationale: {Why}
+- D2: {Decision} — Rationale: {Why}
+
+## Implementation Notes
+
+{Guidance for implementers, references to code/diagrams}
+
+**Task Tracking**: Maintain `{PlanName}.plan.Tasks.inventory` alongside this plan file listing all related `.task` files. Tasks may be distributed across components but must be listed in the inventory for auditing and automation.
+
+## Verification
+
+- [ ] `<BUILD_CMD>` clean
+- [ ] `<TEST_CMD>` passes
+- [ ] All tasks in `{PlanName}.plan.Tasks.inventory` are tracked
+- [ ] Additional checks: {list}
+
+## Task Inventory Management
+
+Create `{PlanName}.plan.Tasks.inventory` in the same directory as this plan:
+
+
+```markdown
+# {PlanName} - Tasks
+
+## {Component/Feature Section}
+
+{Slice}/{Task}.task
+{Slice}/{Task}.task
+
+## {Another Section}
+
+{Slice}/{Task}.task
+```
+
+Update the inventory when:
+
+- Adding new tasks related to this plan
+- Completing tasks (mark with comment or move section to "## Completed")
+- Archiving the plan (move plan and inventory together to slice-level `archive/` directory)

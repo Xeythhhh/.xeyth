@@ -1,0 +1,113 @@
+# Task Template Metadata Contract
+
+# This metadata file defines the structure and validation rules for .task files
+# The automation tool discovers this file and uses it to validate task files
+
+# File targeting - which files does this contract apply to
+target:
+  # Glob patterns to match files
+  patterns:
+    - "**/*.task"
+  # Exclusions
+  exclude:
+    - "**/archive/**"
+    - "**/*.template"
+
+# Schema definition
+schema:
+  # Required sections (markdown headings)
+  requiredSections:
+    - name: "Delegation Prompt"
+      level: 2
+      description: "Top-level section for role-based delegation"
+      
+    - name: "Task Details"
+      level: 2
+      description: "Detailed task information and tracking"
+  
+  # Required fields within sections
+  requiredFields:
+    - section: "Delegation Prompt"
+      fields:
+        - name: "Role"
+          pattern: "^## Role: (Orchestrator|Planner|Reviewer|Implementer|Scaffolder|Cleanup)$"
+          description: "Must specify one of the defined roles"
+          
+        - name: "Task File"
+          pattern: "^\\*\\*Task File\\*\\*: .+\\.task$"
+          description: "Must specify the task file path"
+          
+        - name: "Objective"
+          pattern: "^\\*\\*Objective\\*\\*: .+"
+          description: "One-line objective statement"
+    
+    - section: "Task Details"
+      fields:
+        - name: "Status"
+          pattern: "^Status: (Not Started|In Progress|Complete|Blocked)$"
+          description: "Must be one of the valid status values"
+          
+        - name: "Owner"
+          pattern: "^Owner: .+$"
+          description: "Task owner/role"
+          
+        - name: "Priority"
+          pattern: "^Priority: (High|Medium|Low)$"
+          description: "Task priority level"
+          
+        - name: "Effort"
+          pattern: "^Effort: (Small|Medium|Large)$"
+          description: "Estimated effort"
+
+# Naming conventions
+naming:
+  # Pattern for task file names
+  pattern: "^[A-Z][a-zA-Z0-9]+\\.task$"
+  description: "PascalCase followed by .task extension"
+  examples:
+    - "InventorySystem.task"
+    - "DogfoodFramework.task"
+    - "SolutionSetup.task"
+
+# Archiving rules
+archiving:
+  # Target directory pattern
+  directory: "archive"
+  # Naming pattern when archived
+  pattern: "^[A-Z][a-zA-Z0-9]+\\.\\d{4}-\\d{2}-\\d{2}\\.task$"
+  description: "Original name with date suffix when archived"
+  examples:
+    - "InventorySystem.2024-12-24.task"
+    - "DogfoodFramework.2024-12-24.task"
+
+# Related files
+relatedFiles:
+  # Report files associated with this task
+  - pattern: "{TaskName}.task.*.report"
+    description: "Progress and blocker reports"
+    required: false
+  
+  # Inventory files that should reference this task
+  - pattern: "**/*.inventory"
+    description: "Task should be listed in relevant inventory"
+    validation: "checkInventoryReference"
+
+# Validation rules
+validation:
+  # Custom validation rules
+  rules:
+    - name: "checkInventoryReference"
+      description: "Verify task is listed in at least one inventory file"
+      
+    - name: "deliverables-match-success-criteria"
+      description: "Deliverables section should align with success criteria"
+      
+    - name: "progress-log-exists"
+      description: "Task must have at least one progress log entry"
+
+# Metadata about this contract
+meta:
+  version: "1.0"
+  author: "AI Framework"
+  description: "Contract for .task context files"
+  lastUpdated: "2024-12-24"

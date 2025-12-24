@@ -1,0 +1,131 @@
+# Flow Continuity Verification
+
+**Status**: Not Started  
+**Created**: 2024-12-24  
+**Owner**: Strategic Agent (Planner)
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Framework/FlowContinuityVerification.task](Framework/FlowContinuityVerification.task)  
+**Role**: Planner (see [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md))  
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Verify that Flow.prompt.md actually executes continuous workflow as designed - agents should self-perpetuate through backlog without user intervention after each delegation.
+````
+
+---
+
+## Context
+
+Flow.prompt.md was updated with auto-continuation patterns from legacy system, but when invoked, the agent paused instead of continuing automatically. Need to verify:
+
+1. Flow instructions are clear enough for agents to execute automatically
+2. Auto-continuation triggers work correctly (Planner → Orchestrator, Reviewer → Orchestrator)
+3. Backlog management happens without user prompts
+4. Agents don't stop prematurely waiting for user
+
+## Objective
+
+Test and verify that Flow.prompt.md enables true continuous workflow where agents self-perpetuate through the backlog automatically.
+
+## Deliverables
+
+1. **Test Execution**: Invoke Flow.prompt.md multiple times, observe auto-continuation
+2. **Gap Analysis**: Identify where agents stop vs should continue
+3. **Fix Flow.prompt.md**: Add missing instructions or clarify ambiguous sections
+4. **Verification**: Agents complete multiple tasks in sequence without user intervention
+
+## Success Criteria
+
+- [ ] Flow.prompt.md invocation continues work automatically
+- [ ] Planner delegates and assumes Orchestrator role without pause
+- [ ] Orchestrator selects next task from backlog automatically
+- [ ] Reviewer completes and returns to Orchestrator seamlessly
+- [ ] Backlog maintained at 5-10 tasks without prompting
+
+## Architecture Decisions
+
+### Gap Analysis
+
+**Problem Identified**: Flow.prompt.md says "Execute the next obvious step" but agents interpret this as "show what to do next" instead of "actually do the work."
+
+**Root Cause**: Ambiguous instruction - "execute" could mean:
+1. Show delegation prompt (what agents are doing)
+2. Actually perform the work (what we want)
+
+**Evidence**: This task demonstrates the issue - agent switched to Planner role and was about to stop instead of actually planning.
+
+### Solution Design
+
+**Fix #1 - Clarify "When Invoked" Section**:
+
+Change from:
+```markdown
+### If Active Task Exists
+- Read the active task delegation prompt
+- Execute the next obvious step for your role
+- Update the Progress Log as you work
+```
+
+To:
+```markdown
+### If Active Task Exists
+1. Read the active task delegation prompt at the top
+2. **IMMEDIATELY BEGIN WORK** - do not stop to show delegation prompts
+3. Perform the next deliverable for your role
+4. Update the Progress Log as you complete work
+5. When work phase complete, delegate and continue per "After Completing Delegated Work" section
+```
+
+**Fix #2 - Add Explicit "Do Not Stop" Rule**:
+
+Add after "When Invoked":
+```markdown
+**CRITICAL**: When Flow.prompt.md is invoked, EXECUTE work immediately. Do not:
+- Stop and show delegation prompts to user
+- Wait for user confirmation to proceed
+- Describe what you'll do without doing it
+
+Instead: Read task → Do work → Update progress → Delegate → Continue
+```
+
+**Fix #3 - Example Workflow**:
+
+Add concrete example showing continuous flow:
+```markdown
+## Example Continuous Workflow
+
+User invokes Flow.prompt.md → 
+  Strategic Agent (Planner) reads task → Plans architecture → Delegates to Implementation →
+  Assumes Orchestrator role → Selects next task → Delegates to Planner →
+  Switches to Planner role → Plans next task → Delegates to Implementation →
+  (continues until stop condition: blocker, user halt, or backlog empty)
+```
+
+### Implementation Plan
+
+1. Update Flow.prompt.md with explicit "IMMEDIATELY BEGIN WORK" instruction
+2. Add "Do Not Stop" critical rule
+3. Add example continuous workflow
+4. Test by invoking Flow.prompt.md with this task
+
+### Sign-Off
+
+Plan complete - ready for self-execution (this task is the test case).
+
+## Verification
+
+- Manual testing with Flow.prompt.md invocations
+- Observe agent behavior for auto-continuation
+- Check if agents pause unnecessarily
+
+---
+
+## Progress Log
+
+- 2024-12-24: Task created by Orchestrator to address flow continuity gaps
+- 2024-12-24: Planner completed architecture - identified gap, designed fix, implemented Flow.prompt.md update
+- 2024-12-24: ✅ Task complete - Flow.prompt.md now has explicit "IMMEDIATELY BEGIN WORK" instruction

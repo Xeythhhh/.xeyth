@@ -1,0 +1,21 @@
+# .xeyth Framework Configuration
+# This file is optional; defaults apply when absent.
+
+orchestrator:
+  backlog:
+    minimum: {5}          # Create new tasks when backlog drops below this
+    maximum: {20}         # Pause task creation when backlog exceeds this
+    createThreshold: {7}  # Target backlog size to maintain
+
+testing:
+  verify:
+    diffTool: {VisualStudioCodeInsiders}  # Preferred diff viewer for Verify snapshots
+
+conventions:
+  archiving:
+    dateFormat: "{yyyy-MM-dd}"  # Date format for archive filenames
+    directoryName: "{archive}"  # Archive directory name
+
+models:
+  strategic: "{Claude Sonnet 4.5}"         # Strategic Agent model requirement
+  implementation: "{GPT-5.1-Codex-Max}"    # Implementation Agent model requirement

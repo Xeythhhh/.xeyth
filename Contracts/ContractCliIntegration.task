@@ -1,0 +1,85 @@
+# Contract CLI Integration - Validation Command
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Contracts/ContractCliIntegration.task](Contracts/ContractCliIntegration.task)  
+**Role**: Implementer (see [Framework/Implementation.prompt.md](../Framework/Implementation.prompt.md))  
+**Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
+
+Integrate contract validation engine into CLI - add `xeyth-contracts validate` command with beautiful error reporting and exit codes for CI/CD.
+````
+
+---
+
+Status: Complete  
+Owner: Implementation Agent  
+Priority: High  
+Effort: Small  
+Priority Score: 8 (Impact:5 + Urgency:3 + Dependency:2 - Complexity:1 - Validation engine ready)
+
+## Objective
+
+Add `xeyth-contracts validate` command to contracts CLI, integrating the validation engine with user-friendly output, color coding by severity, and CI/CD-friendly exit codes.
+
+## Task Context
+
+**Current State**:
+- ContractValidationService complete (12 tests passing)
+- ValidationResult models with severity levels (Error/Warning/Info)
+- No CLI integration yet
+
+**Desired State**:
+- `xeyth-contracts validate [--path <file>] [--contract <name>]` command
+- Beautiful terminal output (colored by severity)
+- Exit code 1 on errors, 0 on success/warnings
+- Summary reporting (X errors, Y warnings)
+
+## Deliverables
+
+- D1: Add validate command to Contracts.Cli project
+- D2: Error reporting with color coding (Spectre.Console)
+- D3: Summary output (total files, errors, warnings)
+- D4: Exit code handling (1 on errors, 0 otherwise)
+- D5: Tests for CLI validation flow
+- D6: Documentation (README.md usage examples)
+
+## Architecture Decisions
+
+**AD-1**: Output format
+- Errors in red, warnings in yellow, info in cyan
+- File path + line number for each violation
+- Summary table at end
+
+**AD-2**: CLI flags
+- `--path <file>` - Validate single file
+- `--path <dir>` - Validate all files in directory
+- `--contract <name>` - Use specific contract (optional)
+- `--strict` - Treat warnings as errors
+
+**AD-3**: Exit codes
+- 0: Success (no errors)
+- 1: Validation errors found
+- 2: CLI usage error
+
+## Success Criteria
+
+- [ ] `xeyth-contracts validate` command works
+- [ ] Colored output with severity levels
+- [ ] Exit codes correct for CI/CD
+- [ ] Can validate single file or directory
+- [ ] Tests cover CLI integration
+- [ ] Documentation updated
+
+## Progress Log
+
+- 2024-12-24: Task created after validation engine approval - ready for CLI integration
+- 2025-12-24: Implemented `validate` command with colored output, strict mode, and summary stats; added CLI README and tests covering success vs strict-warning exit codes
+- 2024-12-24: **Implementation APPROVED** ✅ (Reviewer role)
+  - Review report: [ContractCliIntegration.task.ImplementationReview.report](ContractCliIntegration.task.ImplementationReview.report)
+  - All 6 deliverables complete: validate command, colored output, summary, exit codes, tests, documentation
+  - Test suite passing (21/21 tests, 100% success rate)
+  - Build clean (2.2s, 0 errors, 0 warnings)
+  - Ready for production use

@@ -1,0 +1,20 @@
+# Contracts System Plan - Tasks
+
+This inventory tracks all Contracts slice tasks.
+
+## Active Tasks
+
+Contracts/ContractValidation.task
+Contracts/ContractRenderer.task
+
+## Archived Tasks
+
+Contracts/archive/ContractDiscovery.2024-12-24.task
+
+## Notes
+
+- Contracts is a standalone slice, not coupled to Automation
+- CLI tool for contract discovery and validation
+- Consumable by linters, analyzers, build systems, CI/CD
+- Users can extend with custom contracts
+

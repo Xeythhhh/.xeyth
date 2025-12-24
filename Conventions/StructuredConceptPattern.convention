@@ -1,0 +1,224 @@
+# Structured Concept Pattern Convention
+
+**Type**: Architecture Pattern  
+**Scope**: Framework-wide  
+**Applies To**: All slices with file-based structured concepts  
+**Status**: Active
+
+## Convention Summary
+
+All file-based structured concepts (file types with specific formats, multiple instances, need for documentation/templates/tooling) MUST follow the Structured Concept Pattern architecture.
+
+## Pattern Structure
+
+Each structured concept gets its own slice with:
+
+```
+{ConceptName}/
+  {ConceptName}Format.md           # Format documentation (REQUIRED)
+  {ConceptName}.{ext}.template     # Template file (REQUIRED)
+  {ConceptName}.{ext}              # Example instance (OPTIONAL)
+  Proposed/                        # For proposals (OPTIONAL)
+  archive/                         # Archived instances (OPTIONAL)
+  CLI/                             # CLI module (OPTIONAL)
+    {ConceptName}Module.cs         # API for working with concept
+    {ConceptName}Parser.cs         # Parse concept files
+    {ConceptName}Validator.cs      # Validate concept instances
+```
+
+## Required Components
+
+### 1. Format Documentation (`{ConceptName}Format.md`)
+
+**MUST include**:
+- Overview and purpose
+- File format specification (YAML, Markdown sections, etc.)
+- Required vs optional fields
+- Validation rules
+- Usage examples
+- Best practices
+
+**MAY include**:
+- CLI tool integration examples
+- See Also links to related concepts
+- Migration guides for format changes
+
+### 2. Template File (`{ConceptName}.{ext}.template`)
+
+**MUST include**:
+- Complete structure with placeholders
+- Inline comments explaining each section
+- Placeholders in `{CurlyBraces}` format
+
+**MAY include**:
+- Common patterns and examples
+- Conditional sections with comments
+- Links to format documentation
+
+## Optional Components
+
+### 3. Example Instance (`{ConceptName}.{ext}`)
+
+Framework's own configuration instance (e.g., `Configuration.xeyth`)
+
+### 4. Proposed Directory
+
+For concepts that support proposals (e.g., new features, enhancements)
+
+### 5. CLI Module
+
+**When to create**:
+- Parsing/validation adds value
+- Automation would improve workflow
+- Multiple tools need access to concept
+
+**API Requirements**:
+- Parse: Load and parse files
+- Validate: Check structure/content
+- Find: Discover instances in workspace
+- Create: Generate from template (optional)
+- Update: Modify instances (optional)
+
+## Qualifying Concepts
+
+A file type qualifies as a structured concept if:
+- ✅ Multiple instances will exist across workspace
+- ✅ Specific format/schema required
+- ✅ Users benefit from templates and documentation
+- ✅ Tooling could add value (parsing, validation, creation)
+
+Do NOT create structured concept for:
+- ❌ Single-use files
+- ❌ Ad-hoc documentation without schema
+- ❌ Files with no validation requirements
+- ❌ Concepts with fewer than 3 expected instances
+
+## Naming Conventions
+
+### Directories
+- Slice name matches concept name (singular, PascalCase)
+- Examples: `Configuration`, `Planning`, `Contracts`
+
+### Files
+- Format doc: `{ConceptName}Format.md`
+- Template: `{ConceptName}.{ext}.template`
+- CLI module: `{ConceptName}Module.cs`
+
+### File Extensions
+- `.xeyth` - Configuration files
+- `.task` - Task tracking files
+- `.plan` - Planning files
+- `.report` - Progress/blocker reports
+- `.proposal` - Optimization proposals
+- `.convention` - Convention/pattern definitions
+- `.template` - Template files
+- `.inventory` - Inventory/tracking files
+- `.metadata` - Contract metadata (YAML)
+
+## Agent Workflow
+
+### When to Propose Structured Concept
+
+Implementation Agent SHOULD create proposal when discovering:
+- Repeated file patterns without templates
+- Multiple files following same structure
+- Concepts needing validation/tooling
+- Patterns that could benefit from documentation
+
+### Proposal Process
+
+1. Create `.proposal` file in `Planning/Proposed/`
+2. Include:
+   - Concept name and purpose
+   - Qualifying criteria met
+   - Proposed slice structure
+   - Estimated instances (current + future)
+   - Tooling value proposition
+3. Continue current task
+4. Orchestrator reviews proposals in batch
+
+### Implementation Process
+
+When proposal accepted:
+1. Create slice directory
+2. Create format documentation
+3. Create template
+4. Migrate existing instances (if any)
+5. Implement CLI module (if approved)
+6. Update [StructuredConceptPattern.md](StructuredConceptPattern.md) with example
+7. Verify all instances validate
+
+## Validation Rules
+
+### Format Documentation
+- ✅ MUST exist for all structured concepts
+- ✅ MUST include overview, format spec, examples
+- ✅ MUST document required vs optional fields
+- ✅ SHOULD include validation rules
+- ✅ SHOULD link to related concepts
+
+### Templates
+- ✅ MUST exist for all structured concepts
+- ✅ MUST use `{PlaceholderName}` format
+- ✅ MUST include inline comments
+- ✅ SHOULD demonstrate common patterns
+
+### CLI Modules
+- ✅ MAY exist (optional)
+- ✅ MUST provide Parse operation if exists
+- ✅ MUST provide Validate operation if exists
+- ✅ SHOULD provide Find operation
+- ✅ MAY provide Create/Update operations
+
+### Instances
+- ✅ MUST validate against format documentation
+- ✅ MUST follow template structure
+- ✅ SHOULD include metadata (if applicable)
+- ✅ MAY deviate from template with rationale
+
+## Quality Gates
+
+Before accepting structured concept:
+- [ ] At least 3 current or expected instances
+- [ ] Clear format specification documented
+- [ ] Template demonstrates complete structure
+- [ ] Validation rules defined
+- [ ] Examples included in documentation
+- [ ] CLI module justified (if included)
+
+## Existing Structured Concepts
+
+### Configuration (`.xeyth`)
+- **Slice**: `Configuration/`
+- **Format Doc**: ✅ ConfigurationFormat.md
+- **Template**: ✅ Configuration.xeyth.template
+- **CLI Module**: ⏳ Planned
+- **Instances**: Framework configuration
+
+### Planning (`.task`, `.plan`, `.report`, `.proposal`)
+- **Slice**: `Planning/`
+- **Format Docs**: ✅ ContextFiles.md, ProposalSystem.md, TaskPrioritySystem.md
+- **Templates**: ✅ Task, Plan, Proposal, ProgressReport, BlockerReport
+- **CLI Module**: 🔄 In Progress (xeyth-planning)
+- **Instances**: Multiple tasks, plans, reports across slices
+
+### Git (`.convention`, `.gitmessage`)
+- **Slice**: `Git/`
+- **Format Doc**: ✅ README.md
+- **Template**: ✅ .gitmessage
+- **CLI Module**: ⏳ Planned (commit validation)
+- **Instances**: Commit.convention, commit message template
+
+### Contracts (`.metadata`)
+- **Slice**: `Contracts/`
+- **Format Doc**: ⏳ Planned
+- **Template**: ⏳ Planned
+- **CLI Module**: ✅ xeyth-contracts (implemented)
+- **Instances**: Task.template.metadata
+
+## See Also
+
+- [StructuredConceptPattern.md](StructuredConceptPattern.md) - Detailed pattern documentation
+- [Planning/ContextFiles.md](../Planning/ContextFiles.md) - Context file system overview
+- [Planning/ProposalSystem.md](../Planning/ProposalSystem.md) - Proposal workflow
+- [ConfigurationFormat.md](ConfigurationFormat.md) - Configuration concept example

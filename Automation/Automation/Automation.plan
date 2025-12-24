@@ -1,0 +1,144 @@
+---
+# PLAN CONTEXT
+---
+
+**Plan Name**: Automation Infrastructure Plan
+**Plan File**: Automation/Automation.plan (new vertical slice)
+**Tasks Inventory**: Automation.plan.Tasks.inventory
+**Related Task**: N/A (New vertical slice for automation tooling)
+**Owner**: Strategic Agent
+
+## Objective
+
+Build a comprehensive C# automation infrastructure using modern .NET 10, Nuke build system, and vertical slice architecture to support framework validation, testing, and maintenance.
+
+## Context
+
+- Current state:
+  - Framework is documentation/prompt-based (markdown files)
+  - No automated validation of inventories, conventions, or context files
+  - Manual archiving and task management
+  - Dogfooding findings identified automation opportunities
+  
+- Constraints:
+  - Must use C# and .NET 10 with latest language features
+  - Build tooling: both Nuke and dotnet CLI support required
+  - Architecture: Vertical slice architecture pattern
+  - Testing: Comprehensive coverage (unit, snapshot, integration, architecture, E2E)
+  - Code quality: Analyzers, linters, modern enterprise patterns
+  
+- Assumptions:
+  - Automation will validate framework integrity (inventories, naming conventions, etc.)
+  - Tools will be cross-platform (Windows, macOS, Linux)
+  - Framework remains primarily markdown-based; automation augments it
+  - Nuke build orchestrates all operations
+
+## Decisions
+
+- D1: C# as automation language — Rationale: Type safety, modern language features, excellent tooling, cross-platform .NET 10
+- D2: Nuke build system — Rationale: C#-based, composable, integrates with dotnet CLI, type-safe build definitions
+- D3: Vertical slice architecture — Rationale: Aligns with framework's slice organization, clear boundaries
+- D4: Comprehensive testing strategy — Rationale: xUnit (unit), Verify (snapshots), integration, Playwright (E2E), NetArchTest (architecture)
+- D5: Both Nuke and dotnet CLI — Rationale: Flexibility, CI/CD compatibility, developer choice
+- D6: Contract metadata discovery system — Rationale: YAML metadata files (`.template.metadata`, `.convention.metadata`, etc.) define context file structure; tools discover and validate against contracts; users can extend with their own contracts
+
+## Implementation Notes
+
+**Architecture**: Vertical slice architecture with slices mirroring framework structure:
+
+- `Automation.Framework/` - Core validation, inventory checks
+- `Automation.Git/` - Git convention validation  
+- `Automation.Planning/` - Task/plan template validation
+- `Automation.Build/` - Nuke build definitions
+
+**Contracts Slice** (separate vertical slice):
+
+- `Contracts/` - Standalone slice for contract metadata discovery and validation
+- Packaged as CLI tool (`xeyth-contracts` or similar)
+- Consumed by linters, analyzers, build systems, CI/CD
+- Discovery engine finds `.metadata` files (shipped + user-defined)
+- Validation engine enforces contracts against target files
+
+**Contract Metadata System** (Contracts slice):
+
+- Each context file type has a `.{Type}.metadata` file (e.g., `Task.template.metadata`, `Convention.convention.metadata`)
+- Metadata files are YAML-based, define structure/schema for context files
+- Metadata files live next to the files they describe (in their slices)
+- Glob patterns in metadata target which files the contract applies to
+- CLI tool discovers contracts at runtime (shipped defaults + user-defined)
+- Users can create custom contracts anywhere in their repo
+- CLI tool packages with default contracts, discovers and merges user contracts
+- Format: YAML (using YamlDotNet) - extensible, human-readable, not compiled
+- Integration: Feeds into linters, analyzers, build systems, CI/CD pipelines
+
+**Technology Stack**:
+- .NET 10 SDK (latest LTS)
+- C# latest language features (records, pattern matching, file-scoped namespaces, etc.)
+- Nuke.Build for build orchestration
+- xUnit for unit testing
+- Verify for snapshot testing
+- NetArchTest for architecture tests
+- Playwright for E2E/browser tests (if needed)
+- YamlDotNet for contract metadata parsing (YAML-based contracts)
+- Glob pattern matching for file targeting
+- CLI packaging (dotnet tool or self-contained executable)
+- Analyzers: StyleCop, Roslynator, etc.
+
+**Quality Gates**:
+- Zero warnings on build
+- All tests passing
+- Architecture tests enforcing slice boundaries
+- Analyzer compliance
+
+## Verification
+
+- [ ] Nuke build executes successfully via both `nuke` and `dotnet nuke`
+- [ ] All automation slices follow vertical slice architecture
+- [ ] Unit tests cover core validation logic (xUnit)
+- [ ] Snapshot tests validate output formats (Verify)
+- [ ] Integration tests validate framework file operations
+- [ ] Architecture tests enforce slice boundaries (NetArchTest)
+- [ ] Analyzers and linters configured and passing
+- [ ] Cross-platform compatibility validated (Windows/macOS/Linux)
+
+## Task Inventory Management
+
+`Automation.plan.Tasks.inventory` tracks all automation infrastructure tasks. As this is a new vertical slice, we'll build incrementally:
+1. Foundation (Nuke setup, solution structure)
+2. Core validation (inventory consistency, naming conventions)
+3. Testing infrastructure (unit, integration, architecture)
+4. Advanced features (auto-archiving, task helpers)
+
+## Future Work
+
+### Foundation (High Priority)
+
+- **Script Migration to .NET**: Replace all bash/PowerShell/JS/Python scripts with C#/.NET implementations - See [ScriptMigrationToDotnet.task](ScriptMigrationToDotnet.task)
+- **Solution & Build Setup**: Create .NET 10 solution, configure Nuke build, establish project structure
+- **Vertical Slice Structure**: Set up slice projects mirroring framework organization
+- **Analyzer Configuration**: StyleCop, Roslynator, EditorConfig, code quality rules
+
+### Core Validation (High Priority)
+
+- **Contract Metadata System**: YAML-based contract discovery engine with glob pattern matching
+- **Inventory Validator**: Verify Plans.inventory and task inventories are consistent
+- **Naming Convention Checker**: Validate context file naming patterns against contracts
+- **Cross-reference Validator**: Ensure task references in inventories exist
+- **Archiving Helper**: Automate moving completed tasks to archive/ with date suffixes
+- **Context File Schema Validator**: Validate context files against discovered contracts
+
+### Testing Infrastructure (Medium Priority)
+
+- **Architecture Tests**: NetArchTest rules enforcing slice boundaries
+- **Snapshot Tests**: Verify template rendering, file generation
+- **Integration Tests**: Validate file operations, git operations
+- **Unit Tests**: Core validation logic coverage
+
+### Advanced Features (Lower Priority)
+
+- **Task Scaffolder**: CLI tool to create tasks from templates
+- **Report Generator**: Aggregate progress across tasks/plans
+- **Dependency Analyzer**: Visualize task dependencies
+- **CI/CD Integration**: GitHub Actions, Azure DevOps templates
+- **Pre-commit Hooks**: Validate context files before commit
+

@@ -1,0 +1,125 @@
+# Convention Files as Structured Concept
+
+**Status**: Accepted  
+**Submitted**: 2024-12-24  
+**Author**: Strategic Agent (Orchestrator)  
+**Related Task**: Configuration/StructuredConceptPattern refinement  
+**Implemented**: 2024-12-25
+
+## Context
+
+While documenting the Structured Concept Pattern, we created [StructuredConceptPattern.md](../Configuration/StructuredConceptPattern.md) to describe the architecture pattern. However, the pattern description itself IS a convention.
+
+Current state:
+- StructuredConceptPattern.md describes a pattern/convention
+- Convention files now formalized in Conventions/ slice
+- ConventionFormat.md and template exist
+- Several conventions already created (StructuredConceptPattern, CommitMessageFormat, TaskFileStructure, NamingConventions, ResponseFooter)
+
+This presents an opportunity to formalize `.convention` files as a structured concept, making the framework more self-consistent and discoverable.
+
+## Proposal
+
+Create **Conventions** as a formal structured concept following the Structured Concept Pattern.
+
+### Structure
+
+```
+Conventions/
+  ConventionFormat.md              # Format specification for .convention files
+  Convention.convention.template   # Template for new conventions
+  StructuredConceptPattern.convention  # Example convention (migrated)
+  CLI/                             # Optional CLI module
+    ConventionModule.cs            # Parse/validate conventions
+```
+
+### Convention File Format
+
+**Proposed YAML frontmatter + Markdown structure**:
+
+```yaml
+---
+type: Architecture Pattern | Coding Standard | Process | Naming | File Format
+scope: Framework-wide | Slice-specific | Project-specific
+applies_to: All files | Specific file types | Specific roles
+status: Active | Deprecated | Proposed | Under Review
+---
+
+# {Convention Name}
+
+## Convention Summary
+{One-paragraph summary of the convention}
+
+## Rules
+{Specific, actionable rules}
+
+## Examples
+{Demonstrating good/bad patterns}
+
+## Validation
+{How to check compliance}
+
+## See Also
+{Related conventions}
+```
+
+### Benefits
+
+1. **Discoverability**: Standard location for all conventions (Conventions/ slice)
+2. **Consistency**: All conventions follow same format
+3. **Validation**: CLI tools can verify convention compliance
+4. **Documentation**: Clear format documentation aids convention creation
+5. **Tooling**: Could integrate with linters/analyzers to enforce conventions
+
+### Estimated Instances
+
+**Current**:
+- StructuredConceptPattern.convention (architecture)
+- Git/Commit.convention (commit format)
+
+**Planned**:
+- NamingConventions.convention (file/directory naming)
+- MarkdownFormatting.convention (markdown style rules)
+- TaskFileStructure.convention (task file organization)
+- ProposalWorkflow.convention (proposal process)
+
+**Estimate**: 10-15 conventions across framework
+
+### CLI Tooling Value
+
+**xeyth-conventions tool** could:
+- `list-conventions` - Find all .convention files
+- `show-convention {name}` - Display convention details
+- `validate-convention {path}` - Validate convention file format
+- `check-compliance {convention} {path}` - Verify file/code follows convention
+- `create-convention --template` - Generate new convention from template
+
+## Effort Estimate
+
+**Small-Medium** (2-3 hours):
+- Create Conventions/ slice
+- Write ConventionFormat.md
+- Create Convention.convention.template
+- Migrate StructuredConceptPattern.convention
+- Migrate Git/Commit.convention
+- Update StructuredConceptPattern.md with example
+- CLI module: Future enhancement (not in initial scope)
+
+## Decision
+
+**ACCEPTED** ✅ - Implemented 2024-12-25
+
+## Rationale
+
+Conventions/ slice successfully established following Structured Concept Pattern:
+- ✅ **Instances**: 7 .convention files created (StructuredConceptPattern, CommitMessageFormat, TaskFileStructure, NamingConventions, ResponseFooter)
+- ✅ **Documentation**: ConventionFormat.md complete (YAML + Markdown spec)
+- ✅ **Template**: Convention.convention.template created
+- ⏳ **CLI Module**: Deferred to future task (Automation/ConventionsCliTool.task)
+
+Implementation exceeded initial estimate with 7 conventions instead of proposed 2. Build and tests pass (0 errors, 0 warnings). All references updated across framework.
+
+## Task Created
+
+**Completed**: Conventions/ slice established (commit 0b1e8e2)
+**Next**: Create Automation/ConventionsCliTool.task for CLI module (xeyth-conventions tool)

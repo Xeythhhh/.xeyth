@@ -1,0 +1,170 @@
+# Chat Instructions Files Automation
+
+**Status**: Complete  
+**Created**: 2024-12-24  
+**Owner**: Strategic Agent (Planner)  
+**Priority**: Medium  
+**Effort**: Small  
+**Priority Score**: 7 (Impact:4 + Urgency:2 + Dependency:3 - Complexity:2 - Enables automation)
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Framework/ChatInstructionsAutomation.task](Framework/ChatInstructionsAutomation.task)  
+**Role**: Planner (see [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md))  
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Design automation to detect new .instructions.md files and auto-update chat.instructionsFiles.locations setting in workspace files.
+````
+
+---
+
+## Context
+
+**Problem**: VS Code setting `chat.instructionsFiles.locations` must be manually updated whenever new `.instructions.md` files are added. This breaks GitHub Copilot's custom instructions discovery.
+
+**Current State**:
+- Setting exists in `.xeyth.code-workspace`  
+- Currently configured with: `.github/instructions`, `Ai`, `Ai/Framework`
+- Must be manually added to consuming workspace files
+
+**Desired State**:
+- Automated detection of all `.instructions.md` files
+- Auto-update workspace files with discovered locations
+- Validation in CI/CD to catch missing locations
+- Documentation in InitializeAiFramework.prompt.md
+
+## Objective
+
+Create automation tooling that discovers `.instructions.md` files and maintains the `chat.instructionsFiles.locations` setting in workspace files, plus validates configuration in CI/CD.
+
+## Deliverables
+
+1. **Discovery Tool**: Scan workspace for `.instructions.md` files, return parent directories
+2. **Workspace Update Tool**: Update `.code-workspace` files with discovered locations
+3. **Validation Tool**: Verify all `.instructions.md` files are covered by setting
+4. **CI/CD Integration**: Automated validation in build pipeline
+5. **Documentation**: Update InitializeAiFramework.prompt.md with automation details
+
+## Success Criteria
+
+- [ ] Tool discovers all `.instructions.md` files in workspace
+- [ ] Can update `chat.instructionsFiles.locations` in `.code-workspace` files
+- [ ] Validation detects missing locations (exit code 1)
+- [ ] Works cross-platform (Windows, macOS, Linux)
+- [ ] Integrated in Nuke build pipeline
+- [ ] Host repositories can easily adopt automation
+
+## Architecture Decisions
+
+### AD-1: Implementation Approach
+
+**Decision**: Dotnet tool in Automation.Framework project  
+**Rationale**:
+- Integrates with existing automation infrastructure
+- Cross-platform .NET 10
+- Can be packaged as dotnet global/local tool
+- Reusable from CI/CD, scripts, and manual use
+- Type-safe JSON manipulation with System.Text.Json
+
+**Alternatives Considered**:
+- PowerShell script: Simpler but less integrated, harder to test
+- VS Code extension: Overkill, requires extension marketplace distribution
+
+### AD-2: Discovery Strategy
+
+**Decision**: Recursive file search with intelligent parent directory detection  
+**Pattern**:
+```csharp
+// Find all *.instructions.md files
+var instructionFiles = Directory.GetFiles(rootPath, "*.instructions.md", SearchOption.AllDirectories);
+
+// Get unique parent directories (relative to workspace root)
+var locations = instructionFiles
+    .Select(f => Path.GetDirectoryName(f))
+    .Select(d => Path.GetRelativePath(rootPath, d))
+    .Distinct()
+    .OrderBy(p => p)
+    .ToList();
+```
+
+**Rationale**: Simple, deterministic, matches VS Code's discovery behavior.
+
+### AD-3: Workspace File Updates
+
+**Decision**: Parse JSON, update array, preserve formatting  
+**Behavior**:
+- Read existing `.code-workspace` file
+- Parse as JSON using System.Text.Json
+- Update `settings["chat.instructionsFiles.locations"]` array
+- Write back with indentation preserved
+- Create backup before modification (`.code-workspace.bak`)
+
+**Safety**: Always create backup, validate JSON after write.
+
+### AD-4: Validation Mode
+
+**Decision**: Separate validation command (no modifications)  
+**Commands**:
+- `xeyth-workspace update-chat-locations` - Discover and update workspace file
+- `xeyth-workspace validate-chat-locations` - Verify coverage, exit 1 if missing
+
+**Rationale**: CI/CD needs validation without modification; developers want easy updates.
+
+### AD-5: Configuration
+
+**Decision**: Convention over configuration  
+**Conventions**:
+- Default workspace file: `<WorkspaceRoot>/.xeyth.code-workspace` or `*.code-workspace` (first found)
+- Root path: Workspace file directory
+- Exclusions: `node_modules/`, `bin/`, `obj/`, `.git/`, `archive/` (standard ignores)
+
+**Override**: CLI flags for custom workspace file path, root path, exclusions.
+
+## Verification
+
+- Manually add new `.instructions.md` file to test location
+- Run discovery tool - new location detected
+- Run update tool - workspace file updated correctly
+- Run validation tool - passes with all files covered
+- Remove location from workspace - validation fails
+- Restore location - validation passes
+
+## Implementation Notes
+
+**Potential Approaches**:
+
+1. **PowerShell Script** (quick win):
+   - `Get-ChildItem -Recurse -Include *.instructions.md`
+   - Parse `.code-workspace` JSON
+   - Update `chat.instructionsFiles.locations` array
+   - Simple, cross-platform via pwsh
+
+2. **Dotnet Tool** (comprehensive):
+   - Part of Automation.Framework project
+   - JSON parsing with System.Text.Json
+   - Integrate with existing workspace validation
+   - Packaged as dotnet tool for CI/CD
+
+3. **VS Code Extension** (future):
+   - Watch file system for `.instructions.md` creation
+   - Auto-prompt to update workspace settings
+   - Requires extension development
+
+**Recommended**: Start with dotnet tool in Automation.Framework, can add PowerShell script wrapper for convenience.
+
+## Related Files
+
+- `.xeyth.code-workspace` - Contains current setting
+- `Ai/Framework/Delegation.instructions.md` - Example instructions file
+- `Ai/Maintenance/InitializeAiFramework.prompt.md` - Documentation to update
+- `.github/copilot-instructions.md` (in consuming repos) - Integration point
+
+---
+
+## Progress Log
+
+- 2024-12-24: Task created by Orchestrator - chat instructions setting needs automation
+- 2025-12-24: Implementation delivered xeyth-workspace CLI (discover/update/validate), wired validation into Nuke build, and documented commands in InitializeAiFramework.prompt.md

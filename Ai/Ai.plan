@@ -1,0 +1,107 @@
+---
+# PLAN CONTEXT
+---
+
+**Plan Name**: AI Framework Master Plan
+**Plan File**: Ai.plan (resides at framework root)
+**Tasks Inventory**: Ai.plan.Tasks.inventory
+**Related Task**: N/A (Top-level framework plan)
+**Owner**: Strategic Agent
+
+## Objective
+
+Develop and maintain a lightweight, reusable AI instruction framework that can be distributed as a submodule and integrated seamlessly into any host repository.
+
+## Context
+
+- Current state:
+  - Framework structure established with slices (Framework/, Git/, Planning/, Maintenance/)
+  - Context file system defined (.task, .plan, .report, .convention, .inventory, .template)
+  - GitHub Copilot integration mechanism via .github/copilot-instructions.md
+  - Basic conventions established (commit messages, file naming)
+  
+- Constraints:
+  - Must remain generic with placeholders for host-specific values
+  - Keep files concise and focused
+  - Maintain read-only submodule for consumers
+  
+- Assumptions:
+  - Framework will be used across multiple projects
+  - Host repositories will run Cleanup role to customize placeholders
+  - VS Code is primary editor with workspace settings support
+
+## Decisions
+
+- D1: Vertical slice architecture — Rationale: Keep related files together, easier to navigate and understand scope
+- D2: Context files as markdown — Rationale: Universal format, syntax highlighting, preview support
+- D3: Plans at slice root, tasks distributed — Rationale: Plans are scope-level, tasks are implementation-level
+- D4: Scoped naming pattern `{Name}.{Type}.{Scope}.{Ext}` — Rationale: Clear relationships, parseable, self-documenting
+- D5: Slice-level `done/` archiving — Rationale: Keep archives close to active work
+
+## Implementation Notes
+
+**Architecture**: Lightweight prompt-based agent system with clear roles (Orchestrator, Planner, Implementer, Reviewer, Scaffolder, Cleanup)
+
+**Quality Gates**: Placeholder-based (`<BUILD_CMD>`, `<TEST_CMD>`, `<LINT_CMD>`) to be filled by host repo
+
+**Distribution**: Git submodule under `.xeyth/` with framework in `Ai/` subdirectory
+
+**Task Tracking**: Maintain `Ai.plan.Tasks.inventory` for all framework-level tasks that don't belong to slice-specific plans
+
+## Verification
+
+- [ ] All prompt files are concise and focused
+- [ ] Context file types fully documented
+- [ ] Workspace settings include all context file associations
+- [ ] GitHub integration template provided
+- [ ] All tasks in `Ai.plan.Tasks.inventory` are tracked
+- [ ] Archiving convention documented and followed
+
+## Task Inventory Management
+
+`Ai.plan.Tasks.inventory` tracks all framework tasks that don't have their own plans. As work grows, tasks may be grouped into slice-specific plans (e.g., `Framework/EnhancePrompts.plan`), at which point they move to those plan-specific inventories.
+
+## Future Work
+
+### High Priority
+
+- **Framework Integration Testing**: Apply the framework to this repository itself (dogfooding)
+  - Create `.github/copilot-instructions.md` referencing framework
+  - Migrate existing tasks to follow framework conventions
+  - Test all delegation workflows and context file types
+  - Document integration experience and refine InitializeAiFramework.prompt.md
+
+### Medium Priority
+
+- **Automation & Validation**:
+  - PowerShell scripts to validate inventory consistency
+  - Automated check for orphaned context files
+  - Script to verify all task deliverables match success criteria
+  - Lint rules for context file format validation
+  
+- **Performance Optimization**:
+  - Analyze prompt token usage across roles
+  - Optimize delegation prompts for conciseness
+  - Create compact versions of templates for simple tasks
+  - Benchmark agent response quality vs prompt length
+
+### Lower Priority
+
+- **Templates & Conventions**:
+  - API design template
+  - Architecture decision records (ADR) template
+  - Code style convention files
+  - Testing conventions and patterns
+  - Security review checklist template
+  
+- **Integration & Tooling**:
+  - CI/CD pipeline templates
+  - Pre-commit hooks for context file validation
+  - VS Code extension for context file management
+  - GitHub Actions for inventory validation
+  
+- **Documentation**:
+  - User guide with step-by-step tutorial
+  - Best practices guide with real examples
+  - Troubleshooting common issues
+  - Video walkthrough of framework usage

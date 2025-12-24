@@ -1,0 +1,169 @@
+# GitHub Repository Setup
+
+---
+
+## Delegation Prompt
+
+---
+
+## Role: Implementer
+
+**Task File**: Git/GitHubRepositorySetup.task  
+**Objective**: Create GitHub remote repository and push initial codebase
+
+**Role Reference**: See [Ai/Framework/Implementation.prompt.md](../Ai/Framework/Implementation.prompt.md) for workflow guidance.
+
+### Context
+
+Workspace is ready for GitHub remote. All prerequisites complete:
+- ✅ Ai slice migration complete
+- ✅ Conventions/ slice established
+- ✅ .gitmessage template in place
+- ✅ .gitignore comprehensive
+- ✅ README.md professional
+- ✅ All commits atomic and well-documented
+- ✅ Build and tests passing
+
+Need to execute GitHub repository creation and initial push following the documented checklist in GitHubRemotePreparation task.
+
+### Your Responsibilities
+
+1. Create GitHub private repository `.xeyth`
+2. Configure repository settings (description, topics, visibility)
+3. Add remote to local repository
+4. Push initial codebase to remote
+5. Verify push successful and repository accessible
+6. Document next steps for CI/CD setup
+
+### Deliverables
+
+- [ ] **D1**: GitHub repository created (private, `.xeyth`)
+- [ ] **D2**: Repository configured (description, topics)
+- [ ] **D3**: Remote added to local repository
+- [ ] **D4**: Initial push completed (`git push -u origin master`)
+- [ ] **D5**: Verify all commits visible on GitHub
+- [ ] **D6**: Document remote URL and next steps
+
+### Implementation Guidance
+
+**Follow GitHubRemotePreparation checklist** (Step 1-6):
+
+**Step 1 - Create Repository**:
+```bash
+# Option A: GitHub Web UI
+# Navigate to: https://github.com/new
+
+# Option B: GitHub CLI (recommended)
+gh repo create .xeyth --private --description "Lightweight AI instruction framework for agent-driven development"
+```
+
+**Repository Settings**:
+- Name: `.xeyth`
+- Description: `Lightweight AI instruction framework for agent-driven development`
+- Visibility: Private
+- Topics: `ai`, `framework`, `github-copilot`, `agent-driven-development`, `dotnet`, `vertical-slice-architecture`
+- Initialize: ❌ NO (pushing existing repo)
+
+**Step 2 - Configure Remote**:
+```bash
+# Replace {user} with GitHub username
+git remote add origin https://github.com/{user}/.xeyth.git
+git remote -v  # Verify
+```
+
+**Step 3 - Initial Push**:
+```bash
+git push -u origin master
+```
+
+**Step 4 - Verify**:
+- [ ] Navigate to GitHub repository
+- [ ] Verify README displays on landing page
+- [ ] Check commit history (should show all local commits)
+- [ ] Verify file structure matches local
+- [ ] Confirm topics visible
+
+**Step 5 - Next Steps** (document in Progress Log):
+- Create Git/BranchProtectionRules.task
+- Create Git/GitHubActionsWorkflows.task
+- Create Git/AzureDevOpsIntegration.task
+- Update Git/Repository.plan.Tasks.inventory
+
+**Critical Notes**:
+- Use GitHub CLI if available (`gh`) for automation
+- Verify remote URL before pushing
+- Check authentication (SSH vs HTTPS)
+- Ensure working tree clean before push
+- Document remote URL in task completion
+
+### Verification Steps
+
+- [ ] `git remote -v` shows origin
+- [ ] `git push -u origin master` succeeds
+- [ ] GitHub repository accessible at URL
+- [ ] All commits visible in GitHub history
+- [ ] README.md renders correctly
+- [ ] Topics displayed on repository page
+
+---
+
+## Task Details
+
+---
+
+Status: Not Started  
+Owner: Implementation Agent  
+Priority: Critical  
+Effort: Small  
+Priority Score: 12 (Impact:8 + Urgency:5 + Dependency:5 - Complexity:1 - Blocks all GitHub workflows)
+
+## Objective
+
+Create GitHub remote repository and push initial .xeyth framework codebase.
+
+## Task Context
+
+- Current state:
+  - Local repository with 25+ commits
+  - No remote configured
+  - Workspace structure complete
+  - All prerequisites verified
+  - GitHubRemotePreparation checklist documented
+  
+- Desired state:
+  - GitHub private repository `.xeyth` created
+  - Remote added to local repository
+  - All commits pushed to remote
+  - Repository accessible and configured
+  - Ready for CI/CD and collaboration
+
+## Task Deliverables
+
+- D1: GitHub repository created (private, with description/topics)
+- D2: Remote `origin` added to local repository
+- D3: Initial push successful (all commits on remote)
+- D4: Repository verified accessible
+- D5: Follow-on tasks created (branch protection, Actions, Azure)
+- D6: Repository URL documented
+
+## Architecture Decisions
+
+- AD-1: Private repository initially — Rationale: Iterate privately, release publicly when stable
+- AD-2: master branch as default — Rationale: Existing branch, rename later if desired
+- AD-3: Use GitHub CLI — Rationale: Automation-friendly, scriptable, consistent
+- AD-4: Comprehensive topics — Rationale: Discoverability, SEO, community building
+
+## Success Criteria
+
+- [ ] `gh repo view` shows repository details
+- [ ] `git remote -v` shows origin URL
+- [ ] `git log origin/master` matches local history
+- [ ] README.md renders on GitHub landing page
+- [ ] Topics visible on repository page
+- [ ] Repository accessible at documented URL
+- [ ] No errors during push
+- [ ] All files present on remote
+
+## Progress Log
+
+- 2024-12-25: Task created after GitHubRemotePreparation completion

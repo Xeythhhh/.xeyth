@@ -1,0 +1,279 @@
+# Legacy System Integration - Flow Enhancement & Configuration
+
+---
+
+## Delegation Prompt
+
+---
+
+## Role: Implementer (Plan Review - Iteration 1)
+
+**Task File**: Framework/LegacyIntegration.task  
+**Objective**: Integrate legacy system patterns - role switching, configuration file, enhanced task templates
+
+**Role Reference**: See [Framework/Implementation.prompt.md](../Framework/Implementation.prompt.md) for workflow guidance.
+
+### Context
+
+Research completed in [Research/LegacySystemAnalysis.md](../Research/LegacySystemAnalysis.md) identified valuable patterns from Balhacii legacy system. Three critical enhancements needed:
+
+1. **Flow role switching**: Strategic Agent seamlessly switches between Orchestrator/Planner/Reviewer roles; returns delegation code block on model mismatch
+2. **Configuration.xeyth**: Configurable backlog thresholds, Verify settings, conventions
+3. **Task template enhancement**: Add delegation prompt section at top for self-contained instructions
+
+### Your Responsibilities (Plan Review Mode)
+
+1. Review proposed architecture in Research/LegacySystemAnalysis.md
+2. Challenge implementation approach - identify simpler alternatives
+3. Propose performance optimizations or modern patterns
+4. Validate that proposed changes align with .xeyth framework goals
+5. Provide explicit sign-off (✅ APPROVED) or specific refinement recommendations
+
+### Deliverables
+
+- [ ] **D1**: Enhanced Flow.prompt.md with model detection and role-switching logic
+- [ ] **D2**: Configuration.xeyth file with YAML schema for orchestrator, testing, conventions
+- [ ] **D3**: Updated Planning/Task.task.template with delegation prompt section at top
+- [ ] **D4**: Update .xeyth.code-workspace to associate *.xeyth → yaml
+- [ ] **D5**: Unit tests or verification that role switching works correctly
+
+### Architecture Decisions (from Research)
+
+- **AD-1**: Strategic Agent role switching - Only within Strategic roles (Orchestrator/Planner/Reviewer), never to Implementation Agent
+- **AD-2**: Model mismatch handling - Return delegation code block instead of executing
+- **AD-3**: Configuration format - YAML for readability and standard tooling support
+- **AD-4**: Task template structure - Delegation prompt section before task details, separated by `---`
+- **AD-5**: Workspace configuration - Add *.xeyth file association to workspace file
+
+### Implementation Guidance
+
+**Patterns to Follow**:
+- Flow.prompt.md already has model requirements section - extend with role-switching logic
+- Strategic.prompt.md has delegation examples - ensure consistency
+- Task.task.template already exists - add delegation section at top
+
+**Verification Steps**:
+1. Build verification:
+   - [ ] `dotnet build` succeeds (0 errors, 0 warnings)
+2. Manual testing:
+   - [ ] Configuration.xeyth validates as YAML
+   - [ ] Workspace file associations work in VS Code
+   - [ ] Task template renders properly in markdown
+
+**Critical Constraints**:
+- MUST maintain backward compatibility with existing tasks
+- Model requirements (Strategic: Claude Sonnet 4.5, Implementation: GPT-5.1-Codex-Max) are immutable
+- Configuration.xeyth should be optional (framework uses defaults if not present)
+
+### Upon Completion (Plan Review)
+
+Provide sign-off decision using **code block format** (see [Delegation.instructions.md](Delegation.instructions.md)).
+
+**If APPROVED**:
+
+````markdown
+**Task**: [Framework/LegacyIntegration.task](Framework/LegacyIntegration.task)  
+**Role**: Planner (Validation) - Iteration 1 Response (see [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md))  
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+## Iteration 1 Review
+
+**Approval Status**: ✅ APPROVED
+
+**Rationale**: {Why plan is ready for implementation}
+````
+
+**If REFINEMENT NEEDED**:
+
+````markdown
+**Task**: [Framework/LegacyIntegration.task](Framework/LegacyIntegration.task)  
+**Role**: Planner (Validation) - Iteration 1 Response (see [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md))  
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+## Iteration 1 Review
+
+**Approval Status**: ⏳ NEEDS REFINEMENT
+
+**Rationale**: {Concerns or questions}
+
+**Recommendations**:
+1. {Specific recommendation}
+2. {Another recommendation}
+````
+
+---
+
+## Task Details
+
+---
+
+Status: Complete  
+Owner: Implementer (Implementation)  
+Priority: High  
+Effort: Medium  
+Priority Score: 10 (Impact:7 + Urgency:3 + Dependency:5 - Complexity:2 - Enables role switching, configuration)
+
+## Objective
+
+Integrate three critical patterns from Balhacii legacy system to improve .xeyth framework workflow: seamless role switching for Strategic Agent, configurable orchestrator backlog, and self-contained task delegation prompts.
+
+## Task Context
+
+- Current state:
+  - Flow.prompt.md exists but lacks role-switching logic
+  - No configuration file - backlog sizes hardcoded in documentation
+  - Task template lacks delegation prompt section
+  - Model requirements documented but not enforced in workflow
+  
+- Desired state:
+  - Strategic Agent can switch roles (Orchestrator/Planner/Reviewer) seamlessly via Flow
+  - Model mismatch returns delegation code block (matches screenshot behavior)
+  - Configuration.xeyth provides single source of truth for framework settings
+  - Task files self-contained with delegation instructions at top
+  - Backward compatible with existing tasks
+
+## Task Deliverables
+
+### D1: Enhanced Flow.prompt.md
+
+**File**: Framework/Flow.prompt.md
+
+**Changes**:
+- Add "## Role Switching (Strategic Agent Only)" section
+- Add "## Model-Role Enforcement" section with behavior rules
+- Add model mismatch response template (markdown code block format)
+- Update "Behavior by Role" sections with role-switching logic
+
+**Acceptance Criteria**:
+- Strategic Agent can identify when it should switch roles vs. return delegation
+- Clear instructions for when to execute vs. delegate
+- Model mismatch template matches legacy system pattern
+
+### D2: Configuration.xeyth File
+
+**File**: Ai/Configuration.xeyth
+
+**Content**:
+```yaml
+orchestrator:
+  backlog:
+    minimum: 5
+    maximum: 10
+    createThreshold: 7
+testing:
+  verify:
+    diffTool: VisualStudioCodeInsiders
+conventions:
+  archiving:
+    dateFormat: "yyyy-MM-dd"
+    directoryName: "archive"
+models:
+  strategic: "Claude Sonnet 4.5"
+  implementation: "GPT-5.1-Codex-Max"
+```
+
+**Acceptance Criteria**:
+- Valid YAML syntax
+- All current hardcoded values extracted
+- Inline comments explaining each setting
+- Optional (framework works without it using defaults)
+
+### D3: Updated Task Template
+
+**File**: Planning/Task.task.template
+
+**Changes**:
+- Add delegation prompt section at top (between `---` separators)
+- Include role assignment, objective, context, responsibilities, deliverables
+- Add completion delegation format
+- Keep existing task details section intact
+
+**Acceptance Criteria**:
+- Template renders properly in markdown
+- Delegation section provides clear agent instructions
+- Backward compatible (existing tasks still work)
+
+### D4: Workspace Configuration
+
+**File**: .xeyth.code-workspace
+
+**Changes**:
+- Add `"*.xeyth": "yaml"` to files.associations
+
+**Acceptance Criteria**:
+- VS Code recognizes .xeyth files as YAML
+- Syntax highlighting and validation works
+
+### D5: Documentation Updates
+
+**Files**: 
+- Framework/copilot-instructions.md (reference Configuration.xeyth)
+- Framework/Strategic.prompt.md (Orchestrator backlog management section)
+- Planning/ContextFiles.md (document .xeyth context file type)
+
+**Acceptance Criteria**:
+- Configuration.xeyth referenced in copilot-instructions.md
+- Orchestrator section explains backlog management with config references
+- .xeyth added to context files inventory
+
+## Architecture Decisions
+
+### AD-1: Strategic Agent Role Switching
+
+- **Decision**: Strategic Agent can switch between its 3 roles (Orchestrator/Planner/Reviewer) when Flow is invoked with delegation to another Strategic role
+- **Rationale**: Eliminates workflow interruption; Strategic Agent already has context for all 3 roles
+- **Constraint**: CANNOT switch to Implementation Agent or Scaffold Agent (different models)
+- **Implementation**: Model detection in Flow.prompt.md checks current model vs. delegated role's required model
+- **Status**: ✅ Finalized (from legacy research)
+
+### AD-2: Model Mismatch Handling
+
+- **Decision**: When model cannot assume delegated role, return delegation prompt in markdown code block
+- **Rationale**: User can copy/paste to invoke correct model; matches legacy system UX (screenshot)
+- **Format**: 4-backtick markdown code block with 3-line delegation syntax
+- **Status**: ✅ Finalized (from legacy research)
+
+### AD-3: Configuration File Format
+
+- **Decision**: Use YAML for Configuration.xeyth
+- **Rationale**: Human-readable, standard tooling, already using YAML for .metadata files
+- **Alternatives Considered**: JSON (less readable), TOML (less common), C# (overkill for config)
+- **Status**: ✅ Finalized
+
+### AD-4: Configuration Optional vs. Required
+
+- **Decision**: Configuration.xeyth is optional - framework uses defaults if not present
+- **Rationale**: Consuming repos can override via Configuration.xeyth, but don't need to
+- **Implementation**: Prompts reference config values with fallbacks (e.g., "5-10" if no config)
+- **Status**: ✅ Finalized
+
+### AD-5: Task Template Backward Compatibility
+
+- **Decision**: Enhanced template is for NEW tasks; existing tasks don't need migration
+- **Rationale**: Minimizes disruption; delegation prompt is optional enhancement
+- **Migration Path**: Active tasks can adopt new format opportunistically (not required)
+- **Status**: ✅ Finalized
+
+## Success Criteria
+
+- [ ] `dotnet build` succeeds with 0 errors, 0 warnings
+- [ ] Configuration.xeyth validates as YAML
+- [ ] Flow.prompt.md clearly defines role-switching behavior
+- [ ] Task.task.template includes delegation prompt section
+- [ ] Workspace file recognizes *.xeyth as YAML
+- [ ] Documentation updated (copilot-instructions.md, Strategic.prompt.md, ContextFiles.md)
+- [ ] Backward compatible - existing tasks still work
+
+## Progress Log
+
+- 2024-12-24: Task created after legacy system analysis (Research/LegacySystemAnalysis.md). Ready for Implementation Agent plan review (Iteration 1).
+- 2024-12-24: **Plan APPROVED** ✅ (Implementation Agent - Plan Review)
+  - Rationale: Architecture mirrors legacy behavior, adds configurability via optional YAML, maintains backward compatibility
+  - Enhanced task template improves clarity while preserving current structure
+  - Ready for implementation
+- 2024-12-24: **Implementation APPROVED** ✅ (Reviewer role)
+  - Review report: [LegacyIntegration.task.ImplementationReview.report](LegacyIntegration.task.ImplementationReview.report)
+  - All 5 deliverables complete: Flow role-switching, Configuration.xeyth, task template, workspace association, verification
+  - Build passes (5.0s, 0 errors, 0 warnings)
+  - Ready for use
+

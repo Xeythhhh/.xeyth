@@ -1,0 +1,81 @@
+# Script Migration Phase 2 - Git Hooks Tool
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Automation/ScriptMigrationPhase2.task](Automation/ScriptMigrationPhase2.task)  
+**Role**: Implementer (see [Framework/Implementation.prompt.md](../Framework/Implementation.prompt.md))  
+**Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
+
+Implement xeyth-git global tool to replace git hook PowerShell scripts - migrate prepare-commit-msg.ps1 and commit-msg.ps1 logic to C#, keep minimal shell wrappers.
+````
+
+---
+
+Status: Not Started  
+Owner: Implementation Agent  
+Priority: Medium  
+Effort: Medium  
+Priority Score: 6 (Impact:4 + Urgency:1 + Dependency:1 - Complexity:2 - Phase 1 approved)
+
+## Objective
+
+Create xeyth-git global tool to replace PowerShell logic in git hooks (.git/hooks/prepare-commit-msg.ps1, commit-msg.ps1) with C# implementations, keeping minimal shell wrappers for git integration.
+
+## Task Context
+
+**Current State**:
+- prepare-commit-msg.ps1 (70 lines) - Template injection logic
+- commit-msg.ps1 (159 lines) - Commit message validation
+- Shell wrappers delegate to PowerShell scripts
+- PowerShell Core required on all systems
+
+**Desired State**:
+- xeyth-git global tool with prepare-commit-msg and commit-msg commands
+- C# implementation of all validation/template logic
+- Minimal shell wrappers calling dotnet tool
+- No PowerShell Core dependency (except for git hook entry points)
+
+## Deliverables
+
+- D1: xeyth-git project in src/Automation.Git/
+- D2: `prepare-commit-msg` command - template injection logic in C#
+- D3: `commit-msg` command - validation engine in C#
+- D4: Update .git/hooks/ wrappers to call xeyth-git tool
+- D5: Tests for validation logic (xUnit + Verify)
+- D6: Documentation update (Ai/Git/README.md)
+
+## Architecture Decisions
+
+**AD-1**: Global tool structure
+- Rationale: Matches Phase 1 (xeyth-verify), installable via dotnet tool install
+- Package: Automation.Git project as dotnet tool
+- Commands: xeyth-git prepare-commit-msg <file> <source> <sha>, xeyth-git commit-msg <file>
+
+**AD-2**: Shell wrapper pattern
+```bash
+#!/bin/sh
+exec xeyth-git prepare-commit-msg "$@"
+```
+- Rationale: Git requires specific file locations (.git/hooks/), shell scripts call global tool
+- Fallback: If xeyth-git not installed, warn and exit 0 (don't block commits)
+
+**AD-3**: Configuration compatibility
+- Keep existing xeyth.commitValidation config key
+- Read commit.template from git config
+- Maintain all validation rules from current PowerShell implementation
+
+## Success Criteria
+
+- [ ] `dotnet build` succeeds (0 errors, 0 warnings)
+- [ ] xeyth-git tool can be installed globally
+- [ ] prepare-commit-msg hook works identically to PowerShell version
+- [ ] commit-msg validation enforces all existing rules
+- [ ] Tests cover validation edge cases
+- [ ] Documentation updated
+
+## Progress Log
+
+- 2024-12-24: Task created after Phase 1 approval - ready for implementation

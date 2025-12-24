@@ -1,0 +1,25 @@
+# BLOCKER REPORT
+
+---
+
+**Date**: {YYYY-MM-DD}
+**Agent**: {AgentId}
+**Severity**: {Critical|High|Medium}
+
+## Blocker Description
+
+{Clear description of the issue}
+
+## Impact
+
+- Blocked Deliverables: {List}
+- Partial Progress: {List}
+
+## Attempted Solutions
+
+1. {Attempt + outcome}
+2. {Attempt + outcome}
+
+## Recommendation
+
+{Preferred path forward}

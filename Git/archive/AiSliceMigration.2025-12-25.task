@@ -1,0 +1,216 @@
+# Ai Slice Migration - Move Non-AI Slices to Top Level
+
+---
+
+## Delegation Prompt
+
+---
+
+## Role: Implementer
+
+**Task File**: Git/AiSliceMigration.task  
+**Objective**: Migrate non-AI slices (Automation, Contracts, Planning, Research, Setup) from Ai/ to top-level
+
+**Role Reference**: See [Framework/Implementation.prompt.md](../Framework/Implementation.prompt.md) for workflow guidance.
+
+### Context
+
+Several slices under Ai/ are not AI-specific and should be top-level slices:
+- Ai/Automation/ → Automation/ (CLI tools, automation tasks)
+- Ai/Contracts/ → Contracts/ (contract system planning)
+- Ai/Planning/ → Planning/ (planning system, templates, proposals)
+- Ai/Research/ → Research/ (research documents)
+- Ai/Setup/ → Setup/ (setup/initialization)
+- Ai/Configuration.xeyth → Configuration/Configuration.xeyth (framework configuration)
+
+Only true AI Framework slices should remain under Ai/:
+- Ai/Framework/ (core prompts, conventions)
+- Ai/Maintenance/ (framework maintenance)
+- Ai.plan (overall AI strategy)
+- Ai/README.md (AI Framework overview)
+
+**Structured Concept Pattern**: Each slice that introduces a structured concept (like .xeyth, .task, .plan, .proposal) should include:
+- Concept files (the actual instances)
+- Documentation (usage, format, conventions)
+- Templates (standardized format)
+- CLI module (simple API for working with the concept)
+
+These modules can be loaded by central CLI tools or specific tools as needed.
+
+### Your Responsibilities
+
+1. Analyze current Ai/ directory structure
+2. Identify all files/directories to migrate
+3. Execute git mv operations preserving history
+4. Update all file references (links, paths, imports)
+5. Update documentation and workspace configuration
+6. Verify builds and tests pass after migration
+
+### Deliverables
+
+- [ ] **D1**: Migrate Ai/Automation/ → Automation/
+- [ ] **D2**: Migrate Ai/Contracts/ → Contracts/
+- [ ] **D3**: Migrate Ai/Planning/ → Planning/
+- [ ] **D4**: Migrate Ai/Research/ → Research/
+- [ ] **D5**: Migrate Ai/Setup/ → Setup/
+- [ ] **D6**: Migrate Ai/Configuration.xeyth → Configuration/Configuration.xeyth
+- [ ] **D7**: Create Configuration slice structure (docs, template, CLI module)
+- [ ] **D8**: Update all references in markdown files
+- [ ] **D9**: Update workspace configuration if needed
+- [ ] **D10**: Verify build and tests pass
+
+### Implementation Guidance
+
+**Migration Steps**:
+1. Use `git mv Ai/{Slice} {Slice}` to preserve history
+2. Search for broken references: `grep -r "Ai/Automation" **/*.md`
+3. Update all markdown links and paths
+4. Update task delegation prompts if needed
+5. Verify workspace file associations still work
+6. Run `dotnet build` and `nuke Compile Test`
+
+**Files to Migrate**:
+
+**Ai/Automation/**:
+- CliVisualEnhancement.task
+- CliVisualEnhancement.task.Research.report
+- CliVisualEnhancement.task.Phase1Review.report
+- CliVisualEnhancement.task.Phase2Review.report
+- ScriptMigrationPhase2.task
+
+**Ai/Contracts/**:
+- ContractRenderer.task
+- (other contract planning files)
+
+**Ai/Planning/**:
+- BlockerReport.report.template
+- ContextFiles.md
+- Plan.plan.template
+- Plans.inventory
+- ProgressReport.report.template
+- Proposal.template
+- ProposalSystem.md
+- Task.task.template
+- TaskPrioritySystem.md
+- Proposed/ (directory)
+
+**Ai/Research/**:
+- LegacySystemAnalysis.md
+- (other research documents)
+
+**Ai/Setup/**:
+- (initialization/setup files)
+
+**Ai/Configuration.xeyth**:
+- Configuration.xeyth → Configuration/Configuration.xeyth
+- Create Configuration/ slice with:
+  - Configuration.xeyth (the configuration file)
+  - ConfigurationFormat.md (documentation)
+  - Configuration.xeyth.template (template)
+  - CLI module design (for xeyth-config tool or module)
+
+**Verification Steps**:
+- [ ] `dotnet build` succeeds (0 errors, 0 warnings)
+- [ ] `nuke Compile Test` passes
+- [ ] All markdown links resolve correctly
+- [ ] No broken references in grep search
+- [ ] Workspace file associations work
+
+**Critical Notes**:
+- Use `git mv` to preserve history
+- Update references incrementally (search for each slice)
+- Test after each major migration
+- Ai/Configuration.xeyth should stay (AI Framework config)
+- Ai/README.md should stay (AI Framework overview)
+
+### Reports
+
+- Keep status/blocker reports in separate `.report` files named `AiSliceMigration.task.{ReportName}.report` alongside this task file
+- Reference the report filenames here (do not inline full reports)
+- Use [Planning/ProgressReport.report.template](../Planning/ProgressReport.report.template) for status updates and [Planning/BlockerReport.report.template](../Planning/BlockerReport.report.template) when blocked
+
+### Upon Completion
+
+1. Update Progress Log in this file (summaries only; link to `.report` files for details)
+2. Delegate to Reviewer using code block format
+3. When complete, archive to `Git/archive/AiSliceMigration.YYYY-MM-DD.task`
+
+---
+
+## Task Details
+
+---
+
+Status: Complete  
+Owner: Implementation Agent  
+Priority: High  
+Effort: Medium  
+Priority Score: 9 (Impact:7 + Urgency:3 + Dependency:5 - Complexity:2 - Blocks remote repo import)
+
+## Objective
+
+Move non-AI slices from Ai/ to top-level directory structure, leaving only true AI Framework content under Ai/.
+
+## Task Context
+
+- Current state:
+  - Ai/Automation/ contains task automation planning (not AI-specific)
+  - Ai/Contracts/ contains contract system planning (not AI-specific)
+  - Ai/Planning/ contains planning templates and tools (generic)
+  - Ai/Research/ contains research documents (generic)
+  - Ai/Setup/ contains setup/initialization (generic)
+  - Git/ already migrated successfully (precedent)
+  
+- Desired state:
+  - Top-level slices: Automation/, Contracts/, Planning/, Research/, Setup/
+  - Ai/ contains only Framework/, Maintenance/, Ai.plan, Configuration.xeyth, README.md
+  - Clear separation: AI Framework vs application slices
+  - Consistent structure with Git/ migration
+
+## Task Deliverables
+
+- D1: Automation/ at top level (from Ai/Automation/)
+- D2: Contracts/ at top level (from Ai/Contracts/)
+- D3: Planning/ at top level (from Ai/Planning/)
+- D4: Research/ at top level (from Ai/Research/)
+- D5: Setup/ at top level (from Ai/Setup/)
+- D6: Configuration/ slice (from Ai/Configuration.xeyth with docs, template, CLI module)
+- D7: Structured concept pattern established (docs + template + CLI module per concept)
+- D8: All markdown references updated
+- D9: Workspace configuration updated
+- D10: Build and tests passing
+
+## Architecture Decisions
+
+- AD-1: Top-level slices for non-AI content — Rationale: Clear separation, better navigation, consistent with Git/ migration
+- AD-2: Keep Ai/Framework and Ai/Maintenance — Rationale: These are AI Framework-specific (prompts, conventions, framework tasks)
+- AD-3: Use git mv for history preservation — Rationale: Maintain file history, enable git log tracking across rename
+- AD-4: Update references incrementally — Rationale: Easier to track, test after each migration
+- AD-5: Ai.plan stays in Ai/ — Rationale: Strategic plan for AI Framework itself
+- AD-6: Structured concept pattern — Rationale: Each structured concept (.xeyth, .task, .plan, .proposal) gets own slice with docs, template, and CLI module for simple API access
+- AD-7: Configuration as slice — Rationale: .xeyth is a structured concept like .task, deserves same treatment (docs, template, CLI module)
+
+## Success Criteria
+
+- [ ] `dotnet build` succeeds (0 errors, 0 warnings)
+- [ ] `nuke Compile Test` passes (all tests passing)
+- [ ] No Ai/Automation/, Ai/Contracts/, Ai/Planning/, Ai/Research/, Ai/Setup/ directories remain
+- [ ] No Ai/Configuration.xeyth file (moved to Configuration/)
+- [ ] Top-level Automation/, Contracts/, Planning/, Research/, Setup/, Configuration/ exist
+- [ ] Configuration/ has: Configuration.xeyth, ConfigurationFormat.md, Configuration.xeyth.template
+- [ ] All markdown links resolve correctly
+- [ ] No broken references in codebase (especially Configuration.xeyth paths)
+- [ ] Workspace file associations work
+- [ ] Git history preserved for all migrated files
+- [ ] Structured concept pattern documented
+
+## Progress Log
+
+- 2024-12-24: Task created for Ai slice migration to prepare for GitHub remote
+- 2024-12-24: **Migration Complete** ✅ (commit ca30fc1)
+  - All non-AI slices migrated to top-level
+  - Configuration slice established with StructuredConceptPattern
+  - All references updated
+  - Build and tests pass (24/24 tests)
+  - All deliverables verified complete
+

@@ -1,0 +1,29 @@
+# Active Plans
+
+This inventory tracks all active .plan files in the AI framework.
+
+## Framework-Wide Plans
+
+Ai.plan
+
+## Contracts Plans
+
+Contracts/Contracts.plan
+
+## Automation Plans
+
+Automation/Automation.plan
+
+## Framework Plans
+
+(No active plans yet)
+
+## Git Plans
+
+(No active plans yet)
+
+## Note
+
+- This inventory tracks only `.plan` files
+- Each `.plan` file should have an accompanying `{PlanName}.plan.Tasks.inventory` listing its related tasks
+- The master `Ai.plan` tracks framework-level tasks that don't belong to slice-specific plans

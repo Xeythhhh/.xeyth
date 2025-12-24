@@ -1,0 +1,275 @@
+# Context File Tooling - Dotnet CLI Utilities
+
+**Status**: Not Started  
+**Created**: 2024-12-24  
+**Owner**: Strategic Agent (Planner)  
+**Priority**: Medium  
+**Effort**: Large  
+**Priority Score**: 6 (Impact:4 + Urgency:2 + Dependency:3 - Complexity:3 - Enables automation)
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Automation/ContextFileTooling.task](Automation/ContextFileTooling.task)  
+**Role**: Planner (see [../Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md))  
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Design and plan dotnet CLI tooling utilities for querying/managing AI framework context files (.task, .plan, .report, etc.) for use in automations, pipelines, and other projects.
+````
+
+---
+
+## Context
+
+AI framework uses structured context files (.task, .plan, .report, .convention, .template, .inventory) across vertical slices. Currently no programmatic query/management tooling exists for:
+- Discovering all plans/tasks
+- Finding artifacts for specific tasks
+- Filtering completed vs pending work
+- Extracting metadata (status, owner, dates)
+- Automation integration
+
+Need simple dotnet CLI tools that can be invoked from scripts, pipelines, or other .NET projects.
+
+## Objective
+
+Design and implement dotnet CLI tooling suite for context file management:
+- **Discovery**: Find all plans, tasks, reports, conventions
+- **Querying**: Filter by status, slice, type, date
+- **Relationships**: Map tasks to plans, artifacts to tasks
+- **Metadata Extraction**: Parse structured fields (status, owner, dates)
+- **Automation-Friendly**: JSON output, exit codes, pipeline integration
+
+## Deliverables
+
+1. **Architecture Design**: Tool structure, technology choices (dotnet tool vs library)
+2. **Utility Specifications**: Each tool's purpose, inputs, outputs, examples
+3. **Implementation Plan**: Phased approach, dependencies, testing strategy
+4. **Integration Examples**: How to use in automations/pipelines
+
+## Success Criteria
+
+- [ ] CLI tools discoverable and runnable via dotnet CLI
+- [ ] JSON output for automation consumption
+- [ ] Cross-platform (Windows, macOS, Linux)
+- [ ] All core context file types supported (.task, .plan, .report, .convention, .template, .inventory)
+- [ ] Can be consumed by other projects in solution
+- [ ] Documentation with usage examples
+
+## Proposed Utilities (Initial List)
+
+**Discovery**:
+- `GetAllPlans` - List all .plan files
+- `GetAllTasks` - List all .task files
+- `GetAllReports` - List all .report files
+- `GetAllConventions` - List all .convention files
+
+**Filtering**:
+- `GetTasksForPlan` - Tasks related to specific plan
+- `GetArtifactsForTask` - Reports/outputs for specific task
+- `GetCompletedTasks` - Tasks marked complete/archived
+- `GetPendingTasks` - Tasks not started or in progress
+- `GetTasksByStatus` - Filter by status field
+- `GetTasksBySlice` - Filter by vertical slice
+
+**Metadata**:
+- `GetTaskMetadata` - Extract structured fields (status, owner, dates)
+- `GetTaskProgress` - Parse progress log entries
+
+**Automation**:
+- `ValidateContextFile` - Check file follows conventions
+- `ArchiveTask` - Move completed task to archive
+
+## Architecture Decisions
+
+### AD-1: CLI Tool vs Library
+
+**Decision**: Both - library (`Automation.Planning`) + CLI wrapper (`Automation.Planning.Cli`)  
+**Rationale**:
+- Library provides reusable components for other automation
+- CLI wrapper exposes functionality for scripts/pipelines
+- Separation allows consumption from both code and command line
+- Aligns with existing Contracts pattern (Contracts.Core + Contracts.Cli)
+
+### AD-2: Technology Stack
+
+**Decision**: 
+- **Parser**: Markdown frontmatter parsing + convention-based structure detection
+- **Querying**: LINQ over discovered files with strongly-typed models
+- **Output**: System.Text.Json for JSON serialization
+- **File System**: Microsoft.Extensions.FileSystemGlobbing for pattern matching
+- **CLI Framework**: System.CommandLine (modern, type-safe)
+- **Dependencies**: Minimal - file I/O, JSON, glob patterns only
+
+**Rationale**: Modern .NET 10 patterns, minimal dependencies, cross-platform, maintainable.
+
+### AD-3: Project Structure
+
+**Decision**: Create two new projects:
+```
+src/
+  Automation.Planning/         (Library - core logic)
+    Models/                    (Task, Plan, Report, Convention models)
+    Parsers/                   (Parse context files into models)
+    Queries/                   (GetAllTasks, GetCompletedTasks, etc.)
+    Filters/                   (Filter by status, slice, date)
+  
+  Automation.Planning.Cli/     (CLI wrapper)
+    Commands/                  (Each utility as System.CommandLine command)
+    Program.cs                 (CLI entry point)
+    
+  tests/
+    Automation.Planning.Tests/ (Unit + integration tests)
+```
+
+**Rationale**: Clean separation of concerns, testable library, thin CLI wrapper.
+
+### AD-4: Output Format
+
+**Decision**: JSON by default, optional formats (text, table)  
+**Example**:
+```json
+{
+  "tasks": [
+    {
+      "path": "Framework/MarkdownLintRemediation.task",
+      "status": "Not Started",
+      "owner": "Strategic Agent (Planner)",
+      "created": "2024-12-24",
+      "slice": "Framework"
+    }
+  ],
+  "count": 1
+}
+```
+
+**Rationale**: Machine-parseable, works with jq/PowerShell/CI tools, optional human-friendly formats.
+
+### AD-5: CLI Packaging
+
+**Decision**: Dotnet global/local tool via NuGet  
+**Package Name**: `xeyth-planning` (or similar)  
+**Installation**: `dotnet tool install --global xeyth-planning`  
+**Usage**: `xeyth-planning get-all-tasks --format json`
+
+**Rationale**: Standard .NET distribution, easy installation, versioned, auto-updates.
+
+### AD-6: Discovery Strategy
+
+**Decision**: Convention-based file discovery with configurable root  
+**Pattern**:
+- Scan from specified root (default: current directory)
+- Match patterns: `**/*.task`, `**/*.plan`, `**/*.report`, etc.
+- Exclude `**/archive/**` by default (optional --include-archive flag)
+- Parse frontmatter for structured metadata
+
+**Rationale**: Flexible, mirrors framework conventions, performant with glob patterns.
+
+### AD-7: Metadata Extraction
+
+**Decision**: Parse structured sections via regex + convention  
+**Extracted Fields**:
+- Status: Extract from `**Status**: {value}` line
+- Owner: Extract from `**Owner**: {value}` line
+- Created: Extract from `**Created**: {value}` line
+- Slice: Derive from file path
+- Type: Derive from extension (.task, .plan, etc.)
+- Progress Log: Parse ## Progress Log section
+
+**Rationale**: Simple regex parsing sufficient for current format, extensible to YAML frontmatter later if needed.
+
+## Verification
+
+- All tools work cross-platform
+- JSON output parseable by standard tools (jq, PowerShell ConvertFrom-Json)
+- Integration tests with sample context files
+- Documentation includes automation examples
+
+## Implementation Plan
+
+### Phase 1: Foundation (Implementation Agent)
+
+**Create Projects**:
+- `src/Automation.Planning.Cli/` - CLI wrapper project
+- Configure as dotnet tool in .csproj (PackAsTool, ToolCommandName)
+- Add System.CommandLine package
+- Add System.Text.Json for output
+
+**Update Automation.Planning Library**:
+- Add Models/ folder with Task, Plan, Report, Convention classes
+- Add Parsers/ folder with base ContextFileParser
+- Add System.Text.Json for serialization
+- Add Microsoft.Extensions.FileSystemGlobbing (already in Contracts.Core)
+
+### Phase 2: Core Discovery (Implementation Agent)
+
+**Implement File Discovery**:
+- `ContextFileScanner` - discovers files by pattern, excludes archives
+- `TaskParser` - parses .task files into Task model
+- `PlanParser` - parses .plan files into Plan model
+- `ReportParser` - parses .report files into Report model
+
+**Metadata Extraction**:
+- Regex-based extraction for Status, Owner, Created fields
+- Path-based slice detection
+- Extension-based type detection
+
+### Phase 3: Query API (Implementation Agent)
+
+**Implement Query Classes** (in Automation.Planning/Queries/):
+- `GetAllTasks` - returns all discovered tasks
+- `GetAllPlans` - returns all discovered plans
+- `GetTasksForPlan` - filter tasks by plan reference
+- `GetCompletedTasks` - filter by Status contains "Complete" or archived
+- `GetPendingTasks` - filter by Status NOT "Complete"
+- `GetTasksBySlice` - filter by slice path
+- `GetTasksByStatus` - filter by exact status match
+
+### Phase 4: CLI Commands (Implementation Agent)
+
+**Implement Commands** (in Automation.Planning.Cli/Commands/):
+- Each query as System.CommandLine command
+- Common options: --format (json|text|table), --output (file path), --root (scan path)
+- Example: `GetAllTasksCommand` wraps `GetAllTasks` query
+
+**Program.cs**:
+- Configure root command with all subcommands
+- Handle --version, --help flags
+- Configure JSON output formatting (indented by default)
+
+### Phase 5: Testing & Documentation (Implementation Agent)
+
+**Unit Tests** (Automation.Planning.Tests):
+- Parser tests with sample markdown content
+- Query tests with in-memory file lists
+- Filter logic tests
+
+**Integration Tests**:
+- End-to-end tests using actual Ai/ folder files
+- Verify output format (JSON deserialization)
+
+**Documentation**:
+- README.md in Automation.Planning.Cli with usage examples
+- Inline XML docs on public APIs
+- Example scripts (PowerShell, bash) showing automation usage
+
+### Phase 6: Packaging & Distribution (Implementation Agent)
+
+**NuGet Package Configuration**:
+- Configure .csproj with PackAsTool=true
+- Set ToolCommandName (e.g., "xeyth-planning")
+- Add package metadata (authors, description, license, repo URL)
+- Configure release notes, version
+
+**Build Integration**:
+- Add Nuke target for packing tool
+- Add Nuke target for local tool installation (test)
+- Verify cross-platform build
+
+---
+
+## Progress Log
+
+- 2024-12-24: Task created by Orchestrator - user requested dotnet CLI utilities for context file management
+- 2024-12-24: Planning complete (Planner) - Architecture decisions finalized, 6-phase implementation plan created

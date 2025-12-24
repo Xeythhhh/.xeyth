@@ -1,0 +1,401 @@
+# Script Migration to .NET Task
+
+---
+
+## Delegation Prompt
+
+---
+
+## Role: Planner
+
+**Task File**: Automation/ScriptMigrationToDotnet.task  
+**Objective**: Replace all bash, PowerShell, JavaScript/TypeScript, and Python scripts with modern C#/.NET implementations
+
+**Role Reference**: See [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md) for workflow guidance.
+
+### Delegation Context
+
+The framework currently uses mixed scripting languages (PowerShell, bash, potentially JS/TS/Python) for automation tasks. To maintain consistency, improve type safety, leverage IDE tooling, and simplify the tech stack, we should migrate all scripts to C#/.NET implementations using single-file scripts, dotnet script, or global tools.
+
+### Responsibilities
+
+1. Audit all scripts in the workspace (PowerShell, bash, JS/TS/Python)
+2. Categorize scripts by replacement strategy:
+   - Direct replacement (C# single-file script)
+   - Global tool replacement (dotnet tool install)
+   - Integration wrapper (must stay as shell/PowerShell for 3rd party compatibility)
+3. Design migration approach for each category
+4. Plan incremental migration path (high-value first)
+5. Document integration point requirements (what MUST stay non-.NET)
+
+### Delegation Deliverables
+
+- [ ] **D1**: Complete script inventory with categorization
+- [ ] **D2**: Migration strategy for each script category
+- [ ] **D3**: C# single-file script template and conventions
+- [ ] **D4**: Integration point documentation (git hooks, CI/CD interfaces)
+- [ ] **D5**: Incremental migration plan with priority order
+- [ ] **D6**: Architecture decisions for dotnet-script vs compiled tools
+
+### Reports
+
+- Keep status/blocker reports in separate `.report` files named `ScriptMigrationToDotnet.task.{ReportName}.report` alongside this task file
+- Reference the report filenames here (do not inline full reports)
+- Move reports together with the task when archiving/moving
+- Use [Planning/ProgressReport.report.template](../Planning/ProgressReport.report.template) for status updates and [Planning/BlockerReport.report.template](../Planning/BlockerReport.report.template) when blocked
+
+### Guidance
+
+- Patterns: Single-file C# scripts with top-level statements, dotnet global tools, Spectre.Console for CLI
+- Integration Points: Git hooks require shell wrappers but can delegate to C#
+- Verification: `dotnet build` and `nuke` succeed; migrated scripts work identically to originals
+- Critical notes: Some scripts MUST remain as shell/PowerShell wrappers for 3rd party integration (git, CI/CD systems)
+
+### Upon Completion
+
+1. Update Progress Log in this file (summaries only; link to `.report` files for details)
+2. Use Flow prompt for continue/progress/blocker, and delegate using the 3-line format to the next role
+3. When complete, archive to `Automation/archive/ScriptMigrationToDotnet.YYYY-MM-DD.task` and update relevant inventories
+
+---
+
+## Task Details
+
+---
+
+Status: In Progress (Phase 1 - xeyth-verify)  
+Owner: Implementation Agent (Phase 1)  
+Priority: Medium  
+Effort: Large (Phase 1: Small)  
+Priority Score: 6 (Impact:4 + Urgency:1 + Dependency:0 - Complexity:0 for Phase 1)
+
+## Objective
+
+Eliminate all bash, PowerShell, JavaScript/TypeScript, and Python scripts by replacing them with modern C#/.NET implementations. The only allowed non-.NET scripts are thin integration wrappers required by 3rd party tools (git hooks, CI systems) that delegate to C# implementations.
+
+## Task Context
+
+- Current state:
+  - Mixed scripting languages across the workspace
+  - PowerShell git hooks (.git/hooks/prepare-commit-msg.ps1, commit-msg.ps1)
+  - Shell wrappers for git hooks (.git/hooks/prepare-commit-msg, commit-msg)
+  - Build scripts (build.ps1, build.cmd, build.sh)
+  - Setup scripts (Ai/Setup/ConfigureVerifyDiffTool.ps1)
+  - Potentially other scripts in automation projects
+  - Multiple runtimes required (PowerShell Core, bash, Node.js, Python)
+  
+- Desired state:
+  - All business logic in C#/.NET
+  - Single-file C# scripts or dotnet global tools
+  - Shell/PowerShell wrappers ONLY where 3rd party integration requires them
+  - Unified tech stack (C# + .NET only)
+  - Better type safety, IDE support, refactoring capabilities
+  - Simplified dependency management (NuGet instead of npm/pip/PowerShell Gallery)
+
+## Task Deliverables
+
+### D1: Script Inventory
+
+**File**: `Automation/ScriptMigrationToDotnet.task.Inventory.report`
+
+**Content**:
+- Complete list of all scripts in workspace (by language and purpose)
+- Current usage and dependencies
+- Integration point requirements
+- Estimated migration complexity (Low/Medium/High)
+
+**Categories**:
+- PowerShell: git hooks, build scripts, setup scripts
+- Bash: git hook wrappers, build.sh
+- JavaScript/TypeScript: (inventory if present)
+- Python: (inventory if present)
+
+### D2: Migration Strategy by Category
+
+**Categories**:
+
+1. **Direct Replacement** - Can be fully replaced with C# single-file script
+   - Build scripts (build.ps1 → build.csx or global tool)
+   - Setup scripts (ConfigureVerifyDiffTool.ps1 → C# script)
+   - Automation utilities
+   
+2. **Integration Wrapper** - Must keep shell/PowerShell wrapper but delegate to C#
+   - Git hooks (prepare-commit-msg, commit-msg) - Git expects specific filenames
+   - CI/CD entry points - CI systems may expect .sh/.ps1 files
+   - Pre/post build hooks
+   
+3. **Global Tool** - Best as dotnet global tool
+   - Frequently used utilities
+   - Cross-project tools (already planned: xeyth-planning, xeyth-workspace)
+   
+4. **Embedded in Build** - Integrate into Nuke build targets
+   - Build-related automation
+   - Test runners
+   - Package/publish scripts
+
+### D3: C# Single-File Script Template
+
+**Template**: `Automation/SingleFileScript.template.csx`
+
+**Features**:
+- Top-level statements (C# 10+)
+- NuGet package references via #r directives
+- Argument parsing with System.CommandLine or simple string[] args
+- Spectre.Console for colored output
+- Error handling and exit codes
+- Documentation comments
+
+**Example**:
+```csharp
+#!/usr/bin/env dotnet script
+#r "nuget: Spectre.Console, 0.49.1"
+
+using Spectre.Console;
+
+// Script implementation
+if (args.Length == 0)
+{
+    AnsiConsole.MarkupLine("[red]Error:[/] Missing required arguments");
+    return 1;
+}
+
+AnsiConsole.MarkupLine("[green]Success![/]");
+return 0;
+```
+
+### D4: Integration Point Documentation
+
+**File**: `Automation/ScriptMigrationToDotnet.task.IntegrationPoints.report`
+
+**Content**:
+- Git hooks: Shell wrappers required, delegate to C# via `dotnet script` or `dotnet run`
+- CI/CD: Document which scripts CI expects (build.sh, build.ps1) and how to delegate
+- Pre-commit hooks: If using husky/lint-staged, document integration
+- Package managers: npm scripts, dotnet tools, how they interact
+
+**Git Hook Pattern**:
+```bash
+#!/bin/sh
+# prepare-commit-msg - Git hook wrapper
+exec dotnet script .git/hooks/prepare-commit-msg.csx "$@"
+```
+
+### D5: Incremental Migration Plan
+
+**Priority Order** (High to Low):
+
+1. **High Priority** - High impact, low complexity
+   - Build scripts (build.ps1, build.cmd, build.sh) → Nuke targets or global tool
+   - Setup scripts (ConfigureVerifyDiffTool.ps1) → C# script
+   
+2. **Medium Priority** - Moderate impact, medium complexity
+   - Git hook implementations (.ps1 files) → C# scripts
+   - Automation utilities → Global tools or C# scripts
+   
+3. **Low Priority** - Low impact or complex migration
+   - Legacy scripts (if any)
+   - Rarely used utilities
+   
+4. **Keep as Wrappers** - Do not migrate, keep as thin delegators
+   - Shell wrappers for git hooks (required by git)
+   - CI entry points (if CI expects .sh/.ps1 files)
+
+### D6: Architecture Decisions
+
+Need to decide:
+- **AD-1**: dotnet-script vs single-file C# with `dotnet run`
+- **AD-2**: When to use global tools vs local scripts
+- **AD-3**: How to handle NuGet package references in scripts
+- **AD-4**: Error handling and exit code conventions
+- **AD-5**: Logging/output formatting standards (Spectre.Console everywhere?)
+- **AD-6**: Testing strategy for scripts (unit tests? integration tests?)
+
+## Architecture Decisions
+
+### AD-1: Git Hook Execution Model
+
+**Decision**: ✅ **Global tool** - `xeyth-git-hooks <command>`
+
+**Rationale**: 
+- Easiest installation/versioning
+- Single command for all hooks
+- Better discoverability than project references
+- Can be versioned and updated independently
+
+**Implementation**:
+- Global tool: `Automation.Git` project packaged as dotnet tool
+- Commands: `xeyth-git-hooks prepare-commit-msg`, `xeyth-git-hooks commit-msg`
+- Installation: `xeyth-git install-hooks` copies shell wrappers to .git/hooks/
+- Shell wrapper pattern:
+  ```bash
+  #!/bin/sh
+  exec xeyth-git-hooks prepare-commit-msg "$@"
+  ```
+
+**Status**: ✅ Finalized
+
+### AD-2: Hook Installation Strategy
+
+**Decision**: ✅ **Automated installation** via `xeyth-git install-hooks`
+
+**Rationale**:
+- Reduces manual setup errors
+- Ensures consistent hook configuration
+- Can update hooks when tool is upgraded
+- Better developer experience
+
+**Implementation**:
+- `xeyth-git install-hooks` command
+- Checks if .git/ directory exists
+- Creates shell wrappers in .git/hooks/
+- Sets executable permissions (chmod +x on Unix)
+- Validates hook configuration
+
+**Status**: ✅ Finalized
+
+### AD-3: Console Output Library
+
+**Decision**: ✅ **Spectre.Console** for all CLI tools
+
+**Rationale**:
+- Already in use in contract system
+- Beautiful, readable terminal output
+- Cross-platform ANSI support
+- Rich formatting (colors, tables, trees)
+- Better user experience than plain Console.WriteLine
+
+**Status**: ✅ Finalized
+
+### AD-4: Script Execution Model (General)
+
+**Options**:
+1. **dotnet-script** (.csx files)
+   - Pros: Lightweight, no project file, NuGet via #r directives
+   - Cons: Additional tool dependency, limited IDE support
+   
+2. **Single-file C# with dotnet run**
+   - Pros: Native .NET support, full IDE support, no extra tools
+   - Cons: Requires .NET SDK (already required)
+   
+3. **Global tools**
+   - Pros: Best for frequently used tools, versioning, distribution
+   - Cons: More ceremony (csproj, packaging)
+
+**Recommendation**: Hybrid approach
+- Single-file C# for simple scripts
+- Global tools for complex/frequently used utilities
+- Shell wrappers only where required by 3rd party
+
+**Decision**: ✅ **Hybrid approach** - Global tools for complex utilities, keep Nuke entry points
+
+**Options Evaluated**:
+1. dotnet-script (.csx files) - Extra tool dependency, limited IDE support
+2. Single-file C# with dotnet run - Good for simple scripts, slower startup
+3. Global tools - Best for frequently used utilities, good versioning/distribution
+4. Nuke build targets - Best for build-related automation
+
+**Recommendation**: 
+- **Complex/Frequent tools**: Global tools (xeyth-verify, xeyth-git-hooks, xeyth-planning)
+- **Build scripts (build.sh, build.ps1)**: ✅ Keep as-is (Nuke-generated standard entry points)
+- **Simple utilities**: Single-file C# if needed (none identified currently)
+
+**Status**: ✅ Finalized
+
+### AD-5: Build Script Strategy
+
+**Decision**: ✅ **KEEP build.sh and build.ps1 unchanged**
+
+**Rationale**:
+- Nuke-generated standard entry points
+- Only 70-77 lines of SDK bootstrap code
+- Industry standard pattern
+- No business logic to migrate
+- Well-tested and reliable
+- Required by Nuke ecosystem
+
+**Status**: ✅ Finalized
+
+### AD-6: Migration Phases
+
+**Decision**: ✅ **Three-phase incremental migration**
+
+**Phase 1** (High Priority - Immediate):
+- Migrate ConfigureVerifyDiffTool.ps1 → `xeyth-verify setup` global tool
+- Impact: High, Complexity: Low, Effort: Small
+
+**Phase 2** (Medium Priority):
+- Migrate git hooks .ps1 logic → C# implementations
+- Create `xeyth-git-hooks` global tool
+- Create `xeyth-git install-hooks` command
+- Keep minimal shell wrappers in .git/hooks/
+- Impact: Medium, Complexity: Medium, Effort: Medium
+
+**Phase 3** (Complete - No Action):
+- Build scripts (build.sh, build.ps1): ✅ Keep unchanged
+- Rationale: Nuke standard, no value in changing
+
+**Status**: ✅ Finalized
+
+## Success Criteria
+
+**Options**:
+1. **Direct C# execution**
+   ```bash
+   #!/bin/sh
+   exec dotnet run --project .git/hooks/prepare-commit-msg.csproj -- "$@"
+   ```
+   
+2. **Global tool**
+   ```bash
+   #!/bin/sh
+   exec xeyth-git-hooks prepare-commit-msg "$@"
+   ```
+   
+3. **Single-file script**
+   ```bash
+   #!/bin/sh
+   exec dotnet script .git/hooks/prepare-commit-msg.csx -- "$@"
+   ```
+
+**Considerations**:
+- Performance (cold start time)
+- Portability (requires .NET SDK everywhere)
+- Maintainability (how easy to update/test)
+
+### AD-3: Build Script Replacement Strategy
+
+**Decision**: TBD - Replace build.ps1/build.sh or keep as Nuke entry points?
+
+**Current**: build.ps1/build.sh/build.cmd invoke Nuke
+
+**Options**:
+1. Keep scripts - They're just entry points to Nuke
+2. Replace with global tool - `dotnet tool install xeyth-build -g`
+3. Integrate into dotnet CLI - `dotnet build-xeyth`
+
+**Recommendation**: Keep build scripts as entry points (they're minimal wrappers) OR create global tool if we want custom commands
+
+## Success Criteria
+
+- [ ] `dotnet build` succeeds with 0 errors, 0 warnings
+- [ ] `nuke` Compile and Test targets succeed
+- [ ] All migrated scripts work identically to original versions
+- [ ] Integration points (git hooks, CI/CD) function correctly
+- [ ] Documentation updated for script usage
+- [ ] No PowerShell Core, bash, Node.js, or Python required except for thin wrappers
+- [ ] Test coverage for critical scripts (git hooks, build automation)
+
+## Progress Log
+
+- 2025-12-24: Task created by Orchestrator - script migration to C#/.NET requested
+- 2025-12-24: **Planning Complete** (Planner role)
+  - Completed script inventory: 5 scripts found (see [ScriptMigrationToDotnet.task.Inventory.report](ScriptMigrationToDotnet.task.Inventory.report))
+  - Categorized all scripts: 2 keep as-is (Nuke entry points), 1 direct replacement, 2 git hooks (C# + shell wrappers)
+  - Finalized all 6 architecture decisions
+  - Defined 3-phase migration plan
+  - **Ready for Implementation** - Phase 1 (xeyth-verify tool) can begin
+- 2025-12-24: Implementer kicked off Phase 1. Added xeyth-verify global tool (setup/validate commands), deprecated ConfigureVerifyDiffTool.ps1 to call the tool, and refreshed VerifyDiffSetup documentation.
+- 2024-12-24: **Phase 1 APPROVED** ✅ (Reviewer role)
+  - Review report: [ScriptMigrationToDotnet.task.Phase1Review.report](ScriptMigrationToDotnet.task.Phase1Review.report)
+  - All deliverables complete, code quality excellent, tests passing (7/7)
+  - Ready for Phase 2 (xeyth-git global tool)

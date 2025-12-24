@@ -1,0 +1,116 @@
+# Framework Integration Testing (Dogfooding)
+
+---
+
+## Delegation Prompt
+
+---
+
+## Role: Implementer
+
+**Task File**: Maintenance/DogfoodFramework.task  
+**Objective**: Apply the AI Framework to this repository to validate integration, workflows, and conventions
+
+**Role Reference**: See [Framework/Implementation.prompt.md](../Framework/Implementation.prompt.md) for workflow guidance.
+
+### Delegation Context
+
+The framework is complete and stable, but it has never been used in a real repository (not even this one). Before distributing as a submodule, we need to validate that InitializeAiFramework.prompt.md works correctly, that all delegation workflows function as designed, and that the context file system is practical. This is our opportunity to find and fix issues before external use.
+
+### Responsibilities
+
+1. Create `.github/copilot-instructions.md` following InitializeAiFramework.prompt.md guidance
+2. Verify workspace file associations are complete and correct
+3. Test creating a new task using the framework's own system
+4. Test delegation workflows between roles
+5. Document any friction points, missing features, or improvements needed
+
+### Delegation Deliverables
+
+- [x] **D1**: `.github/copilot-instructions.md` created and properly references framework
+- [x] **D2**: Workspace file associations verified for all context file types (`.task`, `.plan`, `.report`, `.convention`, `.inventory`, `.template`)
+- [x] **D3**: At least one test task created, delegated, and completed using framework workflows
+- [x] **D4**: Document findings and improvements in a report file
+- [x] **D5**: Any identified framework improvements implemented or tracked as new tasks
+
+### Reports
+
+- Keep status/blocker reports in separate `.report` files named `DogfoodFramework.task.{ReportName}.report` alongside this task file
+- Reference the report filenames here (do not inline full reports)
+- Move reports together with the task when archiving/moving
+- Use [Planning/ProgressReport.report.template](../Planning/ProgressReport.report.template) for status updates and [Planning/BlockerReport.report.template](../Planning/BlockerReport.report.template) when blocked
+
+### Guidance
+
+- Patterns: Follow InitializeAiFramework.prompt.md exactly as if this were a host repository
+- Verification: Focus on usability and clarity of documentation
+- Critical notes: This is our quality check before distributing the framework - be thorough
+
+### Upon Completion
+
+1. Update Progress Log in this file (summaries only; link to `.report` files for details)
+2. Use Flow prompt for continue/progress/blocker, and delegate using the 3-line format to the next role
+3. When complete, archive to `Maintenance/archive/DogfoodFramework.YYYY-MM-DD.task` and update relevant inventories
+
+---
+
+## Task Details
+
+---
+
+Status: Complete  
+Owner: Implementer  
+Priority: High  
+Effort: Medium
+
+## Objective
+
+Validate the AI Framework by applying it to this repository itself, ensuring all integration steps, workflows, and conventions work correctly before external distribution.
+
+## Task Context
+
+- Current state:
+  - Framework is complete with all core features implemented
+  - Documentation exists but has never been tested in practice
+  - No `.github/copilot-instructions.md` integration in this repo
+  - Framework conventions not being dogfooded in this repository
+
+- Desired state:
+  - This repository uses its own framework via `.github/copilot-instructions.md`
+  - All workflows tested and validated through actual use
+  - Friction points identified and documented
+  - Framework refinements identified and tracked
+
+## Task Deliverables
+
+- D1: `.github/copilot-instructions.md` - Integration file referencing framework per InitializeAiFramework.prompt.md
+- D2: Workspace validation - All context file types have proper associations
+- D3: Test task - Create, delegate, and complete at least one task using framework workflows
+- D4: Findings report - Document usability issues, gaps, and improvement opportunities
+- D5: Framework improvements - Implement critical fixes or create tasks for future work
+
+## Architecture Decisions
+
+- AD-1: Dogfood before external use — Rationale: Catch issues early, improve based on real experience
+- AD-2: Follow InitializeAiFramework.prompt.md exactly — Rationale: Validate documentation accuracy
+- AD-3: Track all findings for transparency — Rationale: Future users benefit from lessons learned
+
+## Success Criteria
+
+- [x] `.github/copilot-instructions.md` exists and correctly references framework
+- [x] All context file types in `.code-workspace` associations
+- [x] Test task successfully created and completed following framework workflows
+- [x] Findings documented with specific examples
+- [x] No critical blockers remain (all either fixed or tracked)
+
+## Progress Log
+
+- 2024-12-24: Task created by Orchestrator; framework dogfooding identified as high priority
+- 2024-12-24: ✅ All deliverables completed
+  - Enhanced .github/copilot-instructions.md with project context
+  - Verified all workspace file associations configured
+  - Created and completed TestReadmeEnhancement test task (archived)
+  - Added Quick Start section to README during test
+  - Documented findings in DogfoodFramework.task.Findings.report
+  - Improved Task.task.template (fixed paths, added archive step)
+

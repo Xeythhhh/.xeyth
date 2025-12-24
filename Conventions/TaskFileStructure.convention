@@ -1,0 +1,193 @@
+---
+type: File Format
+scope: Framework-wide
+applies_to: All .task files
+status: Active
+enforcement: Manual
+version: 1.0
+related_tools: [xeyth-planning]
+---
+
+# Task File Structure
+
+## Convention Summary
+
+All `.task` files MUST follow a standardized structure with delegation prompt section at the top, followed by task details, architecture decisions, and progress tracking. This ensures consistent task management and enables agents to work autonomously.
+
+## Rules
+
+### File Structure
+
+- ✅ MUST start with delegation prompt section (between `---` separators)
+- ✅ MUST include Task Details section with metadata
+- ✅ MUST include Objective section
+- ✅ MUST include Success Criteria section
+- ✅ MUST include Progress Log section
+- ✅ SHOULD include Architecture Decisions when applicable
+- ❌ MUST NOT mix unrelated tasks in single file
+
+### Delegation Prompt Section
+
+- ✅ MUST appear before task details
+- ✅ MUST include Role, Task File, Objective
+- ✅ MUST include Context explaining why task exists
+- ✅ MUST include Responsibilities list
+- ✅ MUST include Deliverables with acceptance criteria
+- ✅ SHOULD include Implementation Guidance
+- ✅ SHOULD include Verification Steps
+
+### Task Details Section
+
+- ✅ MUST include: Status, Owner, Priority, Effort
+- ✅ MUST calculate Priority Score when applicable
+- ✅ MUST use consistent status values: `Not Started`, `In Progress`, `Complete`, `Blocked`
+- ✅ MUST use priority values: `Critical`, `High`, `Medium`, `Low`
+- ✅ MUST use effort values: `Small`, `Medium`, `Large`
+
+### Progress Log
+
+- ✅ MUST use format: `YYYY-MM-DD: {Note}`
+- ✅ MUST record key decisions and status changes
+- ✅ MUST link to separate `.report` files (not inline full reports)
+- ✅ SHOULD note verification evidence
+
+## Examples
+
+### ✅ Good Example - Task File Structure
+
+```markdown
+# Task Name
+
+---
+
+## Delegation Prompt
+
+---
+
+## Role: Implementer
+
+**Task File**: Slice/TaskName.task  
+**Objective**: One-line objective
+
+**Role Reference**: See [Framework/Implementation.prompt.md](...)
+
+### Context
+
+Why this task exists and what it unlocks
+
+### Your Responsibilities
+
+1. Responsibility 1
+2. Responsibility 2
+
+### Deliverables
+
+- [ ] **D1**: Acceptance criteria
+- [ ] **D2**: Acceptance criteria
+
+### Implementation Guidance
+
+**Patterns to Follow**: {Links to examples}
+
+#### Verification Steps
+
+- [ ] Build passes
+- [ ] Tests pass
+
+---
+
+## Task Details
+
+---
+
+Status: Not Started  
+Owner: Implementer  
+Priority: High  
+Effort: Medium  
+Priority Score: 10
+
+## Objective
+
+Detailed objective description
+
+## Task Context
+
+- Current state: {bullets}
+- Desired state: {bullets}
+
+## Task Deliverables
+
+- D1: {Description and acceptance}
+
+## Architecture Decisions
+
+- AD-1: {Decision + rationale}
+
+## Success Criteria
+
+- [ ] Build succeeds
+- [ ] Tests pass
+
+## Progress Log
+
+- 2024-12-25: Task created
+```
+
+### ❌ Bad Example - Missing Structure
+
+```markdown
+# Some Task
+
+We need to do X because Y.
+
+TODO:
+- Thing 1
+- Thing 2
+
+Started 2024-12-25
+```
+
+**Problems**:
+- No delegation prompt
+- No structured deliverables
+- No success criteria
+- Informal format
+
+## Validation
+
+### Manual Verification
+
+- [ ] Delegation prompt section exists between `---` separators
+- [ ] All required sections present (Objective, Deliverables, Success Criteria, Progress Log)
+- [ ] Status is one of valid values
+- [ ] Priority Score calculated (if applicable)
+- [ ] Progress Log uses date format YYYY-MM-DD
+- [ ] Report files linked (not inlined)
+
+### Automated Verification
+
+```bash
+# Validate task file format
+xeyth-planning validate-task {path}
+
+# List all tasks
+xeyth-planning list-tasks
+
+# Check for missing required sections
+xeyth-contracts validate --path {task} --strict
+```
+
+### CI/CD Integration
+
+Contract validation runs in PR pipeline:
+```bash
+xeyth-contracts validate --path . --strict
+```
+
+## See Also
+
+- [Task.task.template](../Planning/Task.task.template) - Official template
+- [TaskPrioritySystem.md](../Planning/TaskPrioritySystem.md) - Priority scoring
+- [ProgressReport.report.template](../Planning/ProgressReport.report.template) - Progress reports
+- [BlockerReport.report.template](../Planning/BlockerReport.report.template) - Blocker reports
+- [Planning/ContextFiles.md](../Planning/ContextFiles.md) - Context file overview

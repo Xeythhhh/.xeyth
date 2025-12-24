@@ -1,0 +1,163 @@
+# Planning CLI Tool - Proposal Management
+
+---
+
+## Delegation Prompt
+
+---
+
+## Role: Implementer
+
+**Task File**: Automation/PlanningCliTool.task  
+**Objective**: Create xeyth-planning CLI tool for proposal and backlog management
+
+**Role Reference**: See [Framework/Implementation.prompt.md](../Framework/Implementation.prompt.md) for workflow guidance.
+
+### Context
+
+The proposal system ([Planning/ProposalSystem.md](../Ai/Planning/ProposalSystem.md)) needs CLI tooling to list pending proposals for Orchestrator review. This enables agents to capture optimization ideas during implementation without disrupting focus, then review them in batch later.
+
+### Your Responsibilities
+
+1. Design xeyth-planning CLI tool architecture
+2. Implement list-proposals command with filtering
+3. Implement show-proposal command for details
+4. Implement accept/defer/reject commands for decisions
+5. Add comprehensive tests (unit + integration)
+6. Package as dotnet tool
+
+### Deliverables
+
+- [ ] **D1**: Automation.Planning project structure (CLI, Core, Tests)
+- [ ] **D2**: list-proposals command (--pending, --all, --status filters)
+- [ ] **D3**: show-proposal command (detailed view)
+- [ ] **D4**: accept-proposal command (creates task, archives proposal)
+- [ ] **D5**: defer-proposal / reject-proposal commands
+- [ ] **D6**: Unit tests + integration tests (file I/O, task creation)
+- [ ] **D7**: Package as dotnet tool (NuGet-ready)
+
+### Implementation Guidance
+
+**Architecture**:
+```
+Automation/
+  Automation.Planning/
+    Program.cs
+    Commands/
+      ListProposalsCommand.cs
+      ShowProposalCommand.cs
+      AcceptProposalCommand.cs
+      DeferProposalCommand.cs
+      RejectProposalCommand.cs
+    Services/
+      ProposalDiscoveryService.cs
+      ProposalParser.cs
+      TaskCreationService.cs
+    Models/
+      Proposal.cs
+      ProposalStatus.cs
+  tests/
+    Automation.Planning.Tests/
+      Commands/
+        ListProposalsCommandTests.cs
+      Services/
+        ProposalDiscoveryServiceTests.cs
+```
+
+**Patterns to Follow**:
+- Use Automation.Cli.Common for visual components
+- Command pattern for CLI commands (like xeyth-contracts)
+- Service layer for proposal discovery/parsing
+- Snapshot tests for command output (Verify)
+
+**Verification Steps**:
+- [ ] `dotnet build` succeeds (0 errors, 0 warnings)
+- [ ] `nuke Compile Test` passes
+- [ ] CLI help text renders correctly
+- [ ] Can list proposals from Ai/Planning/Proposed
+- [ ] Can accept proposal and create task file
+
+**Critical Notes**:
+- Must search all slices for .proposal files (recursive glob)
+- Parse proposal markdown to extract Status, Submitted, Author
+- Create task from template when accepting proposal
+- Archive proposal with decision metadata
+- Handle file I/O errors gracefully
+
+### Reports
+
+- Keep status/blocker reports in separate `.report` files named `PlanningCliTool.task.{ReportName}.report` alongside this task file
+- Reference the report filenames here (do not inline full reports)
+- Use [Planning/ProgressReport.report.template](../Ai/Planning/ProgressReport.report.template) for status updates and [Planning/BlockerReport.report.template](../Ai/Planning/BlockerReport.report.template) when blocked
+
+### Upon Completion
+
+1. Update Progress Log in this file (summaries only; link to `.report` files for details)
+2. Delegate to Reviewer using code block format
+3. When complete, archive to `Automation/archive/PlanningCliTool.YYYY-MM-DD.task`
+
+---
+
+## Task Details
+
+---
+
+Status: Not Started  
+Owner: Implementation Agent  
+Priority: High  
+Effort: Medium  
+Priority Score: 9 (Impact:7 + Urgency:3 + Dependency:5 - Complexity:2 - Enables proposal workflow)
+
+## Objective
+
+Create xeyth-planning CLI tool to manage proposal workflow, enabling Orchestrator to review pending proposals and make decisions without disrupting Implementation Agent focus.
+
+## Task Context
+
+- Current state:
+  - Proposal system documented ([Planning/ProposalSystem.md](../Ai/Planning/ProposalSystem.md))
+  - No CLI tooling for proposal management
+  - Orchestrator must manually search for .proposal files
+  - No automation for task creation from proposals
+  
+- Desired state:
+  - CLI tool lists all pending proposals
+  - Orchestrator can review details, make decisions
+  - Accepting proposal creates task automatically
+  - Deferring/rejecting proposal archives with rationale
+  - Integrated with existing CLI visual system (Automation.Cli.Common)
+
+## Task Deliverables
+
+- D1: Automation.Planning project (CLI + Core + Tests)
+- D2: list-proposals command with filters
+- D3: show-proposal command
+- D4: accept-proposal command (creates task)
+- D5: defer-proposal / reject-proposal commands
+- D6: Comprehensive test coverage
+- D7: NuGet package configuration
+
+## Architecture Decisions
+
+- AD-1: Command pattern for CLI — Rationale: Consistent with xeyth-contracts, xeyth-verify
+- AD-2: Service layer for logic — Rationale: Testable, reusable, separation of concerns
+- AD-3: Recursive .proposal discovery — Rationale: Support proposals in any slice/sub-slice
+- AD-4: Markdown parsing for metadata — Rationale: Extract Status, Submitted, Author from front matter
+- AD-5: Task creation from template — Rationale: Standardize task format, link to proposal
+
+## Success Criteria
+
+- [ ] `dotnet build` succeeds (0 errors, 0 warnings)
+- [ ] `nuke Compile Test` passes (all tests passing)
+- [ ] Can list proposals: `xeyth-planning list-proposals --pending`
+- [ ] Can show details: `xeyth-planning show-proposal {name}`
+- [ ] Can accept: `xeyth-planning accept-proposal {name} --task {path}`
+- [ ] Can defer: `xeyth-planning defer-proposal {name} --reason {text}`
+- [ ] Can reject: `xeyth-planning reject-proposal {name} --reason {text}`
+- [ ] Visual output uses Automation.Cli.Common components
+- [ ] Package installs as dotnet tool
+
+## Progress Log
+
+- 2024-12-24: Task created for proposal management CLI tool
+

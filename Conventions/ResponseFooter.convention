@@ -1,0 +1,170 @@
+---
+type: Process
+scope: Framework-wide
+applies_to: All agent responses
+status: Active
+enforcement: Manual
+version: 1.0
+related_tools: [github-copilot]
+---
+
+# Response Footer Convention
+
+## Convention Summary
+
+All agents MUST end their responses with a standardized footer that documents affected files, current task context, role, and target audience. This provides transparency and traceability for all agent actions.
+
+## Rules
+
+### Footer Structure
+
+- ✅ MUST include 3 separator lines (48 dashes each)
+- ✅ MUST include "Affected files" section
+- ✅ MUST include task/role metadata section
+- ✅ MUST list files added, modified, deleted (or "None" for each)
+- ✅ MUST specify current task file if working on a task
+- ✅ MUST specify role and agent identifier
+- ✅ MUST specify target audience with model name
+- ❌ MUST NOT omit any required sections
+- ❌ MUST NOT use shortened format
+
+### File Lists
+
+- ✅ MUST categorize as Added, Modified, or Deleted
+- ✅ MUST use relative paths from repository root
+- ✅ MUST list each file on separate line or comma-separated
+- ✅ MUST write "None" if category is empty
+- ❌ MUST NOT omit empty categories
+
+### Metadata
+
+- ✅ MUST include Task file path (if applicable)
+- ✅ MUST include Role in backticks
+- ✅ MUST include Agent Identifier
+- ✅ MUST include Target Audience with model name
+- ⚠️ MAY include additional context (commit hash, status, etc.)
+
+## Examples
+
+### ✅ Good Example - Standard Footer
+
+```markdown
+------------------------------------------------
+
+### Affected files
+
+**Added**:
+- Configuration/ConventionFormat.md
+- Convention/Convention.convention.template
+
+**Modified**:
+- Ai/Framework/Implementation.prompt.md
+- Configuration/StructuredConceptPattern.md
+
+**Deleted**: None
+
+------------------------------------------------
+
+> **Task**: Git/AiSliceMigration.task
+> **Role**: `Implementer`
+> **Agent Identifier**: `Implementation Agent`
+> **Target Audience**: `Strategic Agent (Reviewer) (Claude Sonnet 4.5)`
+
+------------------------------------------------
+```
+
+### ✅ Good Example - No Active Task
+
+```markdown
+------------------------------------------------
+
+### Affected files
+
+**Added**: None
+
+**Modified**:
+- README.md
+- .github/copilot-instructions.md
+
+**Deleted**: None
+
+------------------------------------------------
+
+> **Task**: Continuous Flow (Orchestrator)
+> **Role**: `Orchestrator`
+> **Agent Identifier**: `Strategic Agent`
+> **Target Audience**: `User`
+
+------------------------------------------------
+```
+
+### ❌ Bad Example - Missing Sections
+
+```markdown
+Files changed:
+- Configuration/ConventionFormat.md (added)
+- README.md (modified)
+
+Role: Implementer
+```
+
+**Problems**:
+- Missing separator lines
+- Incomplete file categorization
+- Missing task reference
+- Missing target audience
+- Informal format
+
+### ❌ Bad Example - Wrong Format
+
+```markdown
+---
+Changed files: ConventionFormat.md, README.md
+Role: Implementer, Task: AiSliceMigration.task
+---
+```
+
+**Problems**:
+- Using YAML format instead of markdown
+- Not separating Added/Modified/Deleted
+- Missing Agent Identifier
+- Missing Target Audience
+
+## Validation
+
+### Manual Verification
+
+- [ ] Three separator lines present (48 dashes each)
+- [ ] "Affected files" section with Added/Modified/Deleted
+- [ ] Each category lists files or says "None"
+- [ ] Task file specified (or "Continuous Flow")
+- [ ] Role in backticks
+- [ ] Agent Identifier present
+- [ ] Target Audience with model name
+
+### Template
+
+```markdown
+------------------------------------------------
+
+### Affected files
+
+**Added**: {List or None}  
+**Modified**: {List or None}  
+**Deleted**: {List or None}
+
+------------------------------------------------
+
+> **Task**: {TaskFile.task or context}
+> **Role**: `{AssignedRole}`
+> **Agent Identifier**: `{AgentId}`
+> **Target Audience**: `{TargetRole} ({Model})`
+
+------------------------------------------------
+```
+
+## See Also
+
+- [Framework/copilot-instructions.md](../Ai/Framework/copilot-instructions.md) - Standard footer template
+- [Framework/Implementation.prompt.md](../Ai/Framework/Implementation.prompt.md) - Implementation Agent workflow
+- [Framework/Strategic.prompt.md](../Ai/Framework/Strategic.prompt.md) - Strategic Agent workflow

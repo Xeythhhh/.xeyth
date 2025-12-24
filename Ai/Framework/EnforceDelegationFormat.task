@@ -1,0 +1,160 @@
+# Enforce Delegation Format
+
+**Status**: Not Started  
+**Created**: 2024-12-24  
+**Owner**: Strategic Agent (Planner)
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Framework/EnforceDelegationFormat.task](Framework/EnforceDelegationFormat.task)  
+**Role**: Planner (see [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md))  
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Plan enforcement of strict delegation format across all framework files per Delegation.instructions.md.
+````
+
+---
+
+## Context
+
+Delegation prompts throughout the framework need to:
+1. **Always use code blocks** (4 backticks for cross-model delegation, 3 for same-model)
+2. **Strictly follow the format** defined in [Delegation.instructions.md](Delegation.instructions.md)
+3. Be **automatically enforced** through prompt structure and templates
+
+Currently, delegation examples in prompt files are inconsistent - some are in code blocks, some are inline text, and format varies.
+
+## Objective
+
+Ensure all delegation prompts across the framework strictly follow [Delegation.instructions.md](Delegation.instructions.md) format with proper code block wrapping.
+
+## Deliverables
+
+1. **Audit Report**: List all locations where delegation format appears (prompt files, templates, task files)
+2. **Standardized Format**:
+   - Cross-model delegation uses 4-backtick code blocks
+   - Role switching (Strategic Agent) has NO code block, just file updates + re-read + role switch
+3. **Template Updates**: Task template includes delegation prompt section with code block placeholder
+4. **Documentation**:
+   - Clear distinction between cross-model delegation vs role switching
+   - Role switching workflow: update files → re-read task → switch role → continue
+5. **Verification**: All framework files follow consistent delegation pattern
+
+## Success Criteria
+
+- [ ] All prompt files (.prompt.md) use code block delegation examples
+- [ ] Task template includes proper delegation prompt section
+- [ ] Documentation clearly states code block requirement
+- [ ] No inline delegation examples without code blocks
+- [ ] Format matches Delegation.instructions.md exactly
+
+## Architecture Decisions
+
+### Audit Findings
+
+**Files with Delegation Format**:
+
+1. `Ai/Framework/Implementation.prompt.md` - 2 delegation examples (both use 4-backtick code blocks ✓)
+2. `Ai/Framework/Flow.prompt.md` - 2 delegation examples (1 recommendation template + 1 to Implementation)
+3. `Ai/Framework/Strategic.prompt.md` - Delegation examples section
+4. `Ai/Framework/Delegation.instructions.md` - 3 complete examples (all use 4-backtick code blocks ✓)
+5. `Ai/Framework/ModelRequirements.md` - 2 examples (mixed format ⚠️)
+6. `Ai/Framework/ModelQuickReference.md` - Template examples
+7. `Ai/Planning/Task.task.template` - Delegation prompt section placeholder
+8. `Ai/Research/LegacySystemAnalysis.md` - Documentation examples
+9. Legacy files (`.legacy/Balhacii/`) - Not in scope for enforcement
+
+**Current State**:
+
+- ✅ Delegation.instructions.md: All examples use 4-backtick code blocks correctly
+- ✅ Implementation.prompt.md: Both delegation examples use 4-backtick code blocks
+- ✅ Flow.prompt.md: Cross-model delegation uses 4-backtick code blocks
+- ⚠️ Strategic.prompt.md: Has role switching example (correct - no code block)
+- ⚠️ ModelRequirements.md: Has examples but mixed format for documentation purposes
+- ⚠️ Task.task.template: Needs delegation prompt section with code block placeholder
+
+### Design Decisions
+
+**1. Code Block Usage**:
+
+- Cross-model delegation (Strategic ↔ Implementation): **4 backticks** (containing markdown)
+- Role switching (Strategic Agent internal): **NO code block** (just text stating role switch)
+- Documentation examples: Can use code blocks for illustration
+
+**2. Template Structure**:
+
+Task.task.template needs:
+
+````markdown
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [{Slice}/{TaskName}.task]({Slice}/{TaskName}.task)  
+**Role**: {Role} (see [Framework/{Prompt}.prompt.md](../Framework/{Prompt}.prompt.md))  
+**Target Audience**: {Agent} ({Model})
+
+{1-2 sentence context}
+````
+
+````
+
+**3. Enforcement Approach**:
+
+- Update Task.task.template with delegation prompt section
+- Ensure all .prompt.md files reference Delegation.instructions.md
+- Document role-switching workflow (no code block needed)
+- Leave documentation/research files as-is (informational, not executable)
+
+### Implementation Plan
+
+1. **Update Task.task.template**:
+   - Add DELEGATION PROMPT section with 4-backtick code block placeholder
+   - Include guidance: "Replace placeholders when creating task"
+
+2. **Verify .prompt.md Files**:
+   - Strategic.prompt.md ✓ (references Delegation.instructions.md)
+   - Implementation.prompt.md ✓ (references Delegation.instructions.md)
+   - Flow.prompt.md ✓ (references Delegation.instructions.md)
+   - Scaffold.prompt.md (check if needs delegation examples)
+
+3. **Documentation**:
+   - Delegation.instructions.md is authoritative source ✓
+   - All prompt files reference it ✓
+   - Clear distinction between code block delegation vs role switching ✓
+
+4. **Verification**:
+   - Lint all markdown files
+   - Manual review of delegation format consistency
+   - Test task template with placeholder replacement
+
+---
+
+## Implementation Sign-Off
+
+Ready to delegate to Implementation Agent for execution.
+
+## Verification
+
+- Build and lint checks pass
+- Manual review of all delegation examples
+- Task template renders correctly with delegation section
+
+---
+
+## Progress Log
+
+- 2024-12-24: Task created by Orchestrator, delegated to Planner for planning
+- 2024-12-24: Planner completed architecture - ready for Implementation Agent
+
+---
+
+````markdown
+**Task**: [Framework/EnforceDelegationFormat.task](Framework/EnforceDelegationFormat.task)  
+**Role**: Implementer (see [Framework/Implementation.prompt.md](Framework/Implementation.prompt.md))  
+**Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
+
+Execute plan to enforce delegation format across framework - update Task.task.template and verify all prompt files.
+````

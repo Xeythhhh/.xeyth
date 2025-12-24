@@ -1,0 +1,25 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "files.associations": {
+      "*.task": "markdown",
+      "*.plan": "markdown",
+      "*.report": "markdown",
+      "*.template": "markdown",
+      "*.convention": "markdown",
+      "*.inventory": "markdown",
+      "*.proposal": "markdown",
+      "*.metadata": "yaml",
+      "*.xeyth": "yaml",
+      ".gitmessage": "git-commit"
+    },
+    "chat.instructionsFiles.locations": [
+      ".github",
+      "Ai/Framework"
+    ]
+  }
+}

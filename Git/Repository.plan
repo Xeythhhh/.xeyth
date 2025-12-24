@@ -1,0 +1,278 @@
+# PLAN CONTEXT
+
+---
+
+**Plan Name**: Repository Infrastructure
+**Plan File**: Git/Repository.plan
+**Tasks Inventory**: Git/Repository.plan.Tasks.inventory
+**Related Task**: User directive - shift to Git infrastructure
+**Owner**: Strategic Agent (Planner)
+
+## Objective
+
+Establish foundational repository infrastructure to enable remote collaboration, PR-based workflows, cloud agent delegation, and enterprise-grade CI/CD automation.
+
+## Context
+
+- Current state:
+  - Local Git repository with 11+ commits on master branch
+  - No remote repository configured
+  - No branching strategy defined
+  - No CI/CD automation
+  - No GitHub/Azure project integration
+  - src/ directory structure (needs vertical slice reorganization)
+- Constraints:
+  - Must support PR-based workflows with cloud agents
+  - Must integrate GitHub and Azure DevOps projects
+  - Must maintain backward compatibility during migration
+  - Must support cross-platform builds (Windows, macOS, Linux)
+- Assumptions:
+  - GitHub private repository initially (public later)
+  - Nuke build system for CI/CD orchestration
+  - Azure DevOps for enterprise project management
+  - .NET 10 as primary runtime
+
+## Decisions
+
+- D1: **GitHub Flow branching strategy** — Rationale: Simple, PR-centric, aligns with cloud agent delegation model (main + feature branches)
+- D2: **GitHub private repository → public transition** — Rationale: Iterate privately, release publicly when stable
+- D3: **Nuke for CI/CD orchestration** — Rationale: Already in use, cross-platform, strong .NET integration
+- D4: **Azure Boards + GitHub integration** — Rationale: Enterprise project management with developer-friendly GitHub UX
+- D5: **Reusable packaging pipelines** — Rationale: Standardize tool distribution (dotnet tool, NuGet packages)
+- D6: **Branch protection rules** — Rationale: Require PR reviews, passing builds, prevent force-push to main
+
+## Implementation Phases
+
+### Phase 1: GitHub Repository Setup
+- Create GitHub private repository `.xeyth`
+- Configure branch protection rules (main branch)
+- Set up PR templates
+- Create GitHub project for task tracking
+- Configure repository settings (merge strategies, auto-delete branches)
+
+### Phase 2: Azure DevOps Integration
+- Create Azure DevOps project
+- Configure Azure Boards
+- Integrate GitHub repository with Azure Boards (work item linking)
+- Set up Azure Pipelines (if needed for specific workflows)
+
+### Phase 3: Nuke CI/CD Pipelines
+- Create build pipeline (compile all projects)
+- Create test pipeline (unit, integration, E2E)
+- Create packaging pipeline (dotnet tool, NuGet)
+- Create release pipeline (GitHub Releases, package publishing)
+- Configure GitHub Actions workflows to invoke Nuke targets
+
+### Phase 4: Repository Reorganization
+- Plan src/ directory elimination (move to vertical slices)
+- Migrate Ai/Git → Git
+- Migrate other non-AI slices as needed
+- Update all project references, imports, build scripts
+- Validate builds and tests after migration
+
+### Phase 5: Cloud Agent Integration
+- Document cloud agent onboarding process
+- Create delegation templates for PR-based workflows
+- Test PR creation, review, merge cycle with cloud agents
+- Validate instruction file auto-loading for cloud agents
+
+## Implementation Notes
+
+### Branching Strategy (GitHub Flow)
+
+**Main Branch**:
+- Protected branch
+- Requires PR reviews (1+ approvals)
+- Requires passing CI checks
+- No direct commits
+- No force-push
+
+**Feature Branches**:
+- Named `feature/<task-name>` or `fix/<issue-name>`
+- Created from `main`
+- Deleted after merge
+- Squash merge to main (clean history)
+
+**Release Strategy**:
+- Tags on main: `v{major}.{minor}.{patch}`
+- GitHub Releases with changelog
+- NuGet packages published on release
+
+### GitHub Repository Settings
+
+```yaml
+Repository: .xeyth
+Visibility: Private (→ Public later)
+Default Branch: main
+
+Branch Protection (main):
+  - Require pull request before merging
+  - Require approvals: 1
+  - Require status checks to pass
+  - Require branches to be up to date
+  - No force pushes
+  - No deletions
+
+Merge Options:
+  - Allow squash merging (default)
+  - Allow merge commits (optional)
+  - Disable rebase merging
+  - Auto-delete head branches
+```
+
+### PR Template
+
+Create `.github/pull_request_template.md`:
+
+```markdown
+## Description
+{What changed and why}
+
+## Related Task
+- Task: {Link to .task file}
+- Issue: {GitHub issue number if applicable}
+
+## Checklist
+- [ ] Build passes (`dotnet build` or `nuke`)
+- [ ] Tests pass (`dotnet test`)
+- [ ] Task file updated (Progress Log, deliverables)
+- [ ] Documentation updated (if needed)
+
+## Verification
+{Evidence of testing, screenshots, logs}
+```
+
+### Azure DevOps Project Structure
+
+**Project Name**: xeyth
+**Process Template**: Agile
+
+**Boards Configuration**:
+- Work Item Types: Epic, Feature, User Story, Task, Bug
+- Area Paths: By vertical slice (Framework, Contracts, Automation, Git, etc.)
+- Iteration Paths: 2-week sprints
+
+**GitHub Integration**:
+- Link commits via `AB#{work-item-id}` in commit messages
+- Link PRs to work items
+- Update work item state on PR merge
+
+### Nuke CI/CD Targets
+
+**Build Pipeline** (`build.yml`):
+```yaml
+name: Build
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: ./build.sh Compile
+```
+
+**Test Pipeline** (`test.yml`):
+```yaml
+name: Test
+on: [push, pull_request]
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+      - run: ./build.sh Test
+```
+
+**Package Pipeline** (`package.yml`):
+```yaml
+name: Package
+on:
+  release:
+    types: [published]
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+      - run: ./build.sh Pack
+      - run: dotnet nuget push **/*.nupkg --source nuget.org --api-key ${{ secrets.NUGET_API_KEY }}
+```
+
+### Nuke Build Targets
+
+Extend existing `Build.cs`:
+
+```csharp
+Target Pack => _ => _
+    .DependsOn(Compile, Test)
+    .Executes(() =>
+    {
+        DotNetPack(s => s
+            .SetProject(Solution)
+            .SetConfiguration(Configuration)
+            .SetOutputDirectory(ArtifactsDirectory)
+            .EnableNoBuild());
+    });
+
+Target PublishTools => _ => _
+    .DependsOn(Pack)
+    .Executes(() =>
+    {
+        var packages = ArtifactsDirectory.GlobFiles("*.nupkg");
+        foreach (var package in packages)
+        {
+            DotNetNuGetPush(s => s
+                .SetTargetPath(package)
+                .SetSource("https://api.nuget.org/v3/index.json")
+                .SetApiKey(NuGetApiKey));
+        }
+    });
+```
+
+## Task Inventory Management
+
+Create `Git/Repository.plan.Tasks.inventory`:
+
+```markdown
+# Repository Infrastructure - Tasks
+
+## GitHub Setup
+Git/GitHubRepositorySetup.task
+Git/BranchProtectionRules.task
+Git/PrTemplates.task
+Git/GitHubProject.task
+
+## Azure DevOps
+Git/AzureDevOpsProject.task
+Git/AzureBoardsIntegration.task
+
+## CI/CD
+Git/NukeBuildPipeline.task
+Git/NukeTestPipeline.task
+Git/NukePackagePipeline.task
+Git/GitHubActionsWorkflows.task
+
+## Repository Reorganization
+Git/RepositoryReorganization.task
+Git/SliceMigration.task
+```
+
+## Verification
+
+- [ ] `dotnet build` clean (0 errors, 0 warnings)
+- [ ] `nuke Compile Test` passes
+- [ ] GitHub repository created and configured
+- [ ] Azure DevOps project created
+- [ ] GitHub Actions workflows execute successfully
+- [ ] All tasks in `Git/Repository.plan.Tasks.inventory` tracked
+- [ ] Remote repository accessible and functional
+- [ ] PR workflow validated (create, review, merge, delete branch)
+

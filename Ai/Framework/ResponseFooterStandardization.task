@@ -1,0 +1,161 @@
+# Response Footer Standardization
+
+**Status**: Not Started  
+**Created**: 2024-12-24  
+**Owner**: Strategic Agent (Planner)
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Framework/ResponseFooterStandardization.task](Framework/ResponseFooterStandardization.task)  
+**Role**: Planner (see [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md))  
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Standardize response footer format across framework - currently copilot-instructions.md and legacy system have different formats.
+````
+
+---
+
+## Context
+
+Legacy Balhacii system has detailed response footer requirements in copilot-instructions.md with specific formatting and placement rules. Current .xeyth framework has simpler footer in copilot-instructions.md. Need to decide on standard format and document placement rules.
+
+## Objective
+
+Define and document standard response footer format for all agent responses.
+
+## Deliverables
+
+1. **Standard Footer Format**: Single authoritative footer template
+2. **Placement Rules**: When and where to include footer (after responses vs after delegation blocks)
+3. **Update copilot-instructions.md**: Document standard footer
+4. **Examples**: Show correct footer usage in different scenarios
+
+## Success Criteria
+
+- [ ] One standard footer format documented
+- [ ] Clear placement rules (after direct responses, not inside delegation code blocks)
+- [ ] Examples cover: direct response, delegation, report templates
+- [ ] All framework files reference standard footer
+
+## Architecture Decisions
+
+### Format Comparison
+
+**Legacy Balhacii Format**:
+
+- Detailed placement rules (3 scenarios)
+- Agent Identifier includes descriptive name (e.g., `Copilot-Claude-Sonnet-4.5-Planner-FeatureName`)
+- Explicit "CRITICAL" warnings about code block placement
+- Template usage instructions
+- More verbose
+
+**.xeyth Current Format**:
+
+- Simpler, less verbose
+- Basic fields only
+- Shorter Agent Identifier
+- No detailed placement rules
+
+### Design Decisions
+
+**AD-1**: Use simplified .xeyth format as standard
+
+- Rationale: Less verbose, easier to implement, covers essential info
+- Keep: Affected files, Task, Role, Agent ID, Target Audience
+- Remove: Excessive placement warnings (covered in Delegation.instructions.md)
+
+**AD-2**: Add placement rules section (but concise)
+
+- Rationale: Users need to know when footer is required
+- Rule: Footer after direct responses, NOT inside delegation code blocks
+
+**AD-3**: Agent Identifier format: `{Agent}-{Model}`
+
+- Rationale: Simple, clear (e.g., `Strategic-ClaudeSonnet4.5`, `Implementation-GPT5.1CodexMax`)
+- Avoid: Overly detailed names from legacy
+
+**AD-4**: Document in copilot-instructions.md
+
+- Current location ✓
+- Add placement rules subsection
+- Reference from Delegation.instructions.md
+
+### Standard Footer Template
+
+```markdown
+------------------------------------------------
+
+### Affected Files
+
+**Added**: {List or None}  
+**Modified**: {List or None}  
+**Deleted**: {List or None}
+
+------------------------------------------------
+
+> **Task**: {TaskFile.task}  
+> **Role**: `{Orchestrator|Planner|Reviewer|Implementer|Scaffolder}`  
+> **Agent Identifier**: `{Agent}-{Model}`  
+> **Target Audience**: `{TargetRole} ({TargetModel})`
+
+------------------------------------------------
+```
+
+### Placement Rules
+
+**Include footer**:
+
+- After completing task work (before delegation)
+- After direct responses to user
+- After status/blocker reports
+
+**Do NOT include footer**:
+
+- Inside delegation code blocks
+- Inside template scaffolds
+- In documentation/examples
+
+### Implementation Plan
+
+1. Update copilot-instructions.md Response Footer section:
+   - Replace current footer example
+   - Add concise placement rules (3 bullet points)
+   - Add Agent Identifier format guidance
+
+2. Update Delegation.instructions.md:
+   - Reference footer placement from copilot-instructions.md
+   - Show example: delegation code block + footer after
+
+3. Create examples showing correct usage:
+   - Direct response with footer
+   - Delegation + footer after code block
+   - Progress report + footer
+
+### Sign-Off
+
+Plan complete - ready for Implementation Agent execution.
+
+## Verification
+
+- Documentation clarity
+- Examples demonstrate all scenarios
+
+---
+
+## Progress Log
+
+- 2024-12-24: Task created by Orchestrator for backlog maintenance
+- 2024-12-24: Planner completed architecture - standardized footer format, defined placement rules
+
+---
+
+````markdown
+**Task**: [Framework/ResponseFooterStandardization.task](Framework/ResponseFooterStandardization.task)  
+**Role**: Implementer (see [Framework/Implementation.prompt.md](Framework/Implementation.prompt.md))  
+**Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
+
+Update copilot-instructions.md and Delegation.instructions.md with standardized footer format and placement rules.
+````

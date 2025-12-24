@@ -1,0 +1,40 @@
+# Proposal Template
+
+**Status**: Pending  
+**Submitted**: {YYYY-MM-DD}  
+**Author**: {Agent Role}  
+**Related Task**: {Link to task where discovered}
+
+## Context
+
+{What prompted this proposal? What problem does it solve?}
+
+## Proposal
+
+{Detailed description of the optimization/idea/feature}
+
+## Benefits
+
+- {Benefit 1}
+- {Benefit 2}
+- {Benefit 3}
+
+## Effort Estimate
+
+**Size**: Small | Medium | Large
+
+**Impact**:
+- {What needs to change}
+- {Dependencies}
+- {Risks}
+
+## Implementation Notes
+
+{Any specific guidance, patterns, or constraints}
+
+## Decision
+
+**Status**: Pending | Accepted | Deferred | Rejected  
+**Decision Date**: {YYYY-MM-DD}  
+**Rationale**: {Why accepted/deferred/rejected}  
+**Task Created**: {Link to .task or .plan if accepted}

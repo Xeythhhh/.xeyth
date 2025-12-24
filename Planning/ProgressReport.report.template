@@ -1,0 +1,24 @@
+# PROGRESS REPORT
+
+---
+
+**Date**: {YYYY-MM-DD}
+**Agent**: {AgentId}
+**Status**: {Completed|In-Progress|Paused-For-Input}
+
+## Summary
+
+{Key updates since last report}
+
+## Deliverables
+
+- [x] {Done}
+- [ ] {Pending}
+
+## Verification
+
+{Evidence: `<BUILD_CMD>` output, `<TEST_CMD>` results, links, hashes}
+
+## Next Steps
+
+{What should happen next}

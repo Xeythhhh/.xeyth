@@ -1,0 +1,72 @@
+---
+type: {Architecture Pattern | Coding Standard | Process | Naming | File Format | Documentation}
+scope: {Framework-wide | Slice-specific | Project-specific}
+applies_to: {All files | Specific file types | Specific roles | custom description}
+status: {Active | Deprecated | Proposed | Under Review}
+version: {1.0}
+enforcement: {Manual | Linter | CI/CD | Pre-commit Hook}
+---
+
+# {Convention Name}
+
+## Convention Summary
+
+{One-paragraph summary explaining what this convention governs, why it exists, and who it applies to}
+
+## Rules
+
+{List specific, actionable rules using these markers:}
+
+- ✅ MUST: {Mandatory requirement}
+- ❌ MUST NOT: {Prohibited pattern}
+- ✅ SHOULD: {Recommended practice}
+- ⚠️ MAY: {Optional but suggested}
+
+{Example:}
+- ✅ MUST use PascalCase for file names
+- ❌ MUST NOT use abbreviations in public APIs
+- ✅ SHOULD document all public methods
+- ⚠️ MAY include usage examples in comments
+
+## Examples
+
+{Provide concrete examples demonstrating the convention}
+
+### ✅ Good Example
+
+```{language}
+{Code or pattern that follows the convention}
+```
+
+{Explanation of why this is good}
+
+### ❌ Bad Example
+
+```{language}
+{Code or pattern that violates the convention}
+```
+
+{Explanation of why this is bad}
+
+## Validation
+
+{Explain how to verify compliance with this convention:}
+
+**Manual Verification**:
+- [ ] {Checklist item 1}
+- [ ] {Checklist item 2}
+
+**Automated Verification** (if applicable):
+```bash
+{Command to check compliance}
+```
+
+**CI/CD Integration** (if applicable):
+{Describe pipeline checks}
+
+## See Also
+
+- [{Related Convention}]({path/to/convention.convention})
+- [{Documentation}]({path/to/docs.md})
+- [{Tool}]({path/to/tool})
+- [{Example in codebase}]({path/to/example})

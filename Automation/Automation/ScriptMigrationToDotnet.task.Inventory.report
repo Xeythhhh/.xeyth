@@ -1,0 +1,180 @@
+# Script Inventory Report
+
+**Date**: 2025-12-24  
+**Agent**: Strategic Agent (Planner)  
+**Task**: [ScriptMigrationToDotnet.task](ScriptMigrationToDotnet.task)
+
+## Summary
+
+Total Scripts Found: **5 scripts** (3 PowerShell, 1 bash, 1 shell wrapper)
+
+## Categorization
+
+### Category 1: Integration Wrappers (KEEP - Thin delegates to C#)
+
+**Rationale**: Required by 3rd party systems (git, Nuke) - cannot change filenames or script type
+
+1. **build.sh** (70 lines)
+   - **Purpose**: Nuke build entry point for Unix/macOS
+   - **Current**: Bash script that downloads .NET SDK if needed, invokes Nuke Build.csproj
+   - **Strategy**: ✅ **KEEP AS-IS** - Nuke-generated, standard entry point
+   - **Complexity**: N/A (keep unchanged)
+   - **Priority**: N/A
+
+2. **build.ps1** (77 lines)
+   - **Purpose**: Nuke build entry point for Windows/PowerShell
+   - **Current**: PowerShell script that downloads .NET SDK if needed, invokes Nuke Build.csproj
+   - **Strategy**: ✅ **KEEP AS-IS** - Nuke-generated, standard entry point
+   - **Complexity**: N/A (keep unchanged)
+   - **Priority**: N/A
+
+### Category 2: Direct Replacement (MIGRATE to C#)
+
+3. **Ai/Setup/ConfigureVerifyDiffTool.ps1** (68 lines)
+   - **Purpose**: Configures Verify/DiffEngine for test snapshot diff tool preferences
+   - **Current**: PowerShell script, creates .verify/DiffEngine.json, provides setup guidance
+   - **Strategy**: 🔄 **REPLACE with C# global tool** - `xeyth-verify setup [--tool VSCodeInsiders]`
+   - **Complexity**: **LOW** - Simple JSON file creation, no complex logic
+   - **Priority**: **HIGH** (high-value automation tool)
+   - **Target**: Global tool in Automation.Framework project
+   - **Commands**:
+     - `xeyth-verify setup` - Interactive tool selection
+     - `xeyth-verify setup --tool VSCodeInsiders` - Direct configuration
+     - `xeyth-verify validate` - Check configuration status
+
+### Category 3: Git Hooks (MIGRATE logic to C#, keep shell wrappers)
+
+**Rationale**: Git requires specific hook filenames without extensions. Keep minimal shell wrappers that delegate to C# implementations.
+
+4. **.git/hooks/prepare-commit-msg.ps1** (70 lines)
+   - **Purpose**: Injects commit message template into editor
+   - **Current**: PowerShell script with template injection logic
+   - **Strategy**: 🔄 **REPLACE with C# + keep shell wrapper**
+   - **Complexity**: **MEDIUM** - File I/O, git config reading, template merging
+   - **Priority**: **MEDIUM**
+   - **Target Structure**:
+     - C# implementation: `src/Automation.Git/Hooks/PrepareCommitMsg.cs` (or single-file script)
+     - Shell wrapper: `.git/hooks/prepare-commit-msg` → calls C# implementation
+     - PowerShell wrapper (optional): `.git/hooks/prepare-commit-msg.ps1` (for Windows users who prefer it)
+   - **Migration Path**:
+     ```bash
+     #!/bin/sh
+     # prepare-commit-msg - Git hook wrapper
+     exec dotnet run --project src/Automation.Git/Automation.Git.csproj -- prepare-commit-msg "$@"
+     ```
+     OR
+     ```bash
+     #!/bin/sh
+     # prepare-commit-msg - Git hook wrapper
+     exec xeyth-git-hooks prepare-commit-msg "$@"
+     ```
+
+5. **.git/hooks/commit-msg.ps1** (159 lines)
+   - **Purpose**: Validates commit message format against Conventional Commits rules
+   - **Current**: PowerShell script with regex validation, error reporting, validation levels
+   - **Strategy**: 🔄 **REPLACE with C# + keep shell wrapper**
+   - **Complexity**: **MEDIUM** - Regex validation, git config, formatted console output
+   - **Priority**: **MEDIUM**
+   - **Target Structure**:
+     - C# implementation: `src/Automation.Git/Hooks/CommitMsg.cs`
+     - Shell wrapper: `.git/hooks/commit-msg` → calls C# implementation
+   - **Migration Path**: Same as prepare-commit-msg
+   - **Enhancement Opportunity**: Add commitlint compatibility, custom rule plugins
+
+## Migration Priority Order
+
+### Phase 1: High-Value Tools (Immediate)
+
+1. **ConfigureVerifyDiffTool.ps1** → `xeyth-verify setup`
+   - **Impact**: High (used in test setup)
+   - **Complexity**: Low
+   - **Effort**: Small (1-2 days)
+   - **Benefits**: Better discoverability, cross-platform, testable
+
+### Phase 2: Git Hooks (Medium-term)
+
+2. **prepare-commit-msg.ps1** → C# implementation + shell wrapper
+   - **Impact**: Medium
+   - **Complexity**: Medium
+   - **Effort**: Medium (3-5 days including testing)
+   - **Benefits**: Better testability, easier to extend, type safety
+
+3. **commit-msg.ps1** → C# implementation + shell wrapper
+   - **Impact**: Medium
+   - **Complexity**: Medium
+   - **Effort**: Medium (3-5 days)
+   - **Benefits**: Add commitlint compatibility, plugin system, better error messages
+
+### Phase 3: Build Scripts (Deferred)
+
+4. **build.sh, build.ps1** → ✅ **KEEP UNCHANGED**
+   - **Rationale**: Nuke-generated standard entry points; no value in replacing
+   - **Alternative**: If custom commands needed, create global tool that complements (not replaces) Nuke
+
+## Not Found (Good News!)
+
+- ❌ No JavaScript/TypeScript files found
+- ❌ No Python files found
+- ❌ No npm/package.json dependencies
+- ❌ No additional bash scripts
+
+## Recommendations
+
+### Immediate Actions
+
+1. **Create xeyth-verify global tool** in Automation.Framework project
+   - Command: `xeyth-verify setup [--tool <name>]`
+   - Replace ConfigureVerifyDiffTool.ps1
+   - Add to Automation.Framework.csproj as tool
+
+2. **Plan git hooks migration architecture**
+   - Decide: Global tool vs project reference?
+   - Design hook installation mechanism
+   - Define C# API for hook logic
+
+### Architecture Decisions Needed
+
+**AD-1: Git Hook Execution Model**
+- Option A: Global tool (`xeyth-git-hooks prepare-commit-msg`)
+- Option B: Project reference (`dotnet run --project src/Automation.Git`)
+- Option C: Single-file C# script (`dotnet script .git/hooks/prepare-commit-msg.csx`)
+- **Recommendation**: Option A (global tool) for ease of installation/versioning
+
+**AD-2: Hook Installation Strategy**
+- Manual: User copies wrappers to .git/hooks/
+- Automated: `xeyth-git install-hooks` command
+- Husky-style: Package-based installation
+- **Recommendation**: Automated with `xeyth-git install-hooks`
+
+**AD-3: Console Output Library**
+- Spectre.Console for rich formatting
+- System.Console for minimal dependencies
+- **Recommendation**: Spectre.Console (already used, beautiful output)
+
+## Integration Points Confirmed
+
+### Git Hooks
+- **Requirement**: Git expects specific filenames in `.git/hooks/` directory
+- **Filenames**: `prepare-commit-msg`, `commit-msg` (no extensions)
+- **Solution**: Shell wrappers (#!/bin/sh) delegate to C# implementations
+- **Platform**: Must work on Windows (Git Bash), macOS, Linux
+
+### Nuke Build
+- **Requirement**: Entry scripts (build.sh, build.ps1) are Nuke-generated
+- **Solution**: Keep as-is; they're just SDK downloaders + Nuke invokers
+- **No Migration Needed**: ✅
+
+## Success Metrics
+
+- ✅ **2 out of 5 scripts** can be fully eliminated (ConfigureVerifyDiffTool.ps1, and effectively both git hook .ps1 files once C# versions exist)
+- ✅ **3 scripts remain** as minimal wrappers (build.sh, build.ps1, and git hook shell wrappers)
+- 📉 **PowerShell Core dependency** reduced to build entry point only (Nuke standard)
+- 📈 **C# implementation** provides better testability, type safety, IDE support
+- 🎯 **Single tech stack** for all business logic (C# + .NET)
+
+## Next Steps
+
+1. Update ScriptMigrationToDotnet.task with inventory findings
+2. Add architecture decisions to task
+3. Create sub-tasks for each migration phase
+4. Delegate Phase 1 (xeyth-verify tool) to Implementation Agent

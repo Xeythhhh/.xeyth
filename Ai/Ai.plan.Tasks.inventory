@@ -1,0 +1,20 @@
+# AI Framework Master Plan - Tasks
+
+This inventory tracks all framework-level tasks that don't belong to slice-specific plans.
+
+## Active Tasks
+
+None - All tasks completed and archived as of 2024-12-24.
+
+## Archived Tasks
+
+Maintenance/archive/DogfoodFramework.2024-12-24.task
+Framework/archive/InventorySystem.2024-12-24.task
+Framework/archive/ContextFileConventions.2024-12-24.task
+Git/archive/ConventionSystem.2024-12-24.task
+
+## Notes
+
+- Tasks listed here are framework-wide improvements
+- As work grows, tasks may be grouped into slice-specific plans (e.g., `Framework/EnhancePrompts.plan`)
+- When tasks move to slice-specific plans, remove from this inventory and add to the plan's `.plan.Tasks.inventory`

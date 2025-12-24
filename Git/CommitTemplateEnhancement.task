@@ -1,0 +1,119 @@
+# Git Commit Template Enhancement
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Git/CommitTemplateEnhancement.task](Git/CommitTemplateEnhancement.task)  
+**Role**: Planner (see [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md))  
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Research and design enhanced commit message template with more structured metadata - co-authors, related issues, breaking changes, and validation enforcement.
+````
+
+---
+
+Status: Not Started  
+Owner: Strategic Agent (Planner)  
+Priority: Medium  
+Effort: Small  
+Priority Score: 5 (Impact:3 + Urgency:2 + Dependency:0 - Complexity:1 - Quality improvement)
+
+## Objective
+
+Enhance git commit template (.gitmessage) and validation hook (commit-msg.ps1) to capture more structured information while maintaining enforceability and ease of use.
+
+## Task Context
+
+**Current State**:
+- Basic Conventional Commits format (type/scope/subject)
+- Body and footer sections available but unstructured
+- Validation enforces format but doesn't guide metadata entry
+- Missing common useful metadata (co-authors, issues, breaking changes)
+
+**Desired State**:
+- Structured metadata fields in template
+- Guided prompts for important metadata
+- Validation enforces completeness where appropriate
+- Compatible with CI/CD parsing
+- Easy to use - not overly burdensome
+
+## Potential Enhancements
+
+**Metadata Fields to Consider**:
+- Co-authored-by: Credit multiple contributors
+- Refs: Link to issues/PRs (e.g., Refs: #123, #456)
+- Breaking-Change: Flag breaking changes explicitly
+- Related-To: Link to related commits/tasks
+- Reviewed-By: Code review sign-off
+- Tested-By: Testing verification
+- Signed-off-by: Developer certification of origin (DCO)
+
+**Template Sections**:
+- Structured footer with key-value pairs
+- Examples in comments for guidance
+- Optional vs required fields
+- Autocomplete support (if possible)
+
+**Validation Rules**:
+- Require specific trailers for certain commit types (e.g., BREAKING CHANGE for major versions)
+- Validate issue reference format
+- Ensure co-author format matches Git standards
+
+## Deliverables
+
+- D1: Research common commit metadata practices (Angular, Kernel, Chromium projects)
+- D2: Proposed enhanced .gitmessage template
+- D3: Updated commit-msg.ps1 validation rules
+- D4: Documentation of new fields and when to use them
+- D5: Migration plan for existing repos
+
+## Architecture Decisions
+
+### AD-1: Metadata Format (TBD)
+
+**Options**:
+1. Git trailers (footer with Key: Value format) - Standard, parseable
+2. Structured body sections with headers - More readable
+3. YAML frontmatter - Machine-parseable but non-standard
+
+**Recommendation**: Git trailers (standard format, wide tool support)
+
+### AD-2: Required vs Optional Fields (TBD)
+
+**Balance**:
+- Required: Slows commits, ensures completeness
+- Optional: Fast commits, may miss important metadata
+
+**Recommendation**: Most fields optional, some conditionally required (e.g., Breaking-Change for breaking commits)
+
+### AD-3: Validation Strictness (TBD)
+
+**Options**:
+1. Strict: Block commits with invalid metadata
+2. Warn: Allow commits, warn about issues
+3. Configurable: Let repos choose (xeyth.commitValidation setting)
+
+**Current**: Already configurable (strict/warn/disable)
+
+## Success Criteria
+
+- [ ] Template includes useful metadata fields
+- [ ] Validation enforces format consistency
+- [ ] Documentation explains when to use each field
+- [ ] Easy to use (not overly complex)
+- [ ] Compatible with existing workflows
+- [ ] CI/CD can parse structured data
+
+## Research Questions
+
+1. What metadata do other major projects capture?
+2. Which fields are most valuable for maintainability?
+3. How to balance completeness vs ease of use?
+4. Should we support linking to .task files in commits?
+5. How to handle breaking changes in semantic versioning context?
+
+## Progress Log
+
+- 2024-12-24: Task created based on user request - expand commit template with more structured, enforced metadata

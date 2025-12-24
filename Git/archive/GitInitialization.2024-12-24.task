@@ -1,0 +1,271 @@
+# Git Repository Initialization & Commit Template System
+
+**Status**: Not Started  
+**Created**: 2024-12-24  
+**Owner**: Strategic Agent (Planner)
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Git/GitInitialization.task](Git/GitInitialization.task)  
+**Role**: Planner (see [../Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md))  
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Initialize git repository and implement commit template system with validation hooks - extending Conventional Commits with project-specific conventions.
+````
+
+---
+
+## Context
+
+**Current State**:
+- Git repository not initialized
+- Commit.convention file exists with Conventional Commits specification
+- No automated enforcement or templating
+- Manual commit message construction
+
+**Desired State**:
+- Git repository initialized with proper configuration
+- Interactive commit template (git commit -t)
+- Automated validation via git hooks (commit-msg hook)
+- Custom extensions to Conventional Commits:
+  - Context file tracking (which .task/.plan files affected)
+  - Agent attribution (which agent/role made changes)
+  - Slice-specific scopes
+- Developer tooling (VS Code integration, CLI helpers)
+
+## Objective
+
+Initialize git repository and create comprehensive commit template system that extends Conventional Commits with AI framework-specific conventions, enforced via git hooks and validated in CI/CD.
+
+## Deliverables
+
+### D1: Git Repository Initialization
+- Initialize git repository (`git init`)
+- Configure user identity (name, email)
+- Create `.gitignore` file (exclude bin/, obj/, node_modules/, etc.)
+- Create `.gitattributes` for line endings and diff configurations
+- Configure repository settings (default branch, core.autocrlf, etc.)
+
+### D2: Commit Message Template
+- Create `.gitmessage` template file with interactive prompts
+- Configure git to use template (`git config commit.template`)
+- Include helpers/examples in template comments
+- Support both simple and detailed commit flows
+
+### D3: Git Hooks Implementation
+- Create `commit-msg` hook for validation
+- Validate conventional commit format
+- Check for required components (type, subject)
+- Verify subject length (≤ 50 chars)
+- Validate scope against known scopes
+- Check for task/plan references when applicable
+- Optional: `prepare-commit-msg` hook for automation
+
+### D4: Custom Commit Conventions
+- **Agent Attribution**: Optional footer `Agent: {AgentId} ({Role})`
+- **Context Files**: Optional footer `Context: {TaskFile.task}, {PlanFile.plan}`
+- **Affected Artifacts**: Auto-detect changed context files
+- **Slice Scopes**: Extended scope list for vertical slices
+
+### D5: Developer Tooling
+- PowerShell/Bash helper scripts for commit creation
+- VS Code integration (workspace tasks)
+- Validation CLI tool (for pre-push, CI/CD)
+- Documentation in Git/README.md
+
+### D6: CI/CD Integration
+- Nuke build target to validate commit history
+- GitHub Actions workflow (if applicable)
+- Pre-push hook validation (optional)
+
+## Success Criteria
+
+- [ ] Git repository initialized with sensible defaults
+- [ ] `.gitignore` excludes build artifacts, dependencies, temp files
+- [ ] `.gitmessage` template guides developers through commit creation
+- [ ] `commit-msg` hook validates format and blocks invalid commits
+- [ ] All custom conventions documented in Commit.convention
+- [ ] Helper scripts work cross-platform
+- [ ] VS Code tasks available for commit workflows
+- [ ] CI/CD validates commit format
+- [ ] Documentation includes usage examples
+
+## Architecture Decisions
+
+### AD-1: Git Hooks Language
+
+**Decision**: PowerShell Core (pwsh) for git hooks  
+**Rationale**:
+- Cross-platform (Windows, macOS, Linux)
+- Native to .NET ecosystem
+- Type-safe scripting
+- Can invoke .NET tools directly
+- Better than bash for Windows developers
+
+**Alternative**: Bash (rejected - poor Windows support without WSL)
+
+### AD-2: Commit Template Strategy
+
+**Decision**: Interactive template with sections + helper scripts  
+**Format**:
+```
+# <type>(<scope>): <subject>
+# 
+# <body>
+#
+# <footer>
+#
+# Type: feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert
+# Scope (optional): framework|planning|maintenance|git|contracts|automation
+# Subject: imperative, lowercase, ≤50 chars, no period
+#
+# Body (optional): Explain what/why, wrap at 72 chars
+# 
+# Footer (optional):
+#   BREAKING CHANGE: describe incompatible changes
+#   Agent: {AgentId} ({Role})
+#   Context: {TaskFile.task}
+#   Refs: {IssueOrTask}
+#   Co-authored-by: Name <email>
+```
+
+**Helper Script**: `scripts/commit.ps1` for guided commit creation
+
+### AD-3: Hook Validation Levels
+
+**Decision**: Three validation levels  
+**Levels**:
+1. **Strict** (default): Enforce all rules, block invalid commits
+2. **Warn**: Show warnings but allow commit
+3. **Disable**: Skip validation (via `git commit --no-verify`)
+
+**Configuration**: `git config xeyth.commitValidation [strict|warn|disable]`
+
+### AD-4: Custom Convention Extensions
+
+**Decision**: Optional footer fields, validated but not required  
+**Extensions**:
+- `Agent: <AgentId> (<Role>)` - Tracks which agent made changes
+- `Context: <file.task>, <file.plan>` - Links to context files
+- `Slice: <SliceName>` - Explicit slice when scope is ambiguous
+
+**Rationale**: Provides traceability without mandating overhead for simple commits.
+
+### AD-5: Artifact Detection
+
+**Decision**: Auto-detect changed context files in commit  
+**Behavior**:
+- Hook scans staged files for `*.task`, `*.plan`, `*.report`, `*.convention`
+- Suggests adding to `Context:` footer
+- Validation warns if context files changed but not referenced
+- User can override with `--no-verify`
+
+### AD-6: gitignore Strategy
+
+**Decision**: Comprehensive .gitignore targeting .NET, Node, IDEs  
+**Sections**:
+- Build artifacts (`bin/`, `obj/`, `dist/`)
+- Dependencies (`node_modules/`, `packages/`)
+- IDE files (`.vs/`, `.idea/`, `.vscode/` user-specific)
+- OS files (`.DS_Store`, `Thumbs.db`)
+- Test results (`TestResults/`, `coverage/`)
+
+**Exclusions**: DO commit `.vscode/tasks.json`, `.code-workspace` (shared configuration)
+
+## Implementation Phases
+
+### Phase 1: Repository Initialization (Planner → Implementer)
+1. Create `.gitignore` file
+2. Create `.gitattributes` file
+3. Run `git init`
+4. Configure repository settings
+5. Create initial commit
+
+### Phase 2: Commit Template (Implementer)
+1. Design `.gitmessage` template format
+2. Add interactive prompts and examples
+3. Configure git to use template
+4. Test template with sample commits
+
+### Phase 3: Validation Hooks (Implementer)
+1. Create `.git/hooks/commit-msg` script
+2. Implement conventional commit parsing
+3. Add validation rules (type, scope, subject)
+4. Test with valid and invalid commits
+5. Handle edge cases (merge commits, revert commits)
+
+### Phase 4: Custom Conventions (Implementer)
+1. Extend Commit.convention with custom fields
+2. Update validation hook to recognize extensions
+3. Create helper functions for artifact detection
+4. Add scope validation for slices
+
+### Phase 5: Developer Tooling (Implementer)
+1. Create commit helper scripts (PowerShell, Bash)
+2. Add VS Code tasks to `.code-workspace`
+3. Build validation CLI tool
+4. Write documentation and examples
+
+### Phase 6: CI/CD Integration (Implementer)
+1. Add Nuke build target for commit validation
+2. Configure pre-push hook (optional)
+3. Add GitHub Actions workflow (if applicable)
+4. Document CI/CD requirements
+
+## Verification
+
+- Create test commits with valid formats → hooks accept
+- Create test commits with invalid formats → hooks reject
+- Use helper script → guided commit creation works
+- Run validation tool on commit history → passes
+- Test cross-platform (Windows, macOS, Linux)
+- CI/CD pipeline validates commits
+
+## Example: Extended Commit Message
+
+```
+feat(contracts): add contract validation engine
+
+Implements validation engine for .task, .plan, and .convention files
+using YAML metadata and glob pattern matching. Supports user-defined
+contracts and provides detailed error messages.
+
+Architecture decisions:
+- YAML-based metadata for contract definitions
+- Glob pattern matching for file targeting
+- Extensible validation rule system
+
+BREAKING CHANGE: Contracts.Core.Validator signature changed to accept
+ValidationContext instead of raw file paths.
+
+Agent: Strategic Agent (Planner)
+Context: Contracts/ContractValidation.task
+Refs: Ai.plan
+Co-authored-by: Implementation Agent <implementation@xeyth.ai>
+```
+
+## Related Files
+
+- `Git/Commit.convention` - Existing convention file (extend)
+- `.gitmessage` - Template file (create)
+- `.git/hooks/commit-msg` - Validation hook (create)
+- `.gitignore` - Ignore file (create)
+- `.gitattributes` - Git attributes (create)
+- `.code-workspace` - Add commit tasks (update)
+
+---
+
+## Progress Log
+
+- 2024-12-24: Task created by Orchestrator - git initialization and commit template system requested
+- 2024-12-24: **All Phases Complete**
+  - ✅ Phase 1: Repository initialized (.git/, .gitignore, .gitattributes)
+  - ✅ Phase 2: Commit template system (.gitmessage with extended format)
+  - ✅ Phase 3: Git hooks (prepare-commit-msg.ps1, commit-msg.ps1 with shell wrappers)
+  - ✅ Phase 4: Validation configured (strict mode, custom xeyth.commitValidation config)
+  - ✅ Phase 5: Documentation created (Ai/Git/README.md)
+  - Initial commit created: `feat(git): initialize repository with templated commit system`
+  - **Task Complete** - Ready for archival

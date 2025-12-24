@@ -1,0 +1,195 @@
+---
+type: Naming
+scope: Framework-wide
+applies_to: All files and directories
+status: Active
+enforcement: Manual
+version: 1.0
+---
+
+# Naming Conventions
+
+## Convention Summary
+
+Defines standardized naming conventions for files, directories, and identifiers across the .xeyth framework to ensure consistency, discoverability, and clarity.
+
+## Rules
+
+### Directory Naming
+
+- ✅ MUST use PascalCase for slice directories (`Planning`, `Automation`, `Conventions`)
+- ✅ MUST use singular form (`Convention` not `Conventions` unless referring to the slice itself)
+- ✅ MUST be descriptive and indicate purpose
+- ❌ MUST NOT use abbreviations unless widely understood (e.g., `CI`, `CLI`)
+- ❌ MUST NOT use special characters except hyphens
+- ⚠️ MAY use descriptive subdirectories (`Proposed`, `archive`)
+
+### Context File Naming
+
+#### Task Files (`.task`)
+
+- ✅ MUST use PascalCase: `TaskName.task`
+- ✅ MUST be descriptive of work to be done
+- ✅ MUST avoid version numbers (use archive instead)
+
+**Examples**:
+- ✅ `GitHubRemotePreparation.task`
+- ✅ `AiSliceMigration.task`
+- ❌ `task1.task`, `fix.task`, `GitHubSetupV2.task`
+
+#### Plan Files (`.plan`)
+
+- ✅ MUST use PascalCase: `PlanName.plan`
+- ✅ MUST match domain or feature area
+
+**Examples**:
+- ✅ `Repository.plan`, `Collaboration.plan`
+- ❌ `repo-plan.plan`, `plan.plan`
+
+#### Report Files (`.report`)
+
+- ✅ MUST use pattern: `{TaskName}.{ReportName}.report`
+- ✅ MUST link report to source task
+- ✅ MUST use descriptive report name
+
+**Examples**:
+- ✅ `CliVisualEnhancement.task.Phase1Review.report`
+- ✅ `AiSliceMigration.task.DiagnosticBlocker.report`
+- ❌ `report1.report`, `status.report`
+
+#### Template Files (`.template`)
+
+- ✅ MUST match the concept they template
+- ✅ MUST use full concept extension
+
+**Examples**:
+- ✅ `Task.task.template`
+- ✅ `Convention.convention.template`
+- ❌ `task-template.md`, `template.txt`
+
+#### Convention Files (`.convention`)
+
+- ✅ MUST use PascalCase
+- ✅ MUST be descriptive of convention topic
+- ❌ MUST NOT include "Convention" suffix unless about conventions
+
+**Examples**:
+- ✅ `TaskFileStructure.convention`
+- ✅ `NamingConventions.convention` (exception - about conventions)
+- ❌ `TaskConvention.convention`, `naming.convention`
+
+#### Proposal Files (`.proposal`)
+
+- ✅ MUST use pattern: `{Area}.{ShortName}.proposal`
+- ✅ MUST be descriptive of proposed feature
+
+**Examples**:
+- ✅ `Framework.ConventionStructuredConcept.proposal`
+- ❌ `proposal1.proposal`, `idea.proposal`
+
+### Documentation Files (`.md`)
+
+- ✅ MUST use PascalCase for primary docs
+- ✅ MUST be descriptive of content
+- ✅ SHOULD match related concept (e.g., `ConventionFormat.md` for `.convention` files)
+
+**Examples**:
+- ✅ `README.md`, `ConfigurationFormat.md`, `StructuredConceptPattern.md`
+- ❌ `readme.md`, `doc.md`, `notes.md`
+
+### Archive Naming
+
+- ✅ MUST use pattern: `{Name}.YYYY-MM-DD.{Type}`
+- ✅ MUST include archival date
+- ✅ MUST preserve original type extension
+
+**Examples**:
+- ✅ `GitInitialization.2024-12-24.task`
+- ✅ `ConventionSystem.2024-12-24.task`
+- ❌ `old-task.task`, `archived.task`
+
+### Code Files
+
+- ✅ MUST use PascalCase for classes, interfaces, records
+- ✅ MUST use camelCase for methods, parameters, local variables
+- ✅ MUST use ALL_CAPS for constants
+- ✅ MUST match file name to primary type name
+
+**Examples**:
+- ✅ `ConventionModule.cs`, `TaskParser.cs`
+- ✅ Methods: `ParseConvention()`, `ValidateFormat()`
+- ❌ `convention-module.cs`, `task_parser.cs`
+
+## Examples
+
+### ✅ Good Structure
+
+```
+Conventions/
+  ConventionFormat.md
+  Convention.convention.template
+  TaskFileStructure.convention
+  NamingConventions.convention
+  StructuredConceptPattern.convention
+
+Planning/
+  Task.task.template
+  ContextFiles.md
+  TaskPrioritySystem.md
+  Proposed/
+    Framework.ConventionStructuredConcept.proposal
+
+Git/
+  Repository.plan
+  AiSliceMigration.task
+  archive/
+    GitInitialization.2024-12-24.task
+```
+
+### ❌ Bad Structure
+
+```
+conventions/
+  convention-format.md
+  template.txt
+  task_structure.conv
+
+planning/
+  task_template.md
+  files.md
+  proposals/
+    idea1.md
+
+git/
+  repo_plan.plan
+  migration.task
+  old/
+    git_init.task.old
+```
+
+## Validation
+
+### Manual Checklist
+
+- [ ] All directories use PascalCase
+- [ ] All context files follow extension patterns
+- [ ] Report files link to source task
+- [ ] Archive files include date
+- [ ] No abbreviations unless widely known
+- [ ] Template files match concept name
+
+### Automated Validation
+
+```bash
+# Scan for naming violations
+xeyth-conventions check-compliance NamingConventions
+
+# Validate specific file
+xeyth-conventions validate-name {path}
+```
+
+## See Also
+
+- [ContextFiles.md](../Planning/ContextFiles.md) - Context file specifications
+- [TaskFileStructure.convention](TaskFileStructure.convention) - Task file format
+- [StructuredConceptPattern.convention](StructuredConceptPattern.convention) - Structured concepts

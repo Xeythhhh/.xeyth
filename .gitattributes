@@ -1,0 +1,55 @@
+# Line Endings
+* text=auto
+*.sh text eol=lf
+*.ps1 text eol=crlf
+
+# Markdown
+*.md text
+*.markdown text
+
+# Code Files
+*.cs text diff=csharp
+*.csproj text
+*.sln text
+*.json text
+*.xml text
+*.yaml text
+*.yml text
+
+# Scripts
+*.ps1 text
+*.sh text
+
+# Context Files (AI Framework)
+*.task text
+*.plan text
+*.report text
+*.convention text
+*.inventory text
+*.template text
+*.metadata text
+*.instructions text
+
+# Binary Files
+*.dll binary
+*.exe binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.pdf binary
+
+# Archives
+*.zip binary
+*.tar binary
+*.gz binary
+
+# Custom Diff Patterns
+*.task diff=markdown
+*.plan diff=markdown
+*.convention diff=markdown

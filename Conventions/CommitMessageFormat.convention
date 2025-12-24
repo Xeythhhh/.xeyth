@@ -1,0 +1,154 @@
+# Commit Message Convention
+
+This convention defines the commit message format for the AI framework repository following Conventional Commits 1.0.0.
+
+## Format
+
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+## Components
+
+### Type (Required)
+
+The commit type categorizes the change:
+
+- **feat**: New feature or capability
+- **fix**: Bug fix or correction
+- **docs**: Documentation only changes
+- **style**: Code style changes (formatting, whitespace, no logic changes)
+- **refactor**: Code restructuring without changing behavior
+- **perf**: Performance improvements
+- **test**: Adding or updating tests
+- **chore**: Maintenance tasks, dependency updates, tooling
+- **ci**: CI/CD pipeline changes
+- **build**: Build system or external dependency changes
+- **revert**: Reverting a previous commit
+
+### Scope (Optional)
+
+The scope specifies the area affected. Common scopes for this framework:
+
+- **framework**: Core instruction files (copilot-instructions.md, Strategic.prompt.md, etc.)
+- **planning**: Planning slice (templates, ContextFiles.md)
+- **maintenance**: Maintenance slice operations
+- **git**: Git slice and conventions
+- **workspace**: Workspace configuration (.code-workspace)
+- **docs**: Documentation (README.md, Integration.md)
+
+Examples: `feat(framework):`, `fix(planning):`, `docs(git):`
+
+### Subject (Required)
+
+- **Imperative mood**: "Add feature" not "Added feature" or "Adds feature"
+- **Lowercase first letter**: "add feature" not "Add feature"
+- **No period at end**: "add feature" not "add feature."
+- **Maximum 50 characters**: Keep it concise
+- **Clear and specific**: Describe what, not why
+
+### Body (Optional)
+
+- **Wrap at 72 characters**: For readability in git tools
+- **Explain what and why**: Describe the change and rationale
+- **Separate from subject**: Blank line between subject and body
+- **Use bullet points**: For multiple points, use `- ` prefix
+
+### Footer (Optional)
+
+- **Breaking changes**: Use `BREAKING CHANGE:` prefix to indicate incompatible changes
+- **Issue references**: Link to issues/tasks with `Refs: #123` or `Closes: #456`
+- **Co-authors**: Use `Co-authored-by: Name <email@example.com>`
+
+## Examples
+
+### Simple Feature
+
+```
+feat(git): add commit message convention
+
+Introduces Commit.convention file following Conventional Commits 1.0.0
+specification to standardize commit messages across the framework.
+```
+
+### Bug Fix with Scope
+
+```
+fix(planning): correct template path references
+
+Updated all prompt files to reference Planning/ instead of docs/planning/
+after directory restructuring.
+
+Refs: Git/ConventionSystem.task
+```
+
+### Breaking Change
+
+```
+refactor(framework)!: restructure directory layout
+
+Moved templates from Framework/planning/ to Planning/ to align with
+vertical slice architecture. All path references updated.
+
+BREAKING CHANGE: Template paths changed from docs/templates/ to Planning/.
+Host projects using old paths must update references.
+```
+
+### Documentation Update
+
+```
+docs(planning): document .convention context file type
+
+Added .convention section to ContextFiles.md with schema, usage examples,
+and naming conventions.
+```
+
+### Chore Task
+
+```
+chore(workspace): update file associations
+
+Added *.convention to markdown file associations in .code-workspace for
+syntax highlighting and editing support.
+```
+
+## Commit Message Rules
+
+1. **Atomic commits**: One logical change per commit
+2. **Present tense**: Use imperative mood ("add" not "added")
+3. **Type required**: Every commit must have a valid type
+4. **Subject required**: Every commit must have a clear subject
+5. **Subject length**: Maximum 50 characters for subject line
+6. **Body wrapping**: Wrap body at 72 characters
+7. **Breaking changes**: Must include `BREAKING CHANGE:` footer or `!` after type/scope
+8. **Reference tasks**: Link to .task files when implementing specific work
+
+## Validation
+
+Before committing:
+
+- [ ] Type is valid and matches the change category
+- [ ] Scope is accurate (if provided)
+- [ ] Subject uses imperative mood, lowercase, no period
+- [ ] Subject is ≤ 50 characters
+- [ ] Body (if present) wraps at 72 characters
+- [ ] Breaking changes are marked with `BREAKING CHANGE:` or `!`
+- [ ] Related tasks/issues are referenced in footer
+
+## Tools
+
+Consider using commit message linters like:
+
+- `commitlint` with `@commitlint/config-conventional`
+- Git hooks via `husky` for pre-commit validation
+- VS Code extensions: "Conventional Commits" by vivaxy
+
+## References
+
+- [Conventional Commits 1.0.0](https://www.conventionalcommits.org/)
+- [Angular Commit Guidelines](https://github.com/angular/angular/blob/main/CONTRIBUTING.md#commit)
+- [Semantic Versioning](https://semver.org/)

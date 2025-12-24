@@ -1,0 +1,177 @@
+# Contract Output Rendering System
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Contracts/ContractRenderer.task](Contracts/ContractRenderer.task)  
+**Role**: Implementer (see [Framework/Implementation.prompt.md](../Framework/Implementation.prompt.md))  
+**Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
+
+Implement beautiful terminal rendering for contracts - replace JSON output with card/table/tree styles using Spectre.Console or ANSI codes.
+````
+
+---
+
+## Delegation Prompt
+
+---
+
+## Role: Implementer
+
+**Task File**: Contracts/ContractRenderer.task  
+**Objective**: Implement beautiful, configurable terminal rendering for contract output (replacing ugly JSON)
+
+**Role Reference**: See [Framework/Implementation.prompt.md](../Framework/Implementation.prompt.md) for workflow guidance.
+
+### Delegation Context
+
+CLI tools currently output contracts and validation results as JSON, which is difficult to read in terminals. We need a rendering system that transforms contract data into beautiful, human-readable terminal output with multiple style options (cards, tables, trees, etc.) and user configuration.
+
+### Responsibilities
+
+1. Design renderer abstraction (IContractRenderer interface)
+2. Implement multiple rendering styles (card, table, tree, compact)
+3. Build configuration system for style selection
+4. Create color/theme support using ANSI escape codes or Spectre.Console
+5. Add comprehensive unit tests for rendering output
+
+### Delegation Deliverables
+
+- [ ] **D1**: Renderer abstraction (IContractRenderer, RenderContext)
+- [ ] **D2**: Card-style renderer (formatted boxes with contract details)
+- [ ] **D3**: Table renderer (tabular format for multiple contracts)
+- [ ] **D4**: Tree renderer (hierarchical view showing contract structure)
+- [ ] **D5**: Configuration system (user preferences, CLI flags, config file)
+- [ ] **D6**: Unit tests with snapshot verification of rendered output
+
+### Reports
+
+- Keep status/blocker reports in separate `.report` files named `ContractRenderer.task.{ReportName}.report` alongside this task file
+- Reference the report filenames here (do not inline full reports)
+- Move reports together with the task when archiving/moving
+- Use [Planning/ProgressReport.report.template](../Planning/ProgressReport.report.template) for status updates and [Planning/BlockerReport.report.template](../Planning/BlockerReport.report.template) when blocked
+
+### Guidance
+
+- Patterns: Strategy pattern for renderers, builder pattern for configuration
+- Libraries: Consider Spectre.Console for rich terminal output, or manual ANSI codes for minimal dependencies
+- Verification: `dotnet build` and `nuke` succeed; snapshot tests capture rendered output
+- Critical notes: Must be cross-platform (Windows, macOS, Linux); handle terminal width gracefully
+
+### Upon Completion
+
+1. Update Progress Log in this file (summaries only; link to `.report` files for details)
+2. Use Flow prompt for continue/progress/blocker, and delegate using the 3-line format to the next role
+3. When complete, archive to `Contracts/archive/ContractRenderer.YYYY-MM-DD.task` and update relevant inventories
+
+---
+
+## Task Details
+
+---
+
+Status: Not Started  
+Owner: Implementer  
+Priority: Medium  
+Effort: Medium  
+Priority Score: 5 (Impact:4 + Urgency:1 + Dependency:0 - Complexity:2 - Quality improvement)
+
+## Objective
+
+Replace ugly JSON terminal output with beautiful, human-readable contract rendering. Support multiple styles (card, table, tree, compact) with user configuration for preferred format and color themes.
+
+## Task Context
+
+- Current state:
+  - CLI tools output contracts as JSON
+  - JSON is machine-readable but terrible for humans in terminals
+  - No visual formatting or color coding
+  - Difficult to scan/parse visually
+  
+- Desired state:
+  - Beautiful terminal rendering with multiple style options
+  - Card style: formatted boxes showing contract details elegantly
+  - Table style: columnar format for comparing multiple contracts
+  - Tree style: hierarchical view showing contract structure/nesting
+  - Compact style: minimal single-line format for scripts
+  - User configuration via CLI flags or config file
+  - Color themes for different terminal backgrounds
+
+## Task Deliverables
+
+- D1: IContractRenderer interface, RenderContext (holds contract data, output stream, configuration)
+- D2: CardRenderer - beautiful boxed cards with formatted contract details
+- D3: TableRenderer - columnar table format with headers, alignment
+- D4: TreeRenderer - hierarchical tree showing schema structure
+- D5: RendererConfiguration - user preferences, CLI integration, config file support
+- D6: Snapshot tests capturing rendered output for all styles
+
+## Architecture Decisions
+
+- AD-1: Strategy pattern for renderers — Rationale: Easy to add new styles, testable, swappable at runtime
+- AD-2: Spectre.Console vs manual ANSI — Decision: Evaluate both; Spectre.Console for richness, ANSI for minimal dependencies
+- AD-3: Terminal width detection — Rationale: Responsive rendering adapting to terminal size
+- AD-4: Configuration hierarchy — Rationale: CLI flags override config file override defaults
+- AD-5: Snapshot testing rendered output — Rationale: Catch visual regressions, ensure consistency
+
+## Visual Design Examples
+
+### Card Style (Example)
+
+```text
+╭─────────────────────────────────────────────────────────╮
+│  Contract: Task Template                                │
+│  Type: .task                                            │
+├─────────────────────────────────────────────────────────┤
+│  📋 Target Pattern: **/*.task                           │
+│  📝 Required Sections: 3                                │
+│      • Delegation Prompt                                │
+│      • Task Details                                     │
+│      • Progress Log                                     │
+│  ✓ Naming: {Slice}/{TaskName}.task                     │
+│  📁 Archive: {Slice}/archive/{Name}.YYYY-MM-DD.task     │
+╰─────────────────────────────────────────────────────────╯
+```
+
+### Table Style (Example)
+
+```text
+┌──────────────┬─────────┬────────────┬──────────────┐
+│ Contract     │ Type    │ Sections   │ Archive      │
+├──────────────┼─────────┼────────────┼──────────────┤
+│ Task         │ .task   │ 3 required │ Yes          │
+│ Plan         │ .plan   │ 4 required │ Yes          │
+│ Convention   │ .conv   │ 2 required │ Optional     │
+└──────────────┴─────────┴────────────┴──────────────┘
+```
+
+### Tree Style (Example)
+
+```text
+📄 Task Template Contract
+├─ 🎯 Target: **/*.task
+├─ 📋 Schema
+│  ├─ Delegation Prompt (required)
+│  ├─ Task Details (required)
+│  └─ Progress Log (required)
+├─ ✏️  Naming: {Slice}/{TaskName}.task
+└─ 📁 Archiving: {Slice}/archive/{Name}.YYYY-MM-DD.task
+```
+
+## Success Criteria
+
+- [ ] `dotnet build` succeeds with 0 errors, 0 warnings
+- [ ] `nuke` Compile and Test targets succeed
+- [ ] All renderer styles produce readable, beautiful output
+- [ ] Snapshot tests verify rendered output doesn't regress
+- [ ] Works on Windows, macOS, Linux terminals
+- [ ] Handles narrow terminals gracefully (wrapping, truncation)
+- [ ] Configuration system supports CLI flags and config file
+- [ ] Color themes work on light and dark terminal backgrounds
+
+## Progress Log
+
+- 2024-12-24: Task created; need beautiful terminal output for contracts
+

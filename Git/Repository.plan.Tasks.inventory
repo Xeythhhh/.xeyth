@@ -1,0 +1,20 @@
+# Repository Infrastructure - Tasks
+
+## GitHub Setup
+Git/GitHubRepositorySetup.task
+Git/BranchProtectionRules.task
+Git/PrTemplates.task
+Git/GitHubProject.task
+
+## Azure DevOps
+Git/AzureDevOpsProject.task
+Git/AzureBoardsIntegration.task
+
+## CI/CD
+Git/NukeBuildPipeline.task
+Git/NukeTestPipeline.task
+Git/NukePackagePipeline.task
+Git/GitHubActionsWorkflows.task
+
+## Repository Reorganization
+Git/RepositoryReorganization.task

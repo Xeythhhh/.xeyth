@@ -1,0 +1,119 @@
+---
+# PLAN CONTEXT
+---
+
+**Plan Name**: Contracts System Plan
+**Plan File**: Contracts/Contracts.plan (standalone slice)
+**Tasks Inventory**: Contracts.plan.Tasks.inventory
+**Related Task**: N/A (Foundational infrastructure slice)
+**Owner**: Strategic Agent
+
+## Objective
+
+Build a standalone contract metadata discovery and validation system as a CLI tool that enforces schema contracts for context files. The system discovers YAML-based `.metadata` contracts (shipped defaults + user-defined), validates target files, and integrates with linters, analyzers, build systems, and CI/CD pipelines.
+
+## Context
+
+- Current state:
+  - Context files (.task, .plan, .report, etc.) lack automated schema validation
+  - No enforcement of naming conventions, required sections, or field patterns
+  - Manual validation is error-prone and inconsistent
+  - Example contract created: `Planning/Task.template.metadata`
+  
+- Constraints:
+  - Must be standalone, not coupled to Automation slice
+  - CLI tool must be packageable (dotnet tool or self-contained executable)
+  - Discovery must work at runtime (not compiled contracts)
+  - Users must be able to extend with custom contracts
+  - Must integrate with external tools (linters, analyzers, CI/CD)
+  
+- Assumptions:
+  - YAML is suitable for contract definitions (human-readable, extensible)
+  - Glob patterns adequately target files
+  - CLI tool runs cross-platform (Windows, macOS, Linux)
+  - Contracts evolve independently from consuming tools
+
+## Decisions
+
+- D1: Standalone slice — Rationale: Foundational capability beyond automation; reusable across tools, not tied to automation infrastructure
+- D2: CLI tool packaging — Rationale: Consumable by linters, analyzers, build systems, CI/CD; users can run manually or integrate
+- D3: Runtime contract discovery — Rationale: Users extend without recompilation; tool finds shipped + user contracts, merges them
+- D4: YAML metadata format — Rationale: Human-readable, extensible, standard tooling (YamlDotNet), not compiled
+- D5: Glob pattern targeting — Rationale: Flexible file matching; users control scope via patterns
+- D6: Integration-first design — Rationale: Designed to be consumed by external systems, not just standalone execution
+
+## Implementation Notes
+
+**Architecture**: Two-project structure in Contracts slice:
+
+- `Contracts.Core/` - Discovery engine, validation engine, contract models
+- `Contracts.Cli/` - CLI tool entry point, commands, output formatting
+
+**Contract Discovery Flow**:
+
+1. Tool starts, searches for all `*.metadata` files
+2. Default contracts (shipped with tool) loaded first
+3. User-defined contracts discovered via filesystem scan
+4. Contracts merged (user contracts can extend/override defaults)
+5. Target files identified via glob patterns in contracts
+6. Validation executes against discovered files
+7. Results output (console, JSON, exit codes for CI/CD)
+
+**CLI Commands** (initial):
+
+- `validate` - Validate files against discovered contracts
+- `list-contracts` - Show all discovered contracts
+- `check <file>` - Validate a specific file
+- `init` - Create sample metadata file for custom contracts
+
+**Technology Stack**:
+
+- .NET 10 SDK
+- C# latest language features
+- YamlDotNet for contract parsing
+- Microsoft.Extensions.FileSystemGlobbing or DotNet.Glob for pattern matching
+- System.CommandLine for CLI interface
+- Spectre.Console for rich CLI output (optional)
+
+## Verification
+
+- [ ] CLI tool builds as dotnet tool or self-contained executable
+- [ ] Discovers default contracts shipped with tool
+- [ ] Discovers user-defined contracts in target repository
+- [ ] Merges contracts correctly (user overrides/extends defaults)
+- [ ] Validates files against contract schemas
+- [ ] Glob patterns correctly target intended files
+- [ ] Exit codes appropriate for CI/CD integration (0 = pass, non-zero = violations)
+- [ ] JSON output mode for machine consumption
+- [ ] Cross-platform execution (Windows, macOS, Linux)
+
+## Task Inventory Management
+
+`Contracts.plan.Tasks.inventory` tracks all Contracts slice tasks. Build order:
+
+1. Core engine (discovery, validation models)
+2. CLI tool interface
+3. Integration capabilities (JSON output, exit codes)
+4. User documentation and samples
+
+## Future Work
+
+### High Priority
+
+- **Contract Discovery Engine**: Find and load `.metadata` files from filesystem
+- **Validation Engine**: Execute contract rules against target files
+- **CLI Tool**: Commands for validate, list, check, init
+
+### Medium Priority
+
+- **Advanced Validation Rules**: Custom validators, cross-file validation
+- **IDE Integration**: Language server protocol (LSP) for in-editor validation
+- **Contract Templates**: Common patterns for new contract types
+
+### Lower Priority
+
+- **Contract Visualization**: Diagram showing contract relationships
+- **Auto-fix Capabilities**: Suggest/apply fixes for contract violations
+- **Performance Optimization**: Caching, parallel validation
+- **Contract Versioning**: Handle contract schema evolution
+

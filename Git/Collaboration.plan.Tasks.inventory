@@ -1,0 +1,21 @@
+# Collaboration Workflows - Tasks
+
+## Commit Standards
+Git/CommitMessageTemplate.task
+Git/CommitConventions.task
+Git/CommitHooks.task
+
+## PR Workflow
+Git/ContributingGuidelines.task
+Git/PrTemplates.task
+Git/CodeOwners.task
+
+## Cloud Agent Integration
+Git/CloudAgentOnboarding.task
+Git/CloudAgentDelegation.task
+Git/InstructionFileSetup.task
+
+## Automation
+Git/PrChecks.task
+Git/AutoAssignment.task
+Git/PrLabels.task

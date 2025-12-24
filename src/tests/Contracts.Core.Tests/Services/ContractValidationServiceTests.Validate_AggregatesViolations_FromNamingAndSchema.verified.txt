@@ -1,0 +1,22 @@
+﻿{
+  FilePath: workspace/Invalid.task,
+  Violations: [
+    {
+      Code: invalid-name,
+      Message: File name 'Invalid.task' does not match naming pattern '^Valid.*\.task$'.,
+      Severity: Error,
+      FilePath: workspace/Invalid.task
+    },
+    {
+      Code: missing-field,
+      Message: Section 'Delegation Prompt' is missing field 'Role' matching pattern '^## Role:'.,
+      Severity: Error,
+      FilePath: workspace/Invalid.task,
+      LineNumber: 1,
+      Section: Delegation Prompt
+    }
+  ],
+  IsSuccess: false,
+  HasErrors: true,
+  HasWarnings: false
+}

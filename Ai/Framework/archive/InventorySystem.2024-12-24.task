@@ -1,0 +1,116 @@
+# Inventory System & GitHub Integration
+
+---
+
+## Delegation Prompt
+
+---
+
+## Role: Implementer
+
+**Task File**: Framework/InventorySystem.task  
+**Objective**: Introduce `.inventory` context file type and integrate framework with host `.github/copilot-instructions.md`
+
+**Role Reference**: See [Framework/Implementation.prompt.md](Implementation.prompt.md) for workflow guidance.
+
+### Delegation Context
+
+The framework needs seamless integration with host repositories through `.github/copilot-instructions.md` and requires inventory files to track plans and their associated tasks for auditing and automation purposes.
+
+### Responsibilities
+
+1. Update `InitializeAiFramework.prompt.md` to create/modify `.github/copilot-instructions.md` in host repo
+2. Introduce `.inventory` context file type with clear schema and purpose
+3. Create `Planning/Plans.inventory` as a framework-level example
+4. Update `Plan.plan.template` to enforce `{Plan}.Tasks.inventory` creation
+5. Document inventory file structure and automation potential
+
+### Delegation Deliverables
+
+- [ ] **D1**: `InitializeAiFramework.prompt.md` includes `.github/copilot-instructions.md` setup instructions
+- [ ] **D2**: `.inventory` type documented in `Planning/ContextFiles.md` with schema
+- [ ] **D3**: `Planning/Plans.inventory` created as framework example
+- [ ] **D4**: `Plan.plan.template` updated with Tasks.inventory requirement
+- [ ] **D5**: Workspace `.code-workspace` updated with `*.inventory: markdown` association
+
+### Reports
+
+- Keep status/blocker reports in separate `.report` files named `InventorySystem.{ReportName}.report` alongside this task file
+- Reference the report filenames here (do not inline full reports)
+- Move reports together with the task when archiving/moving
+- Use [Planning/ProgressReport.report.template](../Planning/ProgressReport.report.template) for status updates and [Planning/BlockerReport.report.template](../Planning/BlockerReport.report.template) when blocked
+
+### Guidance
+
+- Patterns: Inventory files are line-based lists for easy parsing and automation
+- Verification: Markdown linting clean for all new files
+- Critical notes: Plans reside at slice root; tasks can be distributed; inventory tracks relationships
+
+### Upon Completion
+
+1. Update Progress Log in this file (summaries only; link to `.report` files for details)
+2. Use Flow prompt for continue/progress/blocker, and delegate using the 3-line format to the next role
+
+---
+
+## Task Details
+
+---
+
+### Inventory System & GitHub Integration
+
+Status: Complete  
+Owner: Implementer  
+Priority: High  
+Effort: Medium
+
+## Objective
+
+Enable seamless host repository integration via `.github/copilot-instructions.md` and introduce inventory tracking for plans and tasks to support auditing and automation.
+
+## Task Context
+
+- Current state: 
+  - Framework lacks integration mechanism with host repos
+  - No systematic tracking of plan-to-task relationships
+  - Plans and tasks mixed without clear audit trail
+  
+- Desired state:
+  - Host repos automatically reference framework via `.github/copilot-instructions.md`
+  - `.inventory` files track plans and their associated tasks
+  - Plans at slice root with `{Plan}.Tasks.inventory` for automation
+  - Clear separation: `.plan` = scope/decisions, `.task` = work items
+
+## Task Deliverables
+
+- D1: `InitializeAiFramework.prompt.md` - Add step to create `.github/copilot-instructions.md` referencing framework
+- D2: `Planning/ContextFiles.md` - Document `.inventory` type with format, location, usage
+- D3: `Planning/Plans.inventory` - Framework-level inventory listing all active plans
+- D4: `Plan.plan.template` - Add Tasks.inventory requirement and guidance
+- D5: `.code-workspace` - Add `*.inventory` file association
+
+## Architecture Decisions
+
+- AD-1: Use `.github/copilot-instructions.md` for integration — Rationale: GitHub Copilot's standard discovery mechanism
+- AD-2: Plans reside at slice root, tasks distributed — Rationale: Plans are slice-scoped; tasks are feature/component scoped
+- AD-3: Inventory files are line-based lists — Rationale: Easy parsing for automation, simple manual editing
+- AD-4: Each plan maintains `{PlanName}.Tasks.inventory` — Rationale: Explicit plan-to-task mapping for auditing and tooling
+
+## Success Criteria
+
+- [ ] Markdown linting passes on all new files
+- [ ] `.inventory` type fully documented with examples
+- [ ] `Plans.inventory` tracks framework plans
+- [ ] Plan template enforces Tasks.inventory creation
+- [ ] Workspace settings include `.inventory` association
+- [ ] InitializeAiFramework includes GitHub integration step
+
+## Progress Log
+
+- 2024-12-24: Task created; Framework/InventorySystem.task scaffolded
+- 2024-12-24: ✅ All deliverables completed
+  - Updated InitializeAiFramework.prompt.md with .github/copilot-instructions.md integration
+  - Documented .inventory type in Planning/ContextFiles.md
+  - Created Planning/Plans.inventory framework example
+  - Updated Plan.plan.template with Tasks.inventory requirement
+  - Updated .code-workspace with *.inventory file association

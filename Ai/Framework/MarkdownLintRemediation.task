@@ -1,0 +1,145 @@
+# Markdown Lint Remediation
+
+**Status**: Not Started  
+**Created**: 2024-12-24  
+**Owner**: Strategic Agent (Planner)  
+**Priority**: Low  
+**Effort**: Medium  
+**Priority Score**: 3 (Impact:2 + Urgency:1 + Dependency:0 - Complexity:1 - Quality improvement)
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Framework/MarkdownLintRemediation.task](Framework/MarkdownLintRemediation.task)  
+**Role**: Planner (see [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md))  
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Plan systematic remediation of markdown lint errors across framework - multiple tasks have MD031, MD032, MD022, MD040 violations.
+````
+
+---
+
+## Context
+
+Multiple framework files have markdown lint errors:
+- MD031: Fenced code blocks should be surrounded by blank lines
+- MD032: Lists should be surrounded by blank lines
+- MD022: Headings should be surrounded by blank lines
+- MD040: Fenced code blocks should have a language specified
+- MD009: Trailing spaces
+
+## Objective
+
+Plan systematic remediation approach for fixing markdown lint violations across all framework files.
+
+## Deliverables
+
+1. **Audit**: List all files with lint errors and violation types
+2. **Remediation Strategy**: Automated vs manual fixes, priority order
+3. **Implementation Plan**: Specific steps to fix each violation type
+4. **Verification**: All framework markdown files pass markdownlint
+
+## Success Criteria
+
+- [ ] All .md, .task, .plan, .report files pass markdownlint
+- [ ] Remediation approach documented
+- [ ] CI integration plan (if applicable)
+
+## Architecture Decisions
+
+### AD-1: Automated vs Manual Remediation
+
+**Decision**: Manual fixes with systematic review approach  
+**Rationale**: Lint violations are mostly formatting (blank lines, language specs) requiring context-aware fixes. Automated tools might miss semantic nuances or introduce regressions.
+
+### AD-2: Priority Order
+
+**Decision**: Fix in this order:
+1. ContractRenderer.task (immediate blocker for delegation)
+2. Task/plan templates (foundational - affect all new files)
+3. Prompt files (.prompt.md) - frequently used
+4. Documentation files
+5. Research files (low priority)
+
+**Rationale**: Fix blockers first, then foundational files to prevent propagation, then active-use files.
+
+### AD-3: Violation Types
+
+**Common violations found**:
+- MD022: Headings should be surrounded by blank lines
+- MD031: Fenced code blocks should be surrounded by blank lines
+- MD040: Fenced code blocks should have a language specified
+- MD032: Lists should be surrounded by blank lines
+
+**Strategy**: Fix all MD031/MD040 together (code blocks), then MD022/MD032 (spacing).
+
+### AD-4: Language Specifications
+
+**Decision**: Use these language tags:
+- Markdown examples: `markdown`
+- ASCII art/boxes: `text`
+- Shell commands: `powershell` or `bash`
+- Configuration: `yaml`, `json`, `xml`
+- Code: `csharp`, `typescript`, etc.
+
+**Rationale**: Semantic accuracy for syntax highlighting and tooling.
+
+## Verification
+
+- [ ] All 31 Ai/ folder markdown files pass markdownlint
+- [ ] ContractRenderer.task lint errors resolved
+- [ ] Templates (Task/Plan/Report) lint-clean
+- [ ] No regressions in existing content
+- [ ] Build succeeds with no warnings
+
+## Implementation Plan
+
+### Phase 1: Immediate Blockers (Implementation Agent)
+
+Fix ContractRenderer.task lint violations:
+- Line 120: Add blank line before `### Card Style (Example)` heading
+- Lines 121, 137, 148: Add blank lines around code fences
+- Lines 121, 137, 148: Add `text` language spec to ASCII art blocks
+
+### Phase 2: Foundational Files (Implementation Agent)
+
+Fix templates in Ai/Planning/:
+- Task.task.template
+- Plan.plan.template
+- BlockerReport.report.template
+- ProgressReport.report.template
+
+Ensure all code blocks have language specs, proper blank line spacing.
+
+### Phase 3: Prompt Files (Implementation Agent)
+
+Fix core prompts:
+- Strategic.prompt.md
+- Implementation.prompt.md
+- Flow.prompt.md
+- Scaffold.prompt.md
+- Cleanup.prompt.md
+
+### Phase 4: Documentation & Research (Implementation Agent)
+
+Fix remaining files:
+- Integration.md
+- ModelRequirements.md
+- ModelQuickReference.md
+- Research/*.md files
+
+### Phase 5: Verification (Reviewer)
+
+- Run full markdownlint scan
+- Verify no content regressions
+- Archive task when complete
+
+---
+
+## Progress Log
+
+- 2024-12-24: Task created by Orchestrator - multiple files have lint violations
+- 2024-12-24: Planning complete (Planner) - 5-phase remediation strategy, priority on blockers → foundational → active-use → documentation
+- 2025-12-24: Implementation Agent remediated MD022/MD031/MD040 issues across ContractRenderer.task, planning templates, prompts, and documentation/research files; added language tags and blank-line spacing

@@ -1,0 +1,20 @@
+# Automation Infrastructure Plan - Tasks
+
+This inventory tracks all automation infrastructure tasks.
+
+## Active Tasks
+
+- [ContextFileTooling.task](ContextFileTooling.task) - CLI utilities for querying context files (GetAllTasks, GetAllPlans, etc.)
+- [ScriptMigrationToDotnet.task](ScriptMigrationToDotnet.task) - Replace all bash/PowerShell/JS/Python scripts with C#/.NET implementations
+
+## Archived Tasks
+
+Automation/archive/SolutionSetup.2024-12-24.task
+
+## Notes
+
+- Tasks will build automation incrementally: Foundation → Core Validation → Testing → Advanced Features
+- All automation in C#/.NET 10 with Nuke build system
+- Follow vertical slice architecture pattern
+- Comprehensive testing: xUnit, Verify, NetArchTest, Playwright
+

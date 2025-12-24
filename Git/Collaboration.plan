@@ -1,0 +1,401 @@
+# PLAN CONTEXT
+
+---
+
+**Plan Name**: Collaboration Workflows
+**Plan File**: Git/Collaboration.plan
+**Tasks Inventory**: Git/Collaboration.plan.Tasks.inventory
+**Related Task**: User directive - enable PR workflows with cloud agents
+**Owner**: Strategic Agent (Planner)
+
+## Objective
+
+Design and implement collaboration workflows that enable seamless PR-based development with human developers and AI cloud agents, ensuring code quality, knowledge sharing, and efficient task delegation.
+
+## Context
+
+- Current state:
+  - Local-only Git repository
+  - No PR workflow established
+  - No cloud agent integration
+  - No code review process
+  - No commit message standards enforced
+  - No contribution guidelines
+- Constraints:
+  - Must support both human and AI cloud agent contributions
+  - Must maintain code quality through automated and manual reviews
+  - Must integrate with GitHub/Azure DevOps for tracking
+  - Must preserve AI Framework delegation patterns
+- Assumptions:
+  - Cloud agents have full instruction file context on initialization
+  - PR workflow uses GitHub Flow (main + feature branches)
+  - AI agents can create PRs, respond to reviews, and merge
+  - Human oversight required for critical/strategic decisions
+
+## Decisions
+
+- D1: **PR-based workflow for all changes** — Rationale: Enables review, CI validation, collaboration history
+- D2: **Cloud agent onboarding checklist** — Rationale: Ensures instruction files loaded, workspace configured
+- D3: **Commit message templates with .gitmessage** — Rationale: Standardize commit format, enforce conventions
+- D4: **CODEOWNERS for critical paths** — Rationale: Require human review on framework/core changes
+- D5: **Contributing guidelines (CONTRIBUTING.md)** — Rationale: Document workflow for humans and cloud agents
+- D6: **AI agent delegation via PR comments** — Rationale: Transparent, trackable task assignment
+
+## Implementation Phases
+
+### Phase 1: Commit Message Standards
+- Create `.gitmessage` template
+- Configure workspace file associations
+- Document commit conventions in Git/Commit.convention
+- Add commit-msg Git hook for validation
+
+### Phase 2: PR Workflow Documentation
+- Create CONTRIBUTING.md with PR workflow
+- Document cloud agent delegation process
+- Create PR review checklist
+- Define merge strategies
+
+### Phase 3: Code Review Process
+- Create CODEOWNERS file
+- Define review requirements by file type
+- Document review guidelines
+- Set up PR comment templates
+
+### Phase 4: Cloud Agent Integration
+- Create cloud agent onboarding guide
+- Document instruction file initialization
+- Create delegation templates for PR workflows
+- Test PR creation/review/merge with simulated cloud agent
+
+### Phase 5: Automation & Guardrails
+- Implement commit-msg hook
+- Add PR checks (lint, format, build, test)
+- Configure auto-assignment rules
+- Set up PR labels and automation
+
+## Implementation Notes
+
+### Commit Message Template (.gitmessage)
+
+Create `.gitmessage` in repository root:
+
+```
+# <type>(<scope>): <subject>
+#
+# <body>
+#
+# <footer>
+#
+# Type: feat|fix|docs|style|refactor|test|chore|ci|perf
+# Scope: component/slice/feature (optional)
+# Subject: imperative, lowercase, no period, ≤50 chars
+# Body: explain what/why (wrap at 72 chars)
+# Footer: breaking changes, issue references
+#
+# Examples:
+# feat(contracts): add YAML schema validation
+# fix(cli): resolve Unicode rendering in CliPanels
+# docs(framework): complete InitializeAiFramework.prompt.md
+#
+# Breaking changes:
+# BREAKING CHANGE: removed src/ directory, moved to vertical slices
+#
+# Issue references:
+# Closes #123
+# Related to #456
+```
+
+### Contributing Guidelines (CONTRIBUTING.md)
+
+```markdown
+# Contributing to .xeyth
+
+## Overview
+
+This project uses the AI Framework for agent-driven development. Contributions can come from:
+- **Human developers**: Traditional PR workflow
+- **AI cloud agents**: Delegated via Framework tasks
+
+## PR Workflow
+
+### 1. Create Feature Branch
+```bash
+git checkout -b feature/your-feature-name
+```
+
+### 2. Make Changes
+- Follow AI Framework conventions (see `.xeyth/Ai/Framework/`)
+- Update task files (Progress Log, deliverables)
+- Write tests, update documentation
+- Use commit message template (`.gitmessage`)
+
+### 3. Run Local Validation
+```bash
+nuke Compile Test
+# or
+dotnet build && dotnet test
+```
+
+### 4. Create Pull Request
+- Use PR template (`.github/pull_request_template.md`)
+- Link to task file and issues
+- Provide verification evidence
+- Request reviews from CODEOWNERS
+
+### 5. Address Review Feedback
+- Respond to comments
+- Make requested changes
+- Re-run validation
+- Request re-review
+
+### 6. Merge
+- Squash merge to main (clean history)
+- Auto-delete feature branch
+- Update task file (mark complete, archive if needed)
+
+## Cloud Agent Workflow
+
+### Onboarding Checklist
+- [ ] Clone repository
+- [ ] Configure workspace (`.code-workspace`)
+- [ ] Verify instruction files loaded (GitHub Copilot settings)
+- [ ] Run `nuke Compile Test` to validate environment
+- [ ] Read assigned task file
+
+### Task Delegation
+1. Strategic Agent creates task file (`.task`)
+2. Delegates to Implementation Agent via PR comment:
+   ```
+   @cloud-agent please implement this task:
+   **Task**: Framework/MyFeature.task
+   **Role**: Implementer
+   **Branch**: feature/my-feature
+   ```
+3. Cloud agent creates feature branch, implements, opens PR
+4. Human/Strategic Agent reviews PR
+5. Cloud agent addresses feedback, updates task file
+6. Merge after approval
+
+### PR Best Practices
+- One task per PR (small, focused changes)
+- Update task Progress Log in each commit
+- Run all checks before requesting review
+- Respond to comments within 24 hours (cloud agents: immediately)
+
+## Code Review Guidelines
+
+### Reviewers
+- **CODEOWNERS**: Required for framework/core changes
+- **Automated checks**: Build, test, lint (always required)
+- **AI Strategic Agent**: Architecture, design decisions
+- **Human developers**: Final approval, strategic oversight
+
+### Review Checklist
+- [ ] Code follows project conventions
+- [ ] Tests added/updated and passing
+- [ ] Documentation updated
+- [ ] Task file updated (Progress Log, deliverables)
+- [ ] No new warnings or errors
+- [ ] Commit messages follow template
+- [ ] No secrets or sensitive data committed
+
+### Review Types
+- **Approve**: Ready to merge
+- **Request Changes**: Blocking issues
+- **Comment**: Non-blocking suggestions
+
+## Commit Message Standards
+
+Use `.gitmessage` template:
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+**Types**:
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation
+- `style`: Formatting
+- `refactor`: Code restructuring
+- `test`: Tests
+- `chore`: Maintenance
+- `ci`: CI/CD
+- `perf`: Performance
+
+**Examples**:
+```
+feat(contracts): add YAML validation engine
+fix(cli): replace Unicode icons with ASCII
+docs(git): add collaboration workflow guide
+```
+
+## File Conventions
+
+- **Tasks**: `{Slice}/{Name}.task` (markdown)
+- **Plans**: `{Slice}/{Name}.plan` (markdown)
+- **Reports**: `{Slice}/{Name}.task.{ReportName}.report` (markdown)
+- **Archives**: `{Slice}/archive/{Name}.YYYY-MM-DD.{Type}`
+
+## Quality Gates
+
+All PRs must pass:
+- [ ] `dotnet build` (0 errors, 0 warnings)
+- [ ] `nuke Compile Test` (all tests passing)
+- [ ] Markdown linting (if applicable)
+- [ ] Code review approval (1+ human reviewer)
+
+## Getting Help
+
+- **Framework Docs**: `.xeyth/Ai/Framework/`
+- **Task Templates**: `.xeyth/Planning/`
+- **Conventions**: `.xeyth/Ai/Git/`
+- **Issues**: GitHub Issues
+- **Discussions**: GitHub Discussions
+```
+
+### CODEOWNERS
+
+Create `.github/CODEOWNERS`:
+
+```
+# Framework core (require human review)
+/Ai/Framework/ @xeyth-maintainers
+/.github/ @xeyth-maintainers
+/Git/ @xeyth-maintainers
+
+# Build system
+/build/ @xeyth-maintainers
+*.nuke @xeyth-maintainers
+
+# Configuration
+*.xeyth @xeyth-maintainers
+.code-workspace @xeyth-maintainers
+
+# Documentation (can be cloud-agent approved)
+*.md @xeyth-reviewers
+
+# Code (require at least one human review)
+*.cs @xeyth-reviewers
+*.csproj @xeyth-reviewers
+```
+
+### Cloud Agent Delegation Template
+
+For PR-based workflows:
+
+````markdown
+## Task Delegation (Cloud Agent)
+
+**Task**: [{TaskPath}]({TaskPath})  
+**Role**: {Role} (see [Framework/{Prompt}.prompt.md](../Framework/{Prompt}.prompt.md))  
+**Target Audience**: {Agent} ({Model})  
+**Branch**: feature/{task-name}  
+**PR**: #{pr-number}
+
+### Context
+{Brief summary of what needs to be done}
+
+### Deliverables
+- [ ] {Deliverable 1}
+- [ ] {Deliverable 2}
+
+### Onboarding Checklist
+Before starting work, ensure:
+- [ ] Repository cloned
+- [ ] Workspace configured (`.code-workspace`)
+- [ ] Instruction files loaded (check GitHub Copilot settings)
+- [ ] `nuke Compile Test` passes locally
+- [ ] Task file read and understood
+
+### Workflow
+1. Create feature branch from main
+2. Implement deliverables
+3. Update task Progress Log
+4. Run `nuke Compile Test` (must pass)
+5. Commit with message template (`.gitmessage`)
+6. Push branch, create PR
+7. Respond to review feedback
+8. Update task file after merge
+
+### PR Checklist
+- [ ] Build passes
+- [ ] Tests pass
+- [ ] Task file updated
+- [ ] Documentation updated
+- [ ] No new warnings
+````
+
+### PR Comment Templates
+
+**Request Changes**:
+```markdown
+## Changes Requested
+
+### Blocking Issues
+1. {Issue description}
+   - **File**: {path}:{line}
+   - **Why**: {explanation}
+   - **Fix**: {suggestion}
+
+### Suggestions (non-blocking)
+- {Suggestion 1}
+- {Suggestion 2}
+
+Please address blocking issues and re-request review.
+```
+
+**Approve**:
+```markdown
+## Approved ✅
+
+Great work! This PR:
+- ✅ Meets all acceptance criteria
+- ✅ Passes quality gates
+- ✅ Follows project conventions
+
+Ready to merge.
+```
+
+## Task Inventory Management
+
+Create `Git/Collaboration.plan.Tasks.inventory`:
+
+```markdown
+# Collaboration Workflows - Tasks
+
+## Commit Standards
+Git/CommitMessageTemplate.task
+Git/CommitConventions.task
+Git/CommitHooks.task
+
+## PR Workflow
+Git/ContributingGuidelines.task
+Git/PrTemplates.task
+Git/CodeOwners.task
+
+## Cloud Agent Integration
+Git/CloudAgentOnboarding.task
+Git/CloudAgentDelegation.task
+Git/InstructionFileSetup.task
+
+## Automation
+Git/PrChecks.task
+Git/AutoAssignment.task
+Git/PrLabels.task
+```
+
+## Verification
+
+- [ ] `.gitmessage` created and workspace configured
+- [ ] `CONTRIBUTING.md` comprehensive and clear
+- [ ] `.github/CODEOWNERS` configured
+- [ ] Commit message template validated
+- [ ] PR workflow tested (create, review, merge, delete)
+- [ ] Cloud agent onboarding checklist verified
+- [ ] Instruction files auto-load correctly
+- [ ] All tasks in `Git/Collaboration.plan.Tasks.inventory` tracked
+
