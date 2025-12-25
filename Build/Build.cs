@@ -27,12 +27,13 @@ class Build : NukeBuild
 
     [Solution] readonly Solution Solution;
 
-    AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
-
     Target Clean => _ => _
         .Before(Restore)
         .Executes(() =>
         {
+            DotNetClean(s => s
+                .SetProject(Solution)
+                .SetConfiguration(Configuration));
         });
 
     Target Restore => _ => _
