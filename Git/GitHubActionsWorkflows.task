@@ -1,0 +1,174 @@
+# GitHub Actions CI/CD Workflows
+
+---
+
+## Delegation Prompt
+
+---
+
+## Role: Implementer
+
+**Task File**: Git/GitHubActionsWorkflows.task  
+**Objective**: Create GitHub Actions workflows for build, test, and package automation
+
+**Role Reference**: See [Ai/Framework/Implementation.prompt.md](../Ai/Framework/Implementation.prompt.md) for workflow guidance.
+
+### Context
+
+Repository Xeyth-Labs/.xeyth is public with branch protection configured. Need GitHub Actions workflows to automate build verification, testing, and packaging. These workflows will serve as status checks for PR validation.
+
+### Your Responsibilities
+
+1. Create build workflow (.github/workflows/build.yml)
+2. Create test workflow (.github/workflows/test.yml)
+3. Configure workflows to trigger on push/PR
+4. Verify workflows execute successfully
+5. Update branch protection to require workflow status checks
+6. Document workflows in Git/README.md
+
+### Deliverables
+
+- [ ] **D1**: Build workflow created and tested
+- [ ] **D2**: Test workflow created and tested
+- [ ] **D3**: Workflows trigger on push/PR events
+- [ ] **D4**: Status checks visible in GitHub
+- [ ] **D5**: Branch protection updated with required checks
+- [ ] **D6**: Workflows documented
+
+### Implementation Guidance
+
+**Build Workflow** (.github/workflows/build.yml):
+```yaml
+name: Build
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Restore
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+```
+
+**Test Workflow** (.github/workflows/test.yml):
+```yaml
+name: Test
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Test
+        run: dotnet test --configuration Release --verbosity normal
+```
+
+**Verification**:
+1. Push workflows to trigger first run
+2. Check Actions tab: https://github.com/Xeyth-Labs/.xeyth/actions
+3. Verify build and test jobs succeed
+4. Update branch protection:
+```bash
+gh api repos/Xeyth-Labs/.xeyth/branches/master/protection \
+  --method PUT \
+  --field required_status_checks[strict]=true \
+  --field required_status_checks[contexts][]=build \
+  --field required_status_checks[contexts][]=test
+```
+
+**Critical Notes**:
+- Workflows run on push to master and PRs
+- Multi-OS test matrix ensures cross-platform compatibility
+- Status checks will block PRs if build/test fail
+- Document workflow badges in README.md
+
+### Upon Completion
+
+Update BranchProtectionRules deferred items (D3, D6):
+- D3: Status check contexts now configured
+- D6: Verification complete (workflows enforce quality)
+
+---
+
+## Task Details
+
+---
+
+Status: Not Started  
+Owner: Implementation Agent  
+Priority: High  
+Effort: Medium  
+Priority Score: 9 (Impact:7 + Urgency:3 + Dependency:4 - Complexity:2 - Enables automated quality gates)
+
+## Objective
+
+Implement GitHub Actions workflows for automated build verification, testing, and CI/CD pipeline.
+
+## Task Context
+
+- Current state:
+  - Repository public with branch protection
+  - No CI/CD automation
+  - Manual build/test verification required
+  - Status checks placeholder in branch protection
+  
+- Desired state:
+  - Build workflow automated
+  - Test workflow with multi-OS matrix
+  - Workflows trigger on push/PR
+  - Status checks enforced in branch protection
+  - PR workflow fully automated
+
+## Task Deliverables
+
+- D1: Build workflow (.github/workflows/build.yml)
+- D2: Test workflow (.github/workflows/test.yml)
+- D3: Workflows verified passing
+- D4: Status checks visible on PRs
+- D5: Branch protection requires workflows
+- D6: Documentation in README.md
+
+## Architecture Decisions
+
+- AD-1: Separate build/test workflows — Rationale: Parallel execution, clearer status reporting
+- AD-2: Multi-OS test matrix — Rationale: Ensure cross-platform compatibility (.NET 10 goal)
+- AD-3: Trigger on push/PR — Rationale: Validate all changes, prevent broken master
+- AD-4: Ubuntu for build — Rationale: Fastest, sufficient for compilation check
+- AD-5: Release configuration — Rationale: Match production builds
+
+## Success Criteria
+
+- [ ] Workflows exist in .github/workflows/
+- [ ] First workflow run succeeds
+- [ ] Status checks appear in GitHub PR UI
+- [ ] Branch protection enforces workflows
+- [ ] README.md shows workflow badges
+- [ ] Build passes: 0 errors, 0 warnings
+- [ ] Tests pass: 24/24 across all OS
+
+## Progress Log
+
+- 2025-12-25: Task created after branch protection completion
