@@ -15,7 +15,7 @@
 
 ### Context
 
-Repository Xeyth-Labs/.xeyth is public with branch protection configured. Need GitHub Actions workflows to automate build verification, testing, and packaging. These workflows will serve as status checks for PR validation.
+Repository Xeythhhh/.xeyth is public with branch protection configured. Need GitHub Actions workflows to automate build verification, testing, and packaging. These workflows will serve as status checks for PR validation.
 
 ### Your Responsibilities
 
@@ -92,11 +92,11 @@ jobs:
 
 **Verification**:
 1. Push workflows to trigger first run
-2. Check Actions tab: https://github.com/Xeyth-Labs/.xeyth/actions
+2. Check Actions tab: https://github.com/Xeythhhh/.xeyth/actions
 3. Verify build and test jobs succeed
 4. Update branch protection:
 ```bash
-gh api repos/Xeyth-Labs/.xeyth/branches/master/protection \
+gh api repos/Xeythhhh/.xeyth/branches/master/protection \
   --method PUT \
   --field required_status_checks[strict]=true \
   --field required_status_checks[contexts][]=build \

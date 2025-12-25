@@ -16,13 +16,13 @@ The `.xeyth` repository uses templated commits based on **Conventional Commits 1
 
 CI workflows (GitHub Actions):
 
-[![Build](https://github.com/Xeyth-Labs/.xeyth/actions/workflows/build.yml/badge.svg)](https://github.com/Xeyth-Labs/.xeyth/actions/workflows/build.yml)
-[![Test](https://github.com/Xeyth-Labs/.xeyth/actions/workflows/test.yml/badge.svg)](https://github.com/Xeyth-Labs/.xeyth/actions/workflows/test.yml)
+[![Build](https://github.com/Xeythhhh/.xeyth/actions/workflows/build.yml/badge.svg)](https://github.com/Xeythhhh/.xeyth/actions/workflows/build.yml)
+[![Test](https://github.com/Xeythhhh/.xeyth/actions/workflows/test.yml/badge.svg)](https://github.com/Xeythhhh/.xeyth/actions/workflows/test.yml)
 
 Check settings:
 
 ```bash
-gh api repos/Xeyth-Labs/.xeyth/branches/master/protection
+gh api repos/Xeythhhh/.xeyth/branches/master/protection
 ```
 
 ## Commit Message Format
