@@ -53,6 +53,7 @@ Desktop.ini
 
 # Build Tools
 .nuke/
+.nuke/temp/
 .tools/
 
 # Rider
