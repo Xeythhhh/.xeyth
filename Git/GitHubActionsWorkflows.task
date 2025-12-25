@@ -55,10 +55,8 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
-      - name: Restore
-        run: dotnet restore
       - name: Build
-        run: dotnet build --no-restore --configuration Release
+        run: ./build.sh Compile
 ```
 
 **Test Workflow** (.github/workflows/test.yml):
@@ -83,7 +81,13 @@ jobs:
         with:
           dotnet-version: '10.0.x'
       - name: Test
-        run: dotnet test --configuration Release --verbosity normal
+        run: |
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            ./build.cmd Test
+          else
+            ./build.sh Test
+          fi
+        shell: bash
 ```
 
 **Verification**:
@@ -157,7 +161,7 @@ Implement GitHub Actions workflows for automated build verification, testing, an
 - AD-2: Multi-OS test matrix — Rationale: Ensure cross-platform compatibility (.NET 10 goal)
 - AD-3: Trigger on push/PR — Rationale: Validate all changes, prevent broken master
 - AD-4: Ubuntu for build — Rationale: Fastest, sufficient for compilation check
-- AD-5: Release configuration — Rationale: Match production builds
+- AD-5: Use Nuke build system — Rationale: Consistent with Repository.plan, orchestrates all CI/CD targets
 
 ## Success Criteria
 
