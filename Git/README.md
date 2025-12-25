@@ -14,10 +14,15 @@ The `.xeyth` repository uses templated commits based on **Conventional Commits 1
 - Status checks: strict mode enabled; contexts list currently empty (add CI contexts once pipelines exist)
 - CODEOWNERS: `.github/CODEOWNERS` with `* @Xeythhhh` (ensures your approval is required)
 
+CI workflows (GitHub Actions):
+
+[![Build](https://github.com/Xeythhhh/.xeyth/actions/workflows/build.yml/badge.svg)](https://github.com/Xeythhhh/.xeyth/actions/workflows/build.yml)
+[![Test](https://github.com/Xeythhhh/.xeyth/actions/workflows/test.yml/badge.svg)](https://github.com/Xeythhhh/.xeyth/actions/workflows/test.yml)
+
 Check settings:
 
 ```bash
-gh api repos/Xeyth-Labs/.xeyth/branches/master/protection
+gh api repos/Xeythhhh/.xeyth/branches/master/protection
 ```
 
 ## Commit Message Format

@@ -4,14 +4,20 @@ Role: Implementer (plan review + execution).
 
 ## Workflow
 
-1. Read the task delegation prompt at the top of the assigned `.task`
-2. Research assumptions when uncertain; prefer modern, simple solutions
-3. Plan Review (if requested): challenge decisions, propose optimizations, send succinct feedback
-4. Implement: follow task guidance and house patterns; keep changes small and testable
-5. Verify: `<BUILD_CMD>`, `<TEST_CMD>`, `<LINT_CMD>` (if defined); keep outputs diagnostic-free
-6. **Resolve Diagnostics**: Fix all errors and warnings before committing (see Diagnostic Resolution below)
-7. Update the task Progress Log with decisions and verification evidence
-8. Delegate to Reviewer when done; use Flow prompt + ProgressReport.template for status
+1. **Create Feature Branch**: `git checkout -b task/{task-name}` (never work on master directly)
+2. Read the task delegation prompt at the top of the assigned `.task`
+3. Research assumptions when uncertain; prefer modern, simple solutions
+4. Plan Review (if requested): challenge decisions, propose optimizations, send succinct feedback
+5. Implement: follow task guidance and house patterns; keep changes small and testable
+6. Verify: `<BUILD_CMD>`, `<TEST_CMD>`, `<LINT_CMD>` (if defined); keep outputs diagnostic-free
+7. **Resolve Diagnostics**: Fix all errors and warnings before committing (see Diagnostic Resolution below)
+8. **Commit to Feature Branch**: `git commit -m "feat(scope): description"`
+9. **Push Feature Branch**: `git push origin task/{task-name}`
+10. **Create PR**: `gh pr create --base master --head task/{task-name}` with task reference
+11. Update the task Progress Log with decisions and verification evidence
+12. Delegate to Reviewer when done; use Flow prompt + ProgressReport.template for status
+
+**CRITICAL**: All commits must go to feature branches. Pull Requests are required for merging to master.
 
 ## Delegation Patterns
 
