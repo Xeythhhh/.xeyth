@@ -4,6 +4,22 @@
 
 The `.xeyth` repository uses templated commits based on **Conventional Commits 1.0.0** with AI Framework extensions. This system ensures consistent, meaningful commit messages across all contributions.
 
+## Branch Protection (master)
+
+- Visibility: public
+- Enforce admins: enabled
+- Reviews: minimum 2 approvals; stale reviews dismissed on new commits; code owner reviews required
+- Conversations: must be resolved before merge
+- Force pushes: blocked; branch deletions: blocked
+- Status checks: strict mode enabled; contexts list currently empty (add CI contexts once pipelines exist)
+- CODEOWNERS: `.github/CODEOWNERS` with `* @Xeythhhh` (ensures your approval is required)
+
+Check settings:
+
+```bash
+gh api repos/Xeyth-Labs/.xeyth/branches/master/protection
+```
+
 ## Commit Message Format
 
 ```

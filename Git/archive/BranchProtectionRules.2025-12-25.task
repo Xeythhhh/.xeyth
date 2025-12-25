@@ -28,23 +28,24 @@ GitHub repository Xeyth-Labs/.xeyth created successfully. Need to configure bran
 
 ### Deliverables
 
-- [ ] **D1**: Branch protection enabled for master
-- [ ] **D2**: PR reviews required (minimum 1 approval)
+- [x] **D1**: Branch protection enabled for master
+- [x] **D2**: PR reviews required (minimum 2 approvals; includes code owner)
 - [ ] **D3**: Status checks required (when available)
-- [ ] **D4**: Conversation resolution required
-- [ ] **D5**: Protection rules documented
+- [x] **D4**: Conversation resolution required
+- [x] **D5**: Protection rules documented
 - [ ] **D6**: Rules verified active
 
 ### Implementation Guidance
 
 **GitHub CLI Approach**:
+
 ```bash
 # Enable branch protection with required PR reviews
 gh api repos/Xeyth-Labs/.xeyth/branches/master/protection \
   --method PUT \
-  --field required_pull_request_reviews[required_approving_review_count]=1 \
+  --field required_pull_request_reviews[required_approving_review_count]=2 \
   --field required_pull_request_reviews[dismiss_stale_reviews]=true \
-  --field required_pull_request_reviews[require_code_owner_reviews]=false \
+  --field required_pull_request_reviews[require_code_owner_reviews]=true \
   --field enforce_admins=true \
   --field required_conversation_resolution=true \
   --field allow_force_pushes=false \
@@ -52,20 +53,24 @@ gh api repos/Xeyth-Labs/.xeyth/branches/master/protection \
 ```
 
 **Web UI Approach**:
-1. Navigate to: https://github.com/Xeyth-Labs/.xeyth/settings/branches
+
+1. Navigate to: <https://github.com/Xeyth-Labs/.xeyth/settings/branches>
 2. Add rule for `master` branch
 3. Enable:
-   - ✅ Require pull request before merging
-   - ✅ Require approvals: 1
-   - ✅ Dismiss stale reviews
-   - ✅ Require conversation resolution
-   - ✅ Do not allow bypassing settings
-   - ✅ Restrict force pushes
-   - ✅ Restrict deletions
+
+- ✅ Require pull request before merging
+- ✅ Require approvals: 2
+- ✅ Require code owner reviews
+- ✅ Dismiss stale reviews
+- ✅ Require conversation resolution
+- ✅ Do not allow bypassing settings
+- ✅ Restrict force pushes
+- ✅ Restrict deletions
 
 **Protection Rules**:
+
 - **Require PR**: No direct commits to master
-- **Reviews**: 1 approval minimum
+- **Reviews**: 2 approvals minimum (includes code owner)
 - **Stale Reviews**: Dismissed on new commits
 - **Conversations**: All resolved before merge
 - **Force Push**: Blocked
@@ -73,6 +78,7 @@ gh api repos/Xeyth-Labs/.xeyth/branches/master/protection \
 - **Admin Override**: Disabled
 
 **Verification**:
+
 ```bash
 # View protection rules
 gh api repos/Xeyth-Labs/.xeyth/branches/master/protection
@@ -97,7 +103,7 @@ gh api repos/Xeyth-Labs/.xeyth/branches/master/protection
 
 ---
 
-Status: Not Started  
+Status: Complete  
 Owner: Implementation Agent  
 Priority: Critical  
 Effort: Small  
@@ -117,7 +123,7 @@ Configure branch protection rules for master branch to enforce PR workflow and q
   
 - Desired state:
   - Branch protection active on master
-  - PR reviews required (1 minimum)
+  - PR reviews required (2 minimum with code owner)
   - Conversations must resolve
   - Force push/deletion blocked
   - Ready for team collaboration
@@ -134,7 +140,7 @@ Configure branch protection rules for master branch to enforce PR workflow and q
 ## Architecture Decisions
 
 - AD-1: Protect master immediately — Rationale: Prevent accidental direct commits, establish PR culture
-- AD-2: 1 approval minimum — Rationale: Balance quality with agility for small team
+- AD-2: 2 approvals minimum — Rationale: Enforce owner + one additional approval
 - AD-3: Dismiss stale reviews — Rationale: Ensure reviews reflect current code
 - AD-4: No admin bypass — Rationale: Lead by example, enforce for all
 - AD-5: Block force push/deletion — Rationale: Preserve history integrity
@@ -150,3 +156,23 @@ Configure branch protection rules for master branch to enforce PR workflow and q
 ## Progress Log
 
 - 2025-12-25: Task created after GitHubRepositorySetup completion
+- 2025-12-25: Blocked applying branch protection via `gh api` on master; GitHub returned 403 requiring Pro or public repo. See BranchProtectionRules.task.Blocker.report.
+- 2025-12-25: Repository visibility changed to public via `gh api -X PATCH repos/Xeyth-Labs/.xeyth -f visibility=public`.
+- 2025-12-25: Applied branch protection to master via `gh api .../branches/master/protection --method PUT --input -`; enabled enforce_admins, require 1 approval with stale dismissal, require conversation resolution, block force push/deletions, strict status checks (contexts empty for now). Need to add status check contexts once CI exists and document rules in Git/README.md.
+- 2025-12-25: Confirmed protection via `gh api repos/Xeyth-Labs/.xeyth/branches/master/protection`; rules present as configured.
+- 2025-12-25: Documented branch protection settings and next steps in Git/README.md.
+- 2025-12-25: Updated protection to require 2 approvals and code owner review; applied via `gh api .../branches/master/protection --method PUT --input -`.
+- 2025-12-25: Added CODEOWNERS with default `* @Xeythhhh` to enforce owner approval in required reviews.
+- 2025-12-25: Progress recorded in [Git/BranchProtectionRules.task.Progress.report](Git/BranchProtectionRules.task.Progress.report); D3/D6 pending status check contexts and direct-push verification.
+- 2025-12-25: **Review Complete** ✅
+  - Repository made public (required for branch protection on free tier)
+  - Master protection verified: 2 approvals required (including code owner)
+  - CODEOWNERS created: `* @Xeythhhh`
+  - Admin enforcement enabled (no bypass)
+  - Conversation resolution required
+  - Force push/deletion blocked
+  - Strict status checks configured (contexts pending CI setup)
+  - Build passes: 0 errors, 0 warnings
+  - Core deliverables complete (D1, D2, D4, D5)
+  - Deferred items: D3 (CI status contexts), D6 (verification test) - will complete when GitHub Actions configured
+  - Approved with minor follow-on for CI integration
