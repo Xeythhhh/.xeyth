@@ -49,4 +49,12 @@ class Build : NukeBuild
         {
         });
 
+    Target Test => _ => _
+        .DependsOn(Compile)
+        .Executes(() =>
+        {
+            ProcessTasks.StartProcess("dotnet", "test --no-build", workingDirectory: RootDirectory)
+                .AssertZeroExitCode();
+        });
+
 }
