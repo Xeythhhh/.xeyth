@@ -177,9 +177,14 @@ Example recommendation:
 
 **Implementation Agent** - After completing implementation:
 
+- Commit changes to feature branch (`task/{task-name}`)
+- Push feature branch to origin
+- Create PR referencing task file (`gh pr create --base master --head task/{task-name}`)
 - Create `{TaskName}.task.{ReportName}.report` with progress summary
 - Delegate to Strategic Agent (Reviewer role) via code block
 - Do NOT assume another role (cross-model boundary)
+
+**CRITICAL**: All work must go through Pull Requests. Never commit directly to master.
 
 ## Delegation Format (Cross-Model)
 

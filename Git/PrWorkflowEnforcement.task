@@ -1,0 +1,237 @@
+# PR Workflow Enforcement
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Git/PrWorkflowEnforcement.task](Git/PrWorkflowEnforcement.task)  
+**Role**: Implementer (see [Ai/Framework/Implementation.prompt.md](../Ai/Framework/Implementation.prompt.md))  
+**Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
+
+Document and enforce PR-based workflow for all task progress. Update agent instructions to create feature branches and PRs. Create PR template that references tasks.
+````
+
+---
+
+## Role: Implementer
+
+**Task File**: Git/PrWorkflowEnforcement.task  
+**Objective**: Enforce PR workflow for task progress; document branch naming, PR creation, and task-to-PR linking
+
+**Role Reference**: See [Ai/Framework/Implementation.prompt.md](../Ai/Framework/Implementation.prompt.md) for workflow guidance.
+
+### Context
+
+Tasks are work items tracking agent progress. All task progress must be merged through Pull Requests (not direct commits to master). Branch protection enforces this via required PR reviews. Future: migrate tasks to GitHub Issues when GitHub Projects integration ready.
+
+**Current Workflow Problem**:
+- Agents commit directly to master
+- No PR review workflow
+- Task progress not linked to PRs
+- Difficult to review incremental work
+
+**Desired Workflow**:
+- Agent creates feature branch per task (e.g., `task/contract-renderer`)
+- Agent commits progress to feature branch
+- Agent creates PR with task reference
+- PR reviewed and merged (2 approvals required)
+- Task progress tracked via PR history
+
+### Your Responsibilities
+
+1. Create PR template (.github/pull_request_template.md)
+2. Document PR workflow in Git/README.md
+3. Update agent instructions (Flow.prompt.md, Implementation.prompt.md)
+4. Define branch naming convention
+5. Document task-to-PR linking pattern
+6. Create example PR for reference
+
+### Deliverables
+
+- [ ] **D1**: PR template created (.github/pull_request_template.md)
+- [ ] **D2**: PR workflow documented (Git/README.md)
+- [ ] **D3**: Agent instructions updated (Flow.prompt.md, Implementation.prompt.md)
+- [ ] **D4**: Branch naming convention documented (Conventions/BranchNamingConvention.convention)
+- [ ] **D5**: First PR created demonstrating workflow
+- [ ] **D6**: Verification: Direct push to master fails
+
+### Implementation Guidance
+
+**PR Template** (.github/pull_request_template.md):
+
+```markdown
+## Description
+
+<!-- What changed and why -->
+
+## Related Task
+
+**Task File**: <!-- Link to .task file, e.g., [Git/PrWorkflowEnforcement.task](../Git/PrWorkflowEnforcement.task) -->
+
+**Deliverables**:
+- [ ] D1: <!-- List completed deliverables -->
+- [ ] D2:
+
+## Verification
+
+<!-- Evidence that changes work -->
+
+**Build**: ✅ Passes (0 errors, 0 warnings)
+**Tests**: ✅ 24/24 passed
+**Lint**: ✅ Clean
+
+**Testing Steps**:
+1. <!-- How reviewers can verify -->
+
+## Checklist
+
+- [ ] Build passes (`dotnet build` or `./build.sh Compile`)
+- [ ] Tests pass (`dotnet test` or `./build.sh Test`)
+- [ ] Task file updated (Progress Log, deliverables)
+- [ ] Documentation updated (if applicable)
+- [ ] Commit messages follow conventions
+
+## Notes
+
+<!-- Additional context for reviewers -->
+```
+
+**Branch Naming Convention**:
+
+- **Task work**: `task/{task-name}` (e.g., `task/contract-renderer`, `task/pr-workflow`)
+- **Bug fixes**: `fix/{issue-description}` (e.g., `fix/build-warnings`)
+- **Features**: `feature/{feature-name}` (e.g., `feature/planning-cli`)
+- **Chores**: `chore/{description}` (e.g., `chore/update-dependencies`)
+
+**Workflow Steps** (for agent instructions):
+
+1. **Start Task**:
+   ```bash
+   git checkout -b task/{task-name}
+   ```
+
+2. **Commit Progress**:
+   ```bash
+   git add .
+   git commit -m "feat(scope): implement deliverable X"
+   git push origin task/{task-name}
+   ```
+
+3. **Create PR**:
+   ```bash
+   gh pr create --title "feat(scope): task description" --body-file .github/pull_request_template.md --base master --head task/{task-name}
+   ```
+
+4. **Link Task**: In PR description, reference task file and completed deliverables
+
+5. **After Merge**: Update task Progress Log with PR link, mark deliverables complete
+
+**Agent Instruction Updates**:
+
+**Flow.prompt.md** - Add to "After Completing Delegated Work":
+```markdown
+**Implementation Agent** - After completing deliverables:
+1. Commit changes to feature branch
+2. Push feature branch to origin
+3. Create PR with task reference
+4. Create progress report
+5. Delegate to Reviewer via code block
+```
+
+**Implementation.prompt.md** - Add to "Workflow":
+```markdown
+## PR Workflow
+
+1. Create feature branch: `git checkout -b task/{task-name}`
+2. Implement deliverables, commit to feature branch
+3. Push branch: `git push origin task/{task-name}`
+4. Create PR: `gh pr create --base master --head task/{task-name}`
+5. Reference task file in PR description
+6. Delegate to Reviewer when ready
+```
+
+**Verification Steps**:
+- [ ] Create feature branch `task/pr-workflow-test`
+- [ ] Commit this task file to feature branch
+- [ ] Create PR with template
+- [ ] Verify direct push to master fails
+- [ ] Merge PR after approval
+- [ ] Verify PR shows in GitHub UI
+
+**Critical Notes**:
+- Branch protection enforces PR requirement (already configured)
+- All agents must create feature branches (no direct commits)
+- PR template guides consistent PR creation
+- Tasks link to PRs for traceability
+- Future: Tasks → GitHub Issues (when Projects ready)
+
+### Upon Completion
+
+1. Update Progress Log with PR workflow implementation
+2. Archive to `Git/archive/PrWorkflowEnforcement.YYYY-MM-DD.task`
+3. Update Git/README.md with workflow documentation
+
+---
+
+## Task Details
+
+---
+
+Status: Not Started  
+Owner: Implementation Agent  
+Priority: Critical  
+Effort: Medium  
+Priority Score: 12 (Impact:10 + Urgency:5 + Dependency:3 - Complexity:2 - Required for collaboration)
+
+## Objective
+
+Enforce PR-based workflow for all task progress; prevent direct commits to master; document workflow for agents.
+
+## Task Context
+
+- Current state:
+  - Branch protection configured (PR reviews required)
+  - No PR template
+  - Agents commit directly to master (habit)
+  - Task-to-PR linking undefined
+  
+- Desired state:
+  - PR template guides consistent PRs
+  - Agents create feature branches per task
+  - All commits go through PR review
+  - Tasks reference PRs in Progress Log
+  - Clear workflow documentation
+
+## Task Deliverables
+
+- D1: PR template (.github/pull_request_template.md)
+- D2: Workflow documented (Git/README.md)
+- D3: Agent instructions updated (Flow.prompt.md, Implementation.prompt.md)
+- D4: Branch naming convention
+- D5: Example PR demonstrating workflow
+- D6: Verification (direct push fails)
+
+## Architecture Decisions
+
+- AD-1: Feature branches per task — Rationale: Isolate work, enable parallel development, clear PR scope
+- AD-2: Branch naming `task/{name}` — Rationale: Semantic, matches task-based workflow
+- AD-3: PR template with task reference — Rationale: Traceability, ensures deliverables documented
+- AD-4: Update agent instructions — Rationale: Enforce workflow at instruction level
+- AD-5: Future GitHub Issues migration — Rationale: Tasks currently file-based, Issues better for collaboration
+
+## Success Criteria
+
+- [ ] PR template exists and renders in GitHub
+- [ ] Direct push to master fails with protection error
+- [ ] First PR created following workflow
+- [ ] Agent instructions reference PR workflow
+- [ ] Branch naming convention documented
+- [ ] Git/README.md explains workflow
+- [ ] Workflow verified end-to-end
+
+## Progress Log
+
+- 2025-12-25: Task created; user requested PR enforcement for task progress
+- 2025-12-25: Branch protection verified (PR reviews required, direct commits blocked)
+

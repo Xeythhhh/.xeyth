@@ -1,0 +1,32 @@
+# PROGRESS REPORT
+
+---
+
+**Date**: 2025-12-25
+**Agent**: GitHub Copilot
+**Status**: In-Progress
+
+## Summary
+
+- Added GitHub Actions workflows: Build (ubuntu-latest, ./build.sh Compile) and Test (matrix: ubuntu/windows/macos using Nuke commands)
+- Updated branch protection required status checks to Build and Test while retaining 2-approval + code owner requirements and conversation resolution
+- Documented workflows with badges in Git/README.md
+
+## Deliverables
+
+- [x] D1: Build workflow created
+- [x] D2: Test workflow created
+- [x] D3: Workflows trigger on push/PR (configured)
+- [ ] D4: Status checks visible (await first run)
+- [ ] D5: Branch protection updated with required checks (configured, pending validation after runs)
+- [ ] D6: Workflows documented (badges added; broader doc OK, but lint warnings remain legacy)
+
+## Verification
+
+- Workflows not yet executed; Actions runs pending next push/PR
+- Branch protection GET shows required_status_checks: Build, Test; approvals/code-owner/admins/conversation/force-push/deletion policies intact
+
+## Next Steps
+
+- Trigger workflows (push/PR) to validate Build/Test checks and mark D4/D5/D6 complete after successful runs
+- Optionally address existing markdownlint warnings in Git/README.md
