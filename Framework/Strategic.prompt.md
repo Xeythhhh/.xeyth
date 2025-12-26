@@ -95,15 +95,11 @@ When drafting PR comments with delegation prompts for Implementation Agent:
 **Current PR Status**: Build ✅ | Tests ✅ | Draft 🚧
 ```
 
-**Incorrect Format** ❌ (nested code blocks):
-```markdown
-4. **Reviewer Delegation**:
-   ```markdown
-   ````markdown
-   **Task**: ...
-   ````
-   ```
-```
+**Incorrect Format** ❌ (nested code blocks — do NOT do this):
+- Outer ` ```markdown ` fenced block (3 backticks)
+  - Inside it, another ` ```markdown ` fenced block (3 backticks)
+    - Inside that, a ` ````markdown ` fenced block (4 backticks) containing the delegation text
+- This kind of nesting breaks markdown rendering and must be avoided in PR comments
 
 **Markdown Backtick Rules**:
 - PR comments use **3 backticks** for outer code block
