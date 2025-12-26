@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Automation.Cli.Common;
 using Xeyth.Common.IO.Paths;
 using Contracts.Core.Services;
 using Spectre.Console;
