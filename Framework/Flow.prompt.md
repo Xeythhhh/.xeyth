@@ -9,10 +9,16 @@
 ### Your Instructions:
 
 **IF you are Strategic Agent (Orchestrator)**:
-1. Review backlog using priority scores (see [TaskPrioritySystem.md](../Planning/TaskPrioritySystem.md))
-2. Select highest-priority ready task (Status: Not Started or Planning Complete)
-3. Delegate to Planner OR Implementation Agent using code block format below
-4. Continue flow automatically
+1. **Check ALL open PRs first** - Review for merge readiness or refinement needs
+2. **Draft PR comments** for incomplete PRs (with @copilot tags and delegation prompts)
+3. **Merge ready PRs** (if all acceptance criteria met)
+4. **Review backlog** using priority scores (see [TaskPrioritySystem.md](../Planning/TaskPrioritySystem.md))
+5. **Select tasks for delegation** to reach 5-PR minimum target
+6. **Output ALL pending work** in single response:
+   - PR review comments (for manual posting until tool supports it)
+   - New task delegations (code blocks for Implementation Agent)
+   - Backlog status summary
+7. **Do NOT wait for user** between delegations - batch everything together
 
 **IF you are Strategic Agent (Planner)**:
 1. Continue planning active task
@@ -111,7 +117,8 @@
 3. Search for tasks with `Status: Not Started` or `Status: Planning Complete` that are NOT already delegated in open PRs
 4. Select highest Priority Score task
 5. Delegate to Planner (if needs design) or Implementation Agent (if ready) using code block
-6. Continue flow - do NOT wait for user
+6. Output ALL pending delegations in single response (see "Orchestrator Output Format" section)
+7. Do NOT wait for user between items - batch everything together
 
 **Implementation Agent**:
 
@@ -130,6 +137,112 @@ Example recommendation:
 **Rationale**: {Why this is valuable}
 **Estimated Scope**: {Small/Medium/Large}
 ````
+
+## Orchestrator Output Format (Copilot Cloud)
+
+When invoked in Copilot Cloud (via `file:Flow.prompt.md`), Strategic Agent (Orchestrator) MUST output ALL pending work in a single comprehensive response:
+
+### Output Structure
+
+**1. PR Review Section** (if any PRs exist):
+```markdown
+## 📊 OPEN PR REVIEW
+
+### PR #{number} - {Title}
+**Status**: {Draft/Open/Ready}  
+**Task**: {TaskFile}  
+**Analysis**: {Readiness check results}
+
+**Action**: 
+- ✅ READY TO MERGE → Proceed with merge
+- ⚠️ NEEDS REFINEMENT → Comment drafted below
+- 🚧 IN PROGRESS → Monitor, no action needed
+```
+
+**2. PR Comment Drafts** (for PRs needing refinement):
+```markdown
+## 📝 PR COMMENTS TO POST (Manual Action Required)
+
+### Comment for PR #{number}
+
+{Full comment text with @copilot tag and delegation prompt}
+
+---
+*Note: Post this comment manually until githubwrite supports PR comments*
+```
+
+**3. New Task Delegations**:
+```markdown
+## 🎯 NEW TASK DELEGATIONS
+
+### Delegation 1: {TaskName}
+
+````markdown
+**Task**: [{TaskPath}]({TaskPath})  
+**Role**: {Role} (see [../Framework/{Prompt}.prompt.md](../Framework/{Prompt}.prompt.md))  
+**Target Audience**: {Agent} ({Model})
+
+{Context}
+````
+
+{1-2 sentence description}
+
+### Delegation 2: {TaskName}
+
+{Repeat format}
+```
+
+**4. Summary Section**:
+```markdown
+## 📊 ORCHESTRATOR SUMMARY
+
+**PRs Reviewed**: {count}
+- Ready to merge: {count}
+- Needs refinement: {count} (comments drafted above)
+- In progress: {count}
+
+**Tasks Delegated**: {count}
+- To Implementation Agent: {count}
+- To Planner: {count}
+
+**Backlog Health**:
+- Total tasks: {count}
+- Open PRs: {count} / 5 minimum
+- Next priority: {highest unassigned task}
+```
+
+### Critical Rules
+
+1. **Never output just one delegation** - always check for more work
+2. **Always review PRs first** before delegating new tasks
+3. **Batch all delegation prompts** in one response
+4. **Include manual workarounds** for tool limitations (PR comments)
+5. **Provide clear action items** for user (what to post, what Copilot will handle)
+
+## PR Review Checklist (Orchestrator)
+
+For each open PR, verify:
+
+**Task File Alignment**:
+- [ ] All deliverables checked `- [x]` in task file
+- [ ] Progress Log updated with completion date
+- [ ] Reviewer delegation block present
+- [ ] Progress report created and linked
+
+**PR Description**:
+- [ ] Build: ✅ Passes (or run and verify)
+- [ ] Tests: ✅ All pass
+- [ ] Checklist: All items complete
+
+**GitHub Status**:
+- [ ] CI/CD: All checks green
+- [ ] Conflicts: None
+- [ ] Reviews: At least 1 approval
+
+**Decision**:
+- If ALL ✅ → Merge PR (use githubwrite tool)
+- If ANY ❌ → Draft comment with @copilot tag listing issues + delegation prompt
+- If 🚧 WIP → Monitor, no action
 
 ## Progress Report
 
