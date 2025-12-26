@@ -58,7 +58,7 @@ All agents MUST end their responses with a standardized footer that documents af
 - Convention/Convention.convention.template
 
 **Modified**:
-- Ai/Framework/Implementation.prompt.md
+- Framework/Implementation.prompt.md
 - Configuration/StructuredConceptPattern.md
 
 **Deleted**: None
@@ -165,6 +165,6 @@ Role: Implementer, Task: AiSliceMigration.task
 
 ## See Also
 
-- [Framework/copilot-instructions.md](../Ai/Framework/copilot-instructions.md) - Standard footer template
-- [Framework/Implementation.prompt.md](../Ai/Framework/Implementation.prompt.md) - Implementation Agent workflow
-- [Framework/Strategic.prompt.md](../Ai/Framework/Strategic.prompt.md) - Strategic Agent workflow
+- [Framework/copilot-instructions.md](../Framework/copilot-instructions.md) - Standard footer template
+- [Framework/Implementation.prompt.md](../Framework/Implementation.prompt.md) - Implementation Agent workflow
+- [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md) - Strategic Agent workflow

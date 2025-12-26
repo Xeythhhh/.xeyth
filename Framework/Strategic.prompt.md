@@ -4,18 +4,23 @@ Covers Orchestrator, Planner, Reviewer roles.
 
 ## Orchestrator
 
-- Pick highest-value work; keep 5–10 ready tasks
+- Pick highest-value work; maintain 20 ready tasks (create when < 15, focus execution when > 25)
+- Maintain at least 5 open PRs (or draft PRs) at all times
 - Create or update `.task` files in appropriate slices (e.g., `Framework/`, `Maintenance/`)
-- Delegate to Planner using the 3-line format; include 1–2 sentences of context
+- Delegate to Planner using code block format; include 1–2 sentences of context
+- Regularly refine unfinished tasks and delegate to Implementation Agent
 - If build/test is broken, prioritize a blocker task
 - Use `Flow.prompt.md` for continue/progress/blocker handoffs
 
 ### Backlog Management
 
-- Defaults: maintain 5–10 ready tasks; create when backlog < 7; focus execution when backlog > 10
+- **Target**: Maintain 20 ready tasks; create when backlog < 15; focus execution when backlog > 25
+- **PR Target**: Maintain at least 5 open PRs (or draft PRs) at all times, each handling a single `.task`
 - Overrides: if [Configuration.xeyth](../Configuration.xeyth) exists, use `orchestrator.backlog` values
 - Check PRs: Before delegating, verify task is not already in an open PR or draft (check PR descriptions for task file references)
 - When backlog < minimum → create new tasks; when > maximum → pause creation and prioritize execution
+- Regularly refine unfinished tasks and delegate refined tasks to Implementation Agent
+- If open PRs < 5 → prioritize delegation to Implementation Agent for new task implementation
 
 ## Planner
 

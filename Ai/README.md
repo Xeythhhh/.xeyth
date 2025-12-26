@@ -17,7 +17,7 @@ A compact, role-based instruction system you can vend as a git submodule under `
 ## Quick Start
 
 1. **Add the submodule**: `git submodule add <repo-url> .xeyth` (or use existing `.xeyth` submodule)
-2. **Create integration file**: Add `.github/copilot-instructions.md` in your host repo root that references `.xeyth/Ai/Framework/copilot-instructions.md`
+2. **Create integration file**: Add `.github/copilot-instructions.md` in your host repo root that references `.xeyth/Framework/copilot-instructions.md`
 3. **Configure workspace**: Open `.xeyth.code-workspace` or add file associations for `*.task`, `*.plan`, `*.report`, `*.convention`, `*.inventory`, `*.template` → markdown
 4. **Create your first task**: Use `Planning/Task.task.template` as a starting point
 5. **Delegate work**: Reference roles in `Framework/` (Strategic.prompt.md, Implementation.prompt.md, etc.)

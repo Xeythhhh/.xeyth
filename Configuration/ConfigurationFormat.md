@@ -275,6 +275,6 @@ Future configuration sections:
 ## See Also
 
 - [Configuration.xeyth.template](Configuration.xeyth.template) - Template file
-- [Ai/Framework/copilot-instructions.md](../Ai/Framework/copilot-instructions.md) - References configuration
+- [Framework/copilot-instructions.md](../Framework/copilot-instructions.md) - References configuration
 - xeyth-config CLI tool - Configuration management (planned)
 

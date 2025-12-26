@@ -38,7 +38,7 @@ Create `.github/copilot-instructions.md` in your repository:
 ```markdown
 # Copilot Instructions
 
-This project uses the AI Framework from the `.xeyth` submodule. See [.xeyth/Ai/Framework/copilot-instructions.md](.xeyth/Ai/Framework/copilot-instructions.md) for roles, workflows, and conventions.
+This project uses the AI Framework from the `.xeyth` submodule. See [.xeyth/Framework/copilot-instructions.md](.xeyth/Framework/copilot-instructions.md) for roles, workflows, and conventions.
 
 ---
 
@@ -61,7 +61,7 @@ Configure workspace settings:
     },
     "chat.instructionsFiles.locations": [
       ".github",
-      ".xeyth/Ai/Framework"
+      ".xeyth/Framework"
     ]
   }
 }
@@ -174,10 +174,10 @@ models:
 
 ## Documentation
 
-- **Framework**: [Ai/Framework/copilot-instructions.md](Ai/Framework/copilot-instructions.md)
-- **Strategic Agent**: [Ai/Framework/Strategic.prompt.md](Ai/Framework/Strategic.prompt.md)
-- **Implementation Agent**: [Ai/Framework/Implementation.prompt.md](Ai/Framework/Implementation.prompt.md)
-- **Flow System**: [Ai/Framework/Flow.prompt.md](Ai/Framework/Flow.prompt.md)
+- **Framework**: [Framework/copilot-instructions.md](Framework/copilot-instructions.md)
+- **Strategic Agent**: [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md)
+- **Implementation Agent**: [Framework/Implementation.prompt.md](Framework/Implementation.prompt.md)
+- **Flow System**: [Framework/Flow.prompt.md](Framework/Flow.prompt.md)
 - **Initialization**: [Ai/Maintenance/InitializeAiFramework.prompt.md](Ai/Maintenance/InitializeAiFramework.prompt.md)
 - **Task Template**: [Planning/Task.task.template](Planning/Task.task.template)
 - **Proposal System**: [Planning/ProposalSystem.md](Planning/ProposalSystem.md)

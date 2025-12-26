@@ -11,7 +11,7 @@
 **Task File**: Automation/AbsolutePathEnforcement.task  
 **Objective**: Require AbsolutePath usage for workspace paths to prevent traversal issues
 
-**Role Reference**: See [Framework/Implementation.prompt.md](../Ai/Framework/Implementation.prompt.md) for workflow guidance.
+**Role Reference**: See [Framework/Implementation.prompt.md](../Framework/Implementation.prompt.md) for workflow guidance.
 
 ### Context
 
