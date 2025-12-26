@@ -44,14 +44,19 @@
 #   - Use bullet points for multiple items (prefix with "- ")
 #   - Separate from subject with blank line
 #
-# Footer (Optional):
-#   BREAKING CHANGE: <description>  - For incompatible changes
-#   Agent: <AgentId> (<Role>)       - AI agent attribution
+# Footer (Git trailers, Optional unless noted):
+#   - Use Git trailer format: <Key>: <Value> (one per line)
+#   - Recommended order: BREAKING CHANGE, Refs/Closes, Context/Slice, Agent, others
+#   BREAKING CHANGE: <description>  - Required when header ends with "!"
+#   Refs: <task or issue>           - Link to tasks/issues (e.g., #123, Git/Task.task)
+#   Closes: <issue>                 - Auto-close issues
 #   Context: <file.task>, <...>     - Related context files
 #   Slice: <SliceName>              - Explicit slice reference
-#   Refs: <task or issue>           - Link to tasks/issues
-#   Closes: <issue>                 - Auto-close issues
-#   Co-authored-by: Name <email>    - Multiple authors
+#   Agent: <AgentId> (<Role>)       - AI agent attribution
+#   Co-authored-by: Name <email>    - Git trailer for additional authors
+#   Reviewed-by: Name <email>       - Reviewer acknowledgment
+#   Signed-off-by: Name <email>     - DCO compliance
+#   Tested-by: Name <details>       - Testing verification
 #
 # ============================================================================
 # EXAMPLES
@@ -72,8 +77,7 @@
 #   Moved templates from Framework/planning/ to Planning/ to align
 #   with vertical slice architecture.
 #   
-#   BREAKING CHANGE: Template paths changed. Host projects using old
-#   paths must update references.
+#   BREAKING CHANGE: Template paths changed. Host projects using old paths must update references.
 #
 # With agent attribution:
 #   feat(contracts): add validation engine
@@ -83,6 +87,14 @@
 #   Agent: Strategic Agent (Planner)
 #   Context: Contracts/ContractValidation.task
 #   Refs: Ai.plan
+#
+# With co-author and refs:
+#   feat(git): add trailer guidance
+#   
+#   Adds Git trailer-focused footer guidance to the commit template.
+#   
+#   Refs: Git/CommitTemplateEnhancement.task
+#   Co-authored-by: Pat Smith <pat@example.com>
 #
 # ============================================================================
 # VALIDATION RULES
@@ -94,6 +106,7 @@
 #   ✓ Subject uses lowercase first letter
 #   ✓ Subject has no trailing period
 #   ✓ Scope is valid (if provided)
+#   ✓ BREAKING CHANGE footer present when using "!"
 #   ⚠ Context files are referenced if changed
 #   ⚠ Body lines wrap at 72 characters
 #
