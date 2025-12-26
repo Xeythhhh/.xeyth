@@ -293,13 +293,16 @@ For each open PR, **automate preparation** then verify readiness:
    # Or poll: gh pr view {number} --json statusCheckRollup
    ```
 
-4. **Resolve review threads** (auto-resolve Copilot reviewer suggestions):
+4. **Handle review threads** (delegate to Implementation Agent, do NOT auto-resolve):
    ```bash
-   # Query unresolved threads
-   gh api graphql -f query='query($owner:String!, $repo:String!, $pr:Int!) { repository(owner:$owner, name:$repo) { pullRequest(number:$pr) { reviewThreads(first:20) { nodes { id isResolved } } } } }' -f owner={owner} -f repo={repo} -F pr={number}
+   # Query unresolved threads with comments
+   gh api graphql -f query='query($owner:String!, $repo:String!, $pr:Int!) { repository(owner:$owner, name:$repo) { pullRequest(number:$pr) { reviewThreads(first:20) { nodes { id isResolved comments(first:5) { nodes { id body author { login } } } } } } } }' -f owner={owner} -f repo={repo} -F pr={number}
    
-   # Resolve each thread
-   gh api graphql -f query='mutation { resolveReviewThread(input: {threadId: "{threadId}"}) { thread { id isResolved } } }'
+   # Post @copilot comment delegating fixes (do NOT resolve threads)
+   gh pr comment {number} --body "@copilot Please address review comments: [details]"
+   
+   # Only resolve threads AFTER Implementation Agent confirms fixes
+   # NEVER merge with unresolved threads
    ```
 
 5. **Verify all checks pass** before marking ready
