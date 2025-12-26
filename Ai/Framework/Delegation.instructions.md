@@ -85,6 +85,13 @@ Implementation complete - all deliverables met, tests passing, ready for review.
 | Strategic Agent | Claude Sonnet 4.5 | Orchestrator, Planner, Reviewer |
 | Implementation Agent | GPT-5.1-Codex-Max | Implementer (Plan Review + Implementation) |
 
+## Pre-Delegation Checklist (Orchestrator Only)
+
+Before delegating a task, verify:
+- [ ] Task status is "Not Started" or "Planning Complete"
+- [ ] Task is not referenced in any open PR or PR draft
+- [ ] No blocking dependencies on other in-progress tasks
+
 ## Common Mistakes
 
 ❌ **Using model placeholder**:
