@@ -24,6 +24,7 @@ Covers Orchestrator, Planner, Reviewer roles.
    - Check if workflows need approval: `gh pr checks {number}`
    - Update branch if behind: `gh pr view {number} --json mergeStateStatus`
    - Wait for CI checks to complete: `gh pr checks {number} --watch` (or poll)
+   - **Resolve review threads**: Query unresolved threads and auto-resolve (see below)
    - Auto-mark ready when all checks pass: `gh pr ready {number}`
 3. For each PR, verify:
    - ✅ All deliverables checked in task file
@@ -41,6 +42,15 @@ Covers Orchestrator, Planner, Reviewer roles.
    - **If `gh` CLI NOT available**: Draft comment for manual posting
 2. Include delegation prompt in comment for Implementation Agent
 3. Move to next PR
+
+**Resolve Review Threads** (if any unresolved):
+```bash
+# Query unresolved threads
+gh api graphql -f query='query($owner:String!, $repo:String!, $pr:Int!) { repository(owner:$owner, name:$repo) { pullRequest(number:$pr) { reviewThreads(first:20) { nodes { id isResolved } } } } }' -f owner=Xeythhhh -f repo=.xeyth -F pr={number}
+
+# Resolve each thread (auto-resolve Copilot reviewer suggestions)
+gh api graphql -f query='mutation { resolveReviewThread(input: {threadId: "{threadId}"}) { thread { id isResolved } } }'
+```
 
 **If PR IS ready**:
 1. Auto-mark as ready: `gh pr ready {number}` (if still draft)

@@ -293,7 +293,16 @@ For each open PR, **automate preparation** then verify readiness:
    # Or poll: gh pr view {number} --json statusCheckRollup
    ```
 
-4. **Verify all checks pass** before marking ready
+4. **Resolve review threads** (auto-resolve Copilot reviewer suggestions):
+   ```bash
+   # Query unresolved threads
+   gh api graphql -f query='query($owner:String!, $repo:String!, $pr:Int!) { repository(owner:$owner, name:$repo) { pullRequest(number:$pr) { reviewThreads(first:20) { nodes { id isResolved } } } } }' -f owner={owner} -f repo={repo} -F pr={number}
+   
+   # Resolve each thread
+   gh api graphql -f query='mutation { resolveReviewThread(input: {threadId: "{threadId}"}) { thread { id isResolved } } }'
+   ```
+
+5. **Verify all checks pass** before marking ready
 
 ### Manual Verification:
 
