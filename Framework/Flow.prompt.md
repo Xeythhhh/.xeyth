@@ -160,6 +160,9 @@ When invoked in Copilot Cloud (via `file:Flow.prompt.md`), Strategic Agent (Orch
 ```
 
 **2. PR Comment Drafts** (for PRs needing refinement):
+
+**Critical**: Use bullet points for delegation block content in PR comments. Avoid nested code blocks (e.g., 4-backtick blocks inside 3-backtick blocks) - they break GitHub markdown rendering.
+
 ```markdown
 ## 📝 PR COMMENTS TO POST (Manual Action Required)
 
@@ -196,8 +199,6 @@ When invoked in Copilot Cloud (via `file:Flow.prompt.md`), Strategic Agent (Orch
 ---
 *Note: Post this comment manually until githubwrite supports PR comments*
 ```
-
-**Critical**: Use bullet points for delegation block content in PR comments. Avoid nested code blocks (e.g., 4-backtick blocks inside 3-backtick blocks) - they break GitHub markdown rendering.
 
 **3. New Task Delegations**:
 ```markdown

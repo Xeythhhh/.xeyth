@@ -108,7 +108,7 @@ When drafting PR comments with delegation prompts for Implementation Agent:
 **Markdown Backtick Rules**:
 - PR comments use **3 backticks** for outer code block
 - Delegation instructions use **bullet points** (no code block)
-- Implementation Agent will use **4 backticks** when adding to task file
+- Implementation Agent will use **4 backticks** when adding to task file (4 backticks allows nesting of 3-backtick code examples within the delegation block)
 - Always validate: outer backticks > inner backticks
 
 ### Backlog Management
