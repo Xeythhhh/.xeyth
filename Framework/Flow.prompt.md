@@ -64,8 +64,8 @@
 ### Model Mismatch Response Template
 
 ````markdown
-**Task**: [{TaskPath}]({TaskPath})  
-**Role**: {Role} (see [Framework/{Prompt}.prompt.md](../Framework/{Prompt}.prompt.md))  
+**Task**: [{TaskPath}]({TaskPath})
+**Role**: {Role} (see [Framework/{Prompt}.prompt.md](../Framework/{Prompt}.prompt.md))
 **Target Audience**: {Agent} ({Model})
 
 {Delegation context}
@@ -130,7 +130,7 @@ Example recommendation:
 
 ````markdown
 **Task**: [Proposed task location]
-**Role**: Planner (see [Strategic.prompt.md](Strategic.prompt.md))  
+**Role**: Planner (see [Strategic.prompt.md](Strategic.prompt.md))
 **Target Audience**: Strategic Agent (Claude Sonnet 4.5)
 
 **Recommendation**: {Brief description of proposed work}
@@ -149,17 +149,21 @@ When invoked in Copilot Cloud (via `file:Flow.prompt.md`), Strategic Agent (Orch
 ## 📊 OPEN PR REVIEW
 
 ### PR #{number} - {Title}
-**Status**: {Draft/Open/Ready}  
-**Task**: {TaskFile}  
+**Status**: {Draft/Open/Ready}
+**Task**: {TaskFile}
 **Analysis**: {Readiness check results}
 
-**Action**: 
+**Action**:
 - ✅ READY TO MERGE → Proceed with merge
 - ⚠️ NEEDS REFINEMENT → Comment drafted below
 - 🚧 IN PROGRESS → Monitor, no action needed
 ```
 
-**2. PR Comment Drafts** (for PRs needing refinement):
+**2. PR Comment Posting** (for PRs needing refinement):
+
+**If `gh` CLI is available**: Post comments automatically using `gh pr comment {number} --body "{comment}"`
+
+**If `gh` CLI is NOT available**: Draft comments for manual posting:
 ```markdown
 ## 📝 PR COMMENTS TO POST (Manual Action Required)
 
@@ -168,7 +172,7 @@ When invoked in Copilot Cloud (via `file:Flow.prompt.md`), Strategic Agent (Orch
 {Full comment text with @copilot tag and delegation prompt}
 
 ---
-*Note: Post this comment manually until githubwrite supports PR comments*
+*Note: Post this comment manually - gh CLI not available*
 ```
 
 **3. New Task Delegations**:
@@ -178,8 +182,8 @@ When invoked in Copilot Cloud (via `file:Flow.prompt.md`), Strategic Agent (Orch
 ### Delegation 1: {TaskName}
 
 ````markdown
-**Task**: [{TaskPath}]({TaskPath})  
-**Role**: {Role} (see [../Framework/{Prompt}.prompt.md](../Framework/{Prompt}.prompt.md))  
+**Task**: [{TaskPath}]({TaskPath})
+**Role**: {Role} (see [../Framework/{Prompt}.prompt.md](../Framework/{Prompt}.prompt.md))
 **Target Audience**: {Agent} ({Model})
 
 {Context}
@@ -216,8 +220,8 @@ When invoked in Copilot Cloud (via `file:Flow.prompt.md`), Strategic Agent (Orch
 1. **Never output just one delegation** - always check for more work
 2. **Always review PRs first** before delegating new tasks
 3. **Batch all delegation prompts** in one response
-4. **Include manual workarounds** for tool limitations (PR comments)
-5. **Provide clear action items** for user (what to post, what Copilot will handle)
+4. **Auto-post PR comments** when `gh` CLI available; draft for manual posting otherwise
+5. **Provide clear action items** for user (what was posted, what needs manual action)
 
 ## PR Review Checklist (Orchestrator)
 
@@ -241,7 +245,7 @@ For each open PR, verify:
 
 **Decision**:
 - If ALL ✅ → Merge PR (use githubwrite tool)
-- If ANY ❌ → Draft comment with @copilot tag listing issues + delegation prompt
+- If ANY ❌ → Post comment with @copilot tag listing issues + delegation prompt (use `gh pr comment` if available, otherwise draft for manual posting)
 - If 🚧 WIP → Monitor, no action
 
 ## Progress Report
@@ -311,8 +315,8 @@ For each open PR, verify:
 
 **To Implementation Agent** (use 4-backtick code block):
 ````markdown
-**Task**: [Planning/Task.task.template](../../Planning/Task.task.template)  
-**Role**: Implementer (see [Implementation.prompt.md](Implementation.prompt.md))  
+**Task**: [Planning/Task.task.template](../../Planning/Task.task.template)
+**Role**: Implementer (see [Implementation.prompt.md](Implementation.prompt.md))
 **Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
 ````
 
@@ -321,8 +325,8 @@ Add 1–2 sentences of context after the block.
 **To Strategic Agent (from Implementation Agent)** (use 4-backtick code block when you cannot continue working):
 
 ````markdown
-**Task**: [Contracts/ContractRenderer.task](../../Contracts/ContractRenderer.task)  
-**Role**: Reviewer (see [Strategic.prompt.md](Strategic.prompt.md))  
+**Task**: [Contracts/ContractRenderer.task](../../Contracts/ContractRenderer.task)
+**Role**: Reviewer (see [Strategic.prompt.md](Strategic.prompt.md))
 **Target Audience**: Strategic Agent (Claude Sonnet 4.5)
 
 Context: {What changed, verification evidence, blockers if any}

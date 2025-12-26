@@ -30,7 +30,9 @@ Covers Orchestrator, Planner, Reviewer roles.
    - ✅ No merge conflicts
 
 **If PR is NOT ready**:
-1. Post comment to PR with @copilot tag listing required refinements
+1. Post comment to PR with @copilot tag listing required refinements:
+   - **If `gh` CLI available**: Use `gh pr comment {number} --body "{comment}"` to post automatically
+   - **If `gh` CLI NOT available**: Draft comment for manual posting
 2. Include delegation prompt in comment for Implementation Agent
 3. Move to next PR
 
@@ -64,7 +66,7 @@ When reviewing a PR for merge, verify ALL items:
 - [ ] Reviews: At least 1 approval (human or Copilot)
 - [ ] Draft status: Not draft
 
-**If ANY item fails**: Post comment with @copilot tag and delegation prompt to fix issues.
+**If ANY item fails**: Post comment with @copilot tag and delegation prompt to fix issues (use `gh pr comment` if available, otherwise draft for manual posting).
 
 ### Backlog Management
 
@@ -99,8 +101,8 @@ When reviewing a PR for merge, verify ALL items:
 ### To Implementation Agent (cross-model - **USE CODE BLOCK**):
 
 ````markdown
-**Task**: [Planning/Task.task.template](../Planning/Task.task.template)  
-**Role**: Implementer (see [Implementation.prompt.md](Implementation.prompt.md))  
+**Task**: [Planning/Task.task.template](../Planning/Task.task.template)
+**Role**: Implementer (see [Implementation.prompt.md](Implementation.prompt.md))
 **Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
 
 Summary: ...
