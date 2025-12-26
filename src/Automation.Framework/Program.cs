@@ -238,16 +238,15 @@ internal static class Program
             return defaultPath;
         }
 
-        var firstWorkspace = Directory.EnumerateFiles(root.Value, "*.code-workspace", SearchOption.TopDirectoryOnly)
-            .Select(AbsolutePath.From)
+        var firstWorkspacePath = Directory.EnumerateFiles(root.Value, "*.code-workspace", SearchOption.TopDirectoryOnly)
             .FirstOrDefault();
 
-        if (firstWorkspace == default)
+        if (firstWorkspacePath is null)
         {
             throw new FileNotFoundException("No .code-workspace file found. Specify one with --workspace.");
         }
 
-        return firstWorkspace;
+        return AbsolutePath.From(firstWorkspacePath);
     }
 
     private static HashSet<string> BuildExclusions(IEnumerable<string> extras)

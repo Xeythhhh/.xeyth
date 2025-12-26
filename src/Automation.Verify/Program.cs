@@ -126,30 +126,30 @@ internal sealed class CommandDispatcher
         return 1;
     }
 
-        private int Unknown(string command)
-        {
-            _reporter.Warning($"Unknown command: {command}");
-            _reporter.Help();
-            return 1;
+    private int Unknown(string command)
+    {
+        _reporter.Warning($"Unknown command: {command}");
+        _reporter.Help();
+        return 1;
     }
 
     private static bool IsHelp(string value)
+    {
+        return value is "help" or "--help" or "-h";
+    }
+
+    private static AbsolutePath ResolveTargetDirectory(string? targetDirectory)
+    {
+        var workspaceRoot = AbsolutePath.From(Directory.GetCurrentDirectory());
+        var resolved = AbsolutePath.From(targetDirectory ?? workspaceRoot.Value);
+
+        if (!resolved.IsUnder(workspaceRoot))
         {
-            return value is "help" or "--help" or "-h";
+            throw new InvalidOperationException($"Target directory must be within workspace root '{workspaceRoot}'.");
         }
 
-        private static AbsolutePath ResolveTargetDirectory(string? targetDirectory)
-        {
-            var workspaceRoot = AbsolutePath.From(Directory.GetCurrentDirectory());
-            var resolved = AbsolutePath.From(targetDirectory ?? workspaceRoot.Value);
-
-            if (!resolved.IsUnder(workspaceRoot))
-            {
-                throw new InvalidOperationException($"Target directory must be within workspace root '{workspaceRoot}'.");
-            }
-
-            return resolved;
-        }
+        return resolved;
+    }
     }
 
 internal sealed record SetupOptions(DiffTool? Tool, string? TargetDirectory)
