@@ -1,0 +1,1 @@
+﻿Task.template (.task): 2 sections, patterns: **/*.task
