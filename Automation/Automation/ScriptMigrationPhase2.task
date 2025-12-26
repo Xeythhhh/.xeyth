@@ -78,7 +78,7 @@ exec xeyth-git prepare-commit-msg "$@"
 
 ## Progress Log
 
-- 2024-12-24: Task created after Phase 1 approval - ready for implementation
+- 2025-12-24: Task created after Phase 1 approval - ready for implementation
 - 2025-12-26: Implemented xeyth-git tool with C# hook commands and wrapper scripts
 - 2025-12-26: Relocated xeyth-git tool and tests to Git slice per repo layout guidance
 - 2025-12-26: Finalized packaging (PackageId xeyth-git), validated hooks and tests, marked deliverables complete
@@ -86,8 +86,8 @@ exec xeyth-git prepare-commit-msg "$@"
 ## Reviewer Delegation
 
 ````markdown
-**Task**: [Planning/Task.task.template](../../Planning/Task.task.template)  
-**Role**: Reviewer (see [Strategic.prompt.md](../Framework/Strategic.prompt.md))  
+**Task**: [Automation/Automation/ScriptMigrationPhase2.task](ScriptMigrationPhase2.task)  
+**Role**: Reviewer (see [Strategic.prompt.md](../../Framework/Strategic.prompt.md))  
 **Target Audience**: Strategic Agent (Claude Sonnet 4.5)
 
 Implementation complete; verification attached in Automation/Automation/ScriptMigrationPhase2.task.
