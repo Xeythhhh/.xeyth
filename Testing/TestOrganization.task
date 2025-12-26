@@ -1,0 +1,76 @@
+# Test Organization & Architecture
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Testing/TestOrganization.task](Testing/TestOrganization.task)
+**Role**: Planner (see [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md))
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Plan test organization strategy - currently tests scattered across slices, need consistent structure and naming conventions.
+````
+
+---
+
+## Role: Planner
+
+**Task File**: Testing/TestOrganization.task
+**Objective**: Define test organization strategy for consistent structure across all slices
+
+**Role Reference**: See [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md) for workflow guidance.
+
+### Context
+
+Tests are currently organized per-slice (Automation/tests, Contracts/tests, Git/tests). Need:
+- Consistent naming conventions (unit, integration, E2E)
+- Shared test infrastructure (fixtures, builders, utilities)
+- Architecture validation tests (NetArchTest)
+- Test categorization and filtering strategy
+
+### Your Responsibilities
+
+1. Research test organization patterns (.NET, xUnit best practices)
+2. Design directory structure and naming conventions
+3. Plan shared test infrastructure location
+4. Define test categories and tagging strategy
+
+### Deliverables
+
+- [ ] **D1**: Research report on test organization patterns
+- [ ] **D2**: Directory structure conventions documented
+- [ ] **D3**: Naming conventions for test projects/classes
+- [ ] **D4**: Shared infrastructure design (test utilities, fixtures)
+- [ ] **D5**: Test category taxonomy (unit, integration, architecture, E2E)
+- [ ] **D6**: Implementation plan for migration
+
+### Verification Steps
+
+- [ ] Plan complete and approved by Planner
+- [ ] Ready for Implementation Agent delegation
+
+---
+
+## Task Details
+
+---
+
+Status: Not Started
+Owner: Strategic Agent (Planner)
+Priority: Medium
+Effort: Medium
+Priority Score: 7 (Impact:6 + Urgency:2 + Dependency:3 - Complexity:2 - Improves maintainability)
+
+## Objective
+
+Establish consistent test organization across all slices for better maintainability and discoverability.
+
+## Task Context
+
+- Current state: Tests organized per-slice, inconsistent structure
+- Desired state: Unified conventions, shared infrastructure, clear categorization
+
+## Progress Log
+
+- 2025-12-26: Task created by Orchestrator for backlog maintenance

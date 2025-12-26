@@ -1,0 +1,76 @@
+# Configuration Validation Tool
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Configuration/ValidationTool.task](Configuration/ValidationTool.task)
+**Role**: Planner (see [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md))
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Plan CLI tool for Configuration.xeyth validation - schema validation, value range checks, migration assistance.
+````
+
+---
+
+## Role: Planner
+
+**Task File**: Configuration/ValidationTool.task
+**Objective**: Create CLI tool to validate Configuration.xeyth files
+
+**Role Reference**: See [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md) for workflow guidance.
+
+### Context
+
+Configuration.xeyth files need validation tool for:
+- Schema validation (required fields, types)
+- Value range validation (backlog thresholds, formats)
+- Migration assistance (template → user config)
+- Diagnostic reporting (missing/invalid values)
+
+### Your Responsibilities
+
+1. Research configuration validation patterns
+2. Design validation rules and error messages
+3. Plan migration assistance commands
+4. Define integration with xeyth-* tool suite
+
+### Deliverables
+
+- [ ] **D1**: Research report on config validation tools
+- [ ] **D2**: Validation rule design
+- [ ] **D3**: CLI command design (validate, init, migrate)
+- [ ] **D4**: Error message templates
+- [ ] **D5**: Migration assistance strategy
+- [ ] **D6**: Implementation plan
+
+### Verification Steps
+
+- [ ] Plan complete and approved by Planner
+- [ ] Ready for Implementation Agent delegation
+
+---
+
+## Task Details
+
+---
+
+Status: Not Started
+Owner: Strategic Agent (Planner)
+Priority: Medium
+Effort: Small
+Priority Score: 6 (Impact:5 + Urgency:1 + Dependency:2 - Complexity:1 - Improves config reliability)
+
+## Objective
+
+Validate Configuration.xeyth files to prevent runtime errors and assist migrations.
+
+## Task Context
+
+- Current state: No validation, errors discovered at runtime
+- Desired state: CLI tool validates before use, suggests fixes
+
+## Progress Log
+
+- 2025-12-26: Task created by Orchestrator for backlog maintenance
