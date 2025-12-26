@@ -222,6 +222,37 @@ Examples:
 
 ---
 
+### `.workflow` - Workflow Definition Files
+
+**Purpose**: Document multi-stage workflows, processes, and procedures that guide agent and developer actions across different phases of work.
+
+**Location**: `Planning/` directory or co-located with related work in appropriate slices
+
+**Schema**: See [Workflow.workflow.template](Workflow.workflow.template)
+
+**Key Sections**:
+
+- Workflow Overview
+- Stage Definitions (triggers, processes, outputs)
+- Quality Standards
+- Integration Points
+- Metrics & Monitoring
+- Best Practices
+
+**Naming Convention**: `{WorkflowName}.workflow` (e.g., `TaskRefinement.workflow`, `ReleaseProcess.workflow`, `CodeReview.workflow`)
+
+**Characteristics**:
+
+- **Multi-stage**: Defines multiple connected stages or phases
+- **Prescriptive**: Provides step-by-step guidance for each stage
+- **Actionable**: Includes triggers, processes, and expected outputs
+- **Measurable**: Specifies metrics and success criteria
+- **Discoverable**: Referenced in task files, conventions, and documentation
+
+**Example**: `Planning/TaskRefinement.workflow` - 6-stage workflow from task creation through implementation to archival
+
+---
+
 ### `.xeyth` - Framework Configuration Files
 
 **Purpose**: Provide optional configuration overrides for the AI framework (e.g., backlog thresholds, Verify diff tool, archiving defaults, model labels).
@@ -250,6 +281,7 @@ Context files are configured as markdown in the workspace settings (`.code-works
     "*.template": "markdown",
     "*.convention": "markdown",
     "*.inventory": "markdown",
+    "*.workflow": "markdown",
     "*.metadata": "yaml",
     "*.xeyth": "yaml"
   }

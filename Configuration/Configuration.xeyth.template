@@ -3,9 +3,12 @@
 
 orchestrator:
   backlog:
-    minimum: {5}          # Create new tasks when backlog drops below this
-    maximum: {20}         # Pause task creation when backlog exceeds this
-    createThreshold: {7}  # Target backlog size to maintain
+    minimum: {15}         # Create new tasks when backlog drops below this
+    maximum: {25}         # Pause task creation when backlog exceeds this
+    target: {20}          # Target backlog size to maintain
+  pullRequests:
+    minimum: {5}          # Maintain at least this many open PRs (or draft PRs)
+    createThreshold: {5}  # Prioritize Implementation Agent delegation when PRs fall below this
 
 testing:
   verify:

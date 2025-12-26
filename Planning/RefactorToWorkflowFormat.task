@@ -1,0 +1,166 @@
+# Refactor Documentation to Workflow Format
+
+**Status**: Not Started  
+**Created**: 2025-12-26  
+**Owner**: Strategic Agent (Planner)  
+**Priority**: Medium  
+**Effort**: Small  
+**Priority Score**: 6 (Impact:4 + Urgency:1 + Dependency:3 - Complexity:2)
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Planning/RefactorToWorkflowFormat.task](Planning/RefactorToWorkflowFormat.task)  
+**Role**: Planner (see [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md))  
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Plan refactoring of existing markdown documentation files into the new .workflow context file type where appropriate.
+````
+
+---
+
+## Context
+
+**Problem**: The `.workflow` context file type was introduced to formalize multi-stage process documentation. Several existing markdown files may be better represented as `.workflow` files.
+
+**Current State**:
+- `.workflow` context file type defined in `Planning/ContextFiles.md`
+- `WorkflowFormat.convention` created with rules and examples
+- `Workflow.workflow.template` created for new workflows
+- `TaskRefinement.workflow` created as reference example
+- Other markdown files may document workflows but use `.md` extension
+
+**Desired State**:
+- All multi-stage workflow documentation uses `.workflow` extension
+- Markdown files (`.md`) reserved for:
+  - General documentation
+  - Guides and tutorials
+  - Reference materials
+  - Architecture descriptions
+- Clear separation between workflows (`.workflow`) and documentation (`.md`)
+
+## Objective
+
+Identify markdown files that document workflows and refactor them to use the `.workflow` extension and format, establishing clear usage patterns for `.workflow` vs `.md` files.
+
+## Deliverables
+
+1. **D1**: Audit existing markdown files
+   - Acceptance: List all `.md` files in framework
+   - Acceptance: Identify which files document multi-stage workflows
+   - Acceptance: Classify files as workflow, convention, or documentation
+
+2. **D2**: Refactoring plan
+   - Acceptance: List files to convert to `.workflow`
+   - Acceptance: List files to convert to `.convention`
+   - Acceptance: List files to keep as `.md` with rationale
+   - Acceptance: Define conversion criteria and checklist
+
+3. **D3**: Execute refactoring
+   - Acceptance: Convert identified files to `.workflow` format
+   - Acceptance: Ensure workflow files follow template structure
+   - Acceptance: Update references in other files
+   - Acceptance: Update inventories and indexes
+
+4. **D4**: Documentation
+   - Acceptance: Update ContextFiles.md with clear `.md` vs `.workflow` guidance
+   - Acceptance: Document when to use each file type
+   - Acceptance: Provide examples of proper categorization
+
+## Success Criteria
+
+- [ ] All files audited and classified
+- [ ] Workflow files follow `.workflow` convention
+- [ ] Convention files follow `.convention` format
+- [ ] Documentation files remain as `.md`
+- [ ] Clear criteria for future file type selection
+- [ ] All references updated
+- [ ] `dotnet build` succeeds (0 warnings)
+- [ ] No broken links
+
+## Architecture Decisions
+
+### AD-1: Classification Criteria
+
+**Decision**: Files document workflows if they meet these criteria  
+**Criteria**:
+- Defines 2+ sequential stages
+- Includes triggers, processes, outputs per stage
+- Documents stage transitions
+- Specifies quality gates or metrics
+- Guides procedural execution
+
+**Alternatives**: Keep all as `.md` - Rejected (loses formalization benefits)
+
+### AD-2: Conversion Approach
+
+**Decision**: Manual refactoring with validation  
+**Rationale**:
+- Small number of files (< 20 candidates)
+- Requires judgment and content understanding
+- Template provides clear structure
+- Quality over speed
+
+### AD-3: Reference Updates
+
+**Decision**: Update all internal references after conversion  
+**Process**:
+- Search for old filename references
+- Update links to new `.workflow` extension
+- Verify all links resolve correctly
+- Test markdown preview
+
+## Implementation Guidance
+
+### Audit Process
+
+1. List all `.md` files: `find . -name "*.md" -not -path "*/.git/*"`
+2. For each file, assess:
+   - Does it define multiple stages?
+   - Does it prescribe a process?
+   - Does it have triggers and outputs?
+   - Is it procedural or reference?
+
+### Conversion Checklist
+
+For each file converted to `.workflow`:
+- [ ] Copy content to new `.workflow` file
+- [ ] Restructure using template sections
+- [ ] Add missing workflow elements (triggers, outputs, quality)
+- [ ] Remove old `.md` file
+- [ ] Update references
+- [ ] Verify builds and links
+
+### Example Candidates
+
+Likely workflows:
+- Any file describing multi-step processes
+- Files with "Workflow" in the name
+- Files documenting procedures
+
+Likely conventions:
+- Files with "Format" in the name
+- Files defining rules or standards
+- Files specifying structure
+
+Likely documentation (keep as .md):
+- README files
+- Architecture descriptions
+- General guides
+- Reference materials
+
+## Verification
+
+- Review all modified files
+- Check all internal links work
+- Verify workspace file associations include `.workflow`
+- Confirm builds succeed
+- Validate workflow files against convention
+
+---
+
+## Progress Log
+
+- 2025-12-26: Task created after introducing `.workflow` context file type

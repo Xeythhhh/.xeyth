@@ -13,13 +13,14 @@
       "*.convention": "markdown",
       "*.inventory": "markdown",
       "*.proposal": "markdown",
+      "*.workflow": "markdown",
       "*.metadata": "yaml",
       "*.xeyth": "yaml",
       ".gitmessage": "git-commit"
     },
     "chat.instructionsFiles.locations": [
       ".github",
-      "Ai/Framework"
+      "Framework"
     ]
   }
 }

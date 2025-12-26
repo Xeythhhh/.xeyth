@@ -27,7 +27,7 @@ Design automation to detect new .instructions.md files and auto-update chat.inst
 
 **Current State**:
 - Setting exists in `.xeyth.code-workspace`  
-- Currently configured with: `.github/instructions`, `Ai`, `Ai/Framework`
+- Currently configured with: `.github/instructions`, `Ai`, `Framework`
 - Must be manually added to consuming workspace files
 
 **Desired State**:
@@ -158,7 +158,7 @@ var locations = instructionFiles
 ## Related Files
 
 - `.xeyth.code-workspace` - Contains current setting
-- `Ai/Framework/Delegation.instructions.md` - Example instructions file
+- `Framework/Delegation.instructions.md` - Example instructions file
 - `Ai/Maintenance/InitializeAiFramework.prompt.md` - Documentation to update
 - `.github/copilot-instructions.md` (in consuming repos) - Integration point
 

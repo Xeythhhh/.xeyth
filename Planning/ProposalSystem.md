@@ -100,7 +100,7 @@ Examples:
 `{Slice}/{SubSlice}/Proposed/{ShortName}.proposal`
 
 Examples:
-- `Ai/Framework/Proposed/DelegationTemplates.proposal`
+- `Framework/Proposed/DelegationTemplates.proposal`
 
 ## Naming Convention
 
