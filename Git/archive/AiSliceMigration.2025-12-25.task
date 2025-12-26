@@ -24,7 +24,7 @@ Several slices under Ai/ are not AI-specific and should be top-level slices:
 - Ai/Configuration.xeyth → Configuration/Configuration.xeyth (framework configuration)
 
 Only true AI Framework slices should remain under Ai/:
-- Ai/Framework/ (core prompts, conventions)
+- Framework/ (core prompts, conventions)
 - Ai/Maintenance/ (framework maintenance)
 - Ai.plan (overall AI strategy)
 - Ai/README.md (AI Framework overview)
@@ -183,7 +183,7 @@ Move non-AI slices from Ai/ to top-level directory structure, leaving only true 
 ## Architecture Decisions
 
 - AD-1: Top-level slices for non-AI content — Rationale: Clear separation, better navigation, consistent with Git/ migration
-- AD-2: Keep Ai/Framework and Ai/Maintenance — Rationale: These are AI Framework-specific (prompts, conventions, framework tasks)
+- AD-2: Keep Framework and Ai/Maintenance — Rationale: These are AI Framework-specific (prompts, conventions, framework tasks)
 - AD-3: Use git mv for history preservation — Rationale: Maintain file history, enable git log tracking across rename
 - AD-4: Update references incrementally — Rationale: Easier to track, test after each migration
 - AD-5: Ai.plan stays in Ai/ — Rationale: Strategic plan for AI Framework itself

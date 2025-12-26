@@ -142,11 +142,11 @@ src/
 [
   {
     "name": "MarkdownLintRemediation",
-    "path": "Ai/Framework/MarkdownLintRemediation.task",
+    "path": "Framework/MarkdownLintRemediation.task",
     "status": "Not Started",
     "owner": "Strategic Agent (Planner)",
     "created": "2024-12-24",
-    "slice": "Ai/Framework"
+    "slice": "Framework"
   }
 ]
 ```
@@ -264,7 +264,7 @@ xeyth-planning list-reports --task MarkdownLintRemediation
 **Filtering Logic**:
 - Implement in-memory LINQ filtering after discovery
 - Case-insensitive matching for text filters
-- Support partial matches for slice paths (e.g., "Frame" matches "Ai/Framework")
+- Support partial matches for slice paths (e.g., "Frame" matches "Framework")
 
 ### Phase 4: Metadata & Relationships (Implementation Agent)
 
@@ -383,7 +383,7 @@ Architecture decisions finalized to extend existing `xeyth-planning` CLI tool wi
 
 ````markdown
 **Task**: [Automation/Automation/ContextFileTooling.task](Automation/Automation/ContextFileTooling.task)  
-**Role**: Implementer (see [Ai/Framework/Implementation.prompt.md](../../Ai/Framework/Implementation.prompt.md))  
+**Role**: Implementer (see [Framework/Implementation.prompt.md](../../Framework/Implementation.prompt.md))  
 **Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
 
 Implement context file management commands in existing `xeyth-planning` CLI tool. Extend `Automation.Planning` with Models, Services, and Commands for .task, .plan, .report, and .convention files following established patterns.

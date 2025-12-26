@@ -1,6 +1,6 @@
 # Copilot Instructions
 
-This project uses the AI Framework from the `.xeyth` submodule. See [.xeyth/Ai/Framework/copilot-instructions.md](.xeyth/Ai/Framework/copilot-instructions.md) for roles, workflows, and conventions.
+This project uses the AI Framework from the `.xeyth` submodule. See [.xeyth/Framework/copilot-instructions.md](.xeyth/Framework/copilot-instructions.md) for roles, workflows, and conventions.
 
 ## Model Requirements
 
@@ -14,7 +14,7 @@ This project uses the AI Framework from the `.xeyth` submodule. See [.xeyth/Ai/F
 
 This project uses the following instruction files for agent workflows:
 
-- **Delegation Format**: [Ai/Framework/Delegation.instructions.md](../Ai/Framework/Delegation.instructions.md)
+- **Delegation Format**: [Framework/Delegation.instructions.md](../Framework/Delegation.instructions.md)
 
 See workspace settings (`chat.instructionsFiles.locations`) for auto-loading configuration.
 
@@ -61,7 +61,7 @@ Completed work moves to slice-level `archive/` directories with optional date su
 ### Vertical Slices
 
 Framework is organized in vertical slices:
-- `Ai/Framework/` - Core prompts and conventions
+- `Framework/` - Core prompts and conventions
 - `Ai/Planning/` - Templates and planning tools
 - `Ai/Maintenance/` - Framework maintenance tasks
 - `Git/` - Git conventions, workflows, and collaboration

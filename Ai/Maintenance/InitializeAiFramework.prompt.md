@@ -22,7 +22,7 @@ Create `.github/copilot-instructions.md` in your **host repository root** with t
 ```markdown
 # Copilot Instructions
 
-This project uses the AI Framework from the `.xeyth` submodule. See [.xeyth/Ai/Framework/copilot-instructions.md](.xeyth/Ai/Framework/copilot-instructions.md) for roles, workflows, and conventions.
+This project uses the AI Framework from the `.xeyth` submodule. See [.xeyth/Framework/copilot-instructions.md](.xeyth/Framework/copilot-instructions.md) for roles, workflows, and conventions.
 
 ---
 
@@ -119,7 +119,7 @@ Add to your workspace `.code-workspace` file or user `settings.json`:
     "chat.instructionsFiles.locations": [
       ".github/instructions",
       "Ai",
-      "Ai/Framework"
+      "Framework"
     ]
   }
 }
@@ -143,7 +143,7 @@ Check that the setup is complete:
 - [ ] Added project-specific rules (quality gates, tech stack, coding standards)
 - [ ] File associations configured in workspace or user settings
 - [ ] Can preview context files (`.task`, `.plan`, etc.) as markdown
-- [ ] Reference link to `.xeyth/Ai/Framework/copilot-instructions.md` resolves correctly
+- [ ] Reference link to `.xeyth/Framework/copilot-instructions.md` resolves correctly
 - [ ] `chat.instructionsFiles.locations` configured in workspace settings
 - [ ] `chat.instructionsFiles.locations` validated (`dotnet run --project src/Automation.Framework -- validate-chat-locations`)
 - [ ] All `.instructions.md` files appear in GitHub Copilot settings (Settings → GitHub Copilot → Chat: Instructions Files Locations)
@@ -165,7 +165,7 @@ If Copilot can access the roles and framework files, integration succeeded.
 The Cleanup Agent can help normalize files and remove obsolete content. Delegate to it:
 
 ```
-You are the Cleanup Agent (see .xeyth/Ai/Framework/Cleanup.prompt.md).
+You are the Cleanup Agent (see .xeyth/Framework/Cleanup.prompt.md).
 Review the workspace for:
 - Stray or duplicate files
 - Inconsistent naming conventions
@@ -197,7 +197,7 @@ This project uses the [.xeyth](https://github.com/your-org/xeyth) AI Framework f
 The AI Framework includes the following instruction files that should auto-load via `chat.instructionsFiles.locations`:
 
 ### Core Framework Instructions
-- [Ai/Framework/Delegation.instructions.md](.xeyth/Ai/Framework/Delegation.instructions.md) - Delegation format rules for cross-model and role-switching workflows
+- [Framework/Delegation.instructions.md](.xeyth/Framework/Delegation.instructions.md) - Delegation format rules for cross-model and role-switching workflows
 
 **Soft References in Copilot Instructions**:
 The `.github/copilot-instructions.md` file should reference these instruction files to ensure agents know where to find them if auto-loading fails:
@@ -207,7 +207,7 @@ The `.github/copilot-instructions.md` file should reference these instruction fi
 
 This project uses the following instruction files for agent workflows:
 
-- **Delegation Format**: [Ai/Framework/Delegation.instructions.md](.xeyth/Ai/Framework/Delegation.instructions.md)
+- **Delegation Format**: [Framework/Delegation.instructions.md](.xeyth/Framework/Delegation.instructions.md)
 
 See workspace settings (`chat.instructionsFiles.locations`) for auto-loading configuration.
 ```
@@ -225,7 +225,7 @@ When delegating to cloud agents, ensure they:
 ## Next Steps
 
 1. **Create your first task**: Use [.xeyth/Ai/Planning/Task.task.template](.xeyth/Ai/Planning/Task.task.template)
-2. **Delegate work**: See examples in [.xeyth/Ai/Framework/Strategic.prompt.md](.xeyth/Ai/Framework/Strategic.prompt.md)
+2. **Delegate work**: See examples in [.xeyth/Framework/Strategic.prompt.md](.xeyth/Framework/Strategic.prompt.md)
 3. **Iterate**: Planner and Implementer collaborate until tasks are complete
 4. **Maintain**: Pull submodule updates periodically; re-run this prompt if framework structure changes
 
@@ -233,11 +233,11 @@ When delegating to cloud agents, ensure they:
 
 ## Troubleshooting
 
-**Copilot doesn't see framework files**: Ensure `.github/copilot-instructions.md` is in the host repository root with the reference link to `.xeyth/Ai/Framework/copilot-instructions.md`.
+**Copilot doesn't see framework files**: Ensure `.github/copilot-instructions.md` is in the host repository root with the reference link to `.xeyth/Framework/copilot-instructions.md`.
 
 **Context files not rendering as markdown**: Check file associations in workspace settings.
 
-**Integration link broken**: Verify submodule is at `.xeyth/` and contains `Ai/Framework/copilot-instructions.md`.
+**Integration link broken**: Verify submodule is at `.xeyth/` and contains `Framework/copilot-instructions.md`.
 
 **Roles not accessible**: Check that the reference link in your `.github/copilot-instructions.md` uses the correct relative path.
 

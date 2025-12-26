@@ -6,7 +6,7 @@
 
 ````markdown
 **Task**: [Automation/Automation/ProgressHelperOptimizations.task](Automation/Automation/ProgressHelperOptimizations.task)  
-**Role**: Reviewer (see [Ai/Framework/Strategic.prompt.md](../../Ai/Framework/Strategic.prompt.md))  
+**Role**: Reviewer (see [Framework/Strategic.prompt.md](../../Framework/Strategic.prompt.md))  
 **Target Audience**: Strategic Agent (Claude Sonnet 4.5)
 
 Review and prioritize potential optimizations for the ProgressHelper component based on code review feedback and additional analysis.

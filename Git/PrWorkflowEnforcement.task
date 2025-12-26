@@ -6,7 +6,7 @@
 
 ````markdown
 **Task**: [Git/PrWorkflowEnforcement.task](Git/PrWorkflowEnforcement.task)  
-**Role**: Implementer (see [Ai/Framework/Implementation.prompt.md](../Ai/Framework/Implementation.prompt.md))  
+**Role**: Implementer (see [Framework/Implementation.prompt.md](../Framework/Implementation.prompt.md))  
 **Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
 
 Document and enforce PR-based workflow for all task progress. Update agent instructions to create feature branches and PRs. Create PR template that references tasks.
@@ -19,7 +19,7 @@ Document and enforce PR-based workflow for all task progress. Update agent instr
 **Task File**: Git/PrWorkflowEnforcement.task  
 **Objective**: Enforce PR workflow for task progress; document branch naming, PR creation, and task-to-PR linking
 
-**Role Reference**: See [Ai/Framework/Implementation.prompt.md](../Ai/Framework/Implementation.prompt.md) for workflow guidance.
+**Role Reference**: See [Framework/Implementation.prompt.md](../Framework/Implementation.prompt.md) for workflow guidance.
 
 ### Context
 
