@@ -170,13 +170,47 @@ When invoked in Copilot Cloud (via `file:Flow.prompt.md`), Strategic Agent (Orch
 - ✅ READY TO MERGE → Proceed with merge
 - ⏳ CHECKS RUNNING → Wait for completion, then auto-mark ready
 - ⚠️ NEEDS REFINEMENT → Comment posted below
+- 🚧 IN PROGRESS → Monitor, no action needed
+```
+
+**2. PR Comment Drafts** (for PRs needing refinement):
+
 **If `gh` CLI is NOT available**: Draft comments for manual posting:
+
+**Critical**: Use bullet points for delegation block content in PR comments. Avoid nested code blocks (e.g., 4-backtick blocks inside 3-backtick blocks) - they break GitHub markdown rendering.
+
 ```markdown
 ## 📝 PR COMMENTS TO POST (Manual Action Required)
 
 ### Comment for PR #{number}
 
-{Full comment text with @copilot tag and delegation prompt}
+@copilot
+
+**Task**: <a>{TaskPath}</a>  
+**Role**: Implementer (see <a>Framework/Implementation.prompt.md</a>)  
+**Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
+
+**Refinements needed before {merge|marking ready for review}**:
+
+1. **Task file** - Mark deliverables complete:
+   - [ ] Update D1-DN to `- [x]` in task file
+
+2. **Progress Log** - Add completion entry:
+   - [ ] Add date and summary
+
+3. **Progress Report** - Create report file:
+   - [ ] Create `{TaskName}.task.{Phase}.report` using template
+   - [ ] Link report in Progress Log
+
+4. **Reviewer Delegation** - Add delegation block to task file (use 4 backticks):
+   - Task: <a>{TaskPath}</a>
+   - Role: Reviewer (see <a>Framework/Strategic.prompt.md</a>)
+   - Target Audience: Strategic Agent (Claude Sonnet 4.5)
+   - Context: {Summary of completed work}
+
+5. **{Additional items as needed}**
+
+**Current PR Status**: Build {✅|❌} | Tests {✅|❌} | {Draft 🚧|Behind master|Ready}
 
 ---
 *Note: Post this comment manually - gh CLI not available*

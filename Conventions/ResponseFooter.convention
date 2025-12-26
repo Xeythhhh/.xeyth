@@ -168,3 +168,23 @@ Role: Implementer, Task: AiSliceMigration.task
 - [Framework/copilot-instructions.md](../Framework/copilot-instructions.md) - Standard footer template
 - [Framework/Implementation.prompt.md](../Framework/Implementation.prompt.md) - Implementation Agent workflow
 - [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md) - Strategic Agent workflow
+
+## Markdown Code Block Nesting
+
+**Rule**: When producing markdown containing code blocks, always validate backtick nesting depth.
+
+**Validation**:
+- Outer block backtick count MUST be > inner block backtick count
+- GitHub markdown maximum nesting: 4 backticks
+- Use alternative formatting (bullet points, plain text) when nesting would break
+
+**Common Scenarios**:
+
+| Scenario | Outer | Inner | Valid? |
+|----------|-------|-------|--------|
+| PR comment with delegation | 3 backticks | Bullet points | ✅ |
+| Task file delegation block | N/A (file) | 4 backticks | ✅ |
+| Nested code examples | 4 backticks | 3 backticks | ✅ |
+| Broken nesting | 3 backticks | 4 backticks | ❌ |
+
+**Best Practice**: When embedding delegation prompts in PR comments, use bullet-point format instead of nested code blocks.
