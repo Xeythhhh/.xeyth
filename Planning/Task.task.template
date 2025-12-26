@@ -6,6 +6,16 @@
 
 ---
 
+Use 4-backtick code block for cross-model delegation (see [Framework/Delegation.instructions.md](../Ai/Framework/Delegation.instructions.md)). Replace agent/model placeholders with exact model names (Strategic roles: Claude Sonnet 4.5; Implementation: GPT-5.1-Codex-Max).
+
+````markdown
+**Task**: [{Slice}/{TaskName}.task]({Slice}/{TaskName}.task)  
+**Role**: {Role} (see [Framework/{Prompt}.prompt.md](../Ai/Framework/{Prompt}.prompt.md))  
+**Target Audience**: {Agent} ({AgentModel})
+
+{1-2 sentence context}
+````
+
 ## Role: {Orchestrator|Planner|Reviewer|Implementer|Scaffolder|Cleanup}
 
 **Task File**: {Slice}/{TaskName}.task  
