@@ -66,6 +66,51 @@ When reviewing a PR for merge, verify ALL items:
 
 **If ANY item fails**: Post comment with @copilot tag and delegation prompt to fix issues.
 
+### PR Comment Formatting
+
+When drafting PR comments with delegation prompts for Implementation Agent:
+
+**Critical**: Avoid nested code blocks - they break GitHub markdown rendering.
+
+**Correct Format** (use bullet points for delegation content):
+```markdown
+@copilot
+
+**Task**: <a>Slice/TaskName.task</a>  
+**Role**: Implementer (see <a>Framework/Implementation.prompt.md</a>)  
+**Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
+
+**Refinements needed**:
+
+1. **Task file** - Mark deliverables complete
+2. **Progress Log** - Add completion entry
+3. **Progress Report** - Create report file using template
+4. **Reviewer Delegation** - Add delegation block to task file (use 4 backticks):
+   - Task: <a>Slice/TaskName.task</a>
+   - Role: Reviewer (see <a>Framework/Strategic.prompt.md</a>)
+   - Target Audience: Strategic Agent (Claude Sonnet 4.5)
+   - Context: {Brief summary of work completed}
+5. **Draft Status** - Mark PR ready for review when complete
+
+**Current PR Status**: Build ✅ | Tests ✅ | Draft 🚧
+```
+
+**Incorrect Format** ❌ (nested code blocks):
+```markdown
+4. **Reviewer Delegation**:
+   ```markdown
+   ````markdown
+   **Task**: ...
+   ````
+   ```
+```
+
+**Markdown Backtick Rules**:
+- PR comments use **3 backticks** for outer code block
+- Delegation instructions use **bullet points** (no code block)
+- Implementation Agent will use **4 backticks** when adding to task file
+- Always validate: outer backticks > inner backticks
+
 ### Backlog Management
 
 - **Target**: Maintain 20 ready tasks; create when backlog < 15; focus execution when backlog > 25
