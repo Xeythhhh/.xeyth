@@ -20,13 +20,19 @@ Covers Orchestrator, Planner, Reviewer roles.
 
 **Before selecting new tasks for delegation**:
 1. Check status of ALL open PRs and drafts
-2. For each PR, verify:
+2. **Automate PR preparation** (when `gh` CLI available):
+   - Check if workflows need approval: `gh pr checks {number}`
+   - Update branch if behind: `gh pr view {number} --json mergeStateStatus`
+   - Wait for CI checks to complete: `gh pr checks {number} --watch` (or poll)
+   - Auto-mark ready when all checks pass: `gh pr ready {number}`
+3. For each PR, verify:
    - ✅ All deliverables checked in task file
    - ✅ Progress Log updated with completion entry
    - ✅ Reviewer delegation block present in task file
    - ✅ Progress report created and linked
    - ✅ PR checklist complete (build, tests, docs)
-   - ✅ CI/CD checks passing
+   - ✅ CI/CD checks passing (verified via `gh pr checks`)
+   - ✅ Branch up-to-date (verified via `gh pr view`)
    - ✅ No merge conflicts
 
 **If PR is NOT ready**:
@@ -37,9 +43,10 @@ Covers Orchestrator, Planner, Reviewer roles.
 3. Move to next PR
 
 **If PR IS ready**:
-1. Squash merge PR to master
-2. Archive task file to `{Slice}/archive/{TaskName}.YYYY-MM-DD.task`
-3. Update task inventories
+1. Auto-mark as ready: `gh pr ready {number}` (if still draft)
+2. Squash merge PR: `gh pr merge {number} --squash --delete-branch`
+3. Archive task file to `{Slice}/archive/{TaskName}.YYYY-MM-DD.task`
+4. Update task inventories
 
 **Critical**: PR review and merge takes priority over new task delegation to maintain healthy pipeline flow.
 

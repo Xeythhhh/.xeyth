@@ -151,18 +151,19 @@ When invoked in Copilot Cloud (via `file:Flow.prompt.md`), Strategic Agent (Orch
 ### PR #{number} - {Title}
 **Status**: {Draft/Open/Ready}
 **Task**: {TaskFile}
+
+**Automated Preparation** (via `gh` CLI):
+- {✅|⏳|❌} Workflows approved/running
+- {✅|⏳|❌} Branch updated (up-to-date with master)
+- {✅|⏳|❌} CI checks passing (build, tests)
+- {✅|⏳|N/A} Auto-marked ready
+
 **Analysis**: {Readiness check results}
 
-**Action**:
+**Action**: 
 - ✅ READY TO MERGE → Proceed with merge
-- ⚠️ NEEDS REFINEMENT → Comment drafted below
-- 🚧 IN PROGRESS → Monitor, no action needed
-```
-
-**2. PR Comment Posting** (for PRs needing refinement):
-
-**If `gh` CLI is available**: Post comments automatically using `gh pr comment {number} --body "{comment}"`
-
+- ⏳ CHECKS RUNNING → Wait for completion, then auto-mark ready
+- ⚠️ NEEDS REFINEMENT → Comment posted below
 **If `gh` CLI is NOT available**: Draft comments for manual posting:
 ```markdown
 ## 📝 PR COMMENTS TO POST (Manual Action Required)
@@ -225,7 +226,32 @@ When invoked in Copilot Cloud (via `file:Flow.prompt.md`), Strategic Agent (Orch
 
 ## PR Review Checklist (Orchestrator)
 
-For each open PR, verify:
+For each open PR, **automate preparation** then verify readiness:
+
+### Automated PR Preparation (use `gh` CLI when available):
+
+1. **Approve workflows** if awaiting approval:
+   ```bash
+   gh pr checks {number} --json name,conclusion
+   # If workflows awaiting approval, approve them (requires maintainer permissions)
+   ```
+
+2. **Update branch** if behind master:
+   ```bash
+   gh pr view {number} --json mergeable,mergeStateStatus
+   # If BEHIND, update: gh pr comment {number} --body "@copilot-action update-branch"
+   # Or use: gh api repos/{owner}/{repo}/pulls/{number}/update-branch -X PUT
+   ```
+
+3. **Wait for CI checks** to complete:
+   ```bash
+   gh pr checks {number} --watch
+   # Or poll: gh pr view {number} --json statusCheckRollup
+   ```
+
+4. **Verify all checks pass** before marking ready
+
+### Manual Verification:
 
 **Task File Alignment**:
 - [ ] All deliverables checked `- [x]` in task file
@@ -234,19 +260,22 @@ For each open PR, verify:
 - [ ] Progress report created and linked
 
 **PR Description**:
-- [ ] Build: ✅ Passes (or run and verify)
-- [ ] Tests: ✅ All pass
+- [ ] Build: ✅ Passes (verified via `gh pr checks`)
+- [ ] Tests: ✅ All pass (verified via `gh pr checks`)
 - [ ] Checklist: All items complete
 
-**GitHub Status**:
-- [ ] CI/CD: All checks green
+**GitHub Status** (automated checks):
+- [ ] CI/CD: All checks green (`gh pr checks {number}`)
+- [ ] Branch: Up-to-date with master (`gh pr view --json mergeStateStatus`)
+- [ ] Workflows: Approved and running
 - [ ] Conflicts: None
 - [ ] Reviews: At least 1 approval
 
 **Decision**:
-- If ALL ✅ → Merge PR (use githubwrite tool)
-- If ANY ❌ → Post comment with @copilot tag listing issues + delegation prompt (use `gh pr comment` if available, otherwise draft for manual posting)
+- If ALL ✅ → **Auto-mark ready** (`gh pr ready {number}`), then merge (`gh pr merge {number} --squash --delete-branch`)
+- If ANY ❌ → Post comment with @copilot tag listing issues + delegation prompt (use `gh pr comment`)
 - If 🚧 WIP → Monitor, no action
+- If ⏳ Checks running → Wait for completion, then re-assess
 
 ## Progress Report
 
