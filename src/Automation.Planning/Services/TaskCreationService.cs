@@ -1,6 +1,6 @@
 using System.Text;
+using Automation.Cli.Common.Paths;
 using Automation.Planning.Models;
-using Automation.Planning.Paths;
 
 namespace Automation.Planning.Services;
 

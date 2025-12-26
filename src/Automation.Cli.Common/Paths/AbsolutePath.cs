@@ -1,8 +1,11 @@
 using System.Runtime.InteropServices;
 
-namespace Automation.Planning.Paths;
+namespace Automation.Cli.Common.Paths;
 
-internal readonly record struct AbsolutePath
+/// <summary>
+/// Normalizes and validates absolute filesystem paths and provides helpers for workspace-bound checks.
+/// </summary>
+public readonly record struct AbsolutePath
 {
     private readonly string _value;
 

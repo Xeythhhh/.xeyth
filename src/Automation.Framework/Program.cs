@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Linq;
+using Automation.Cli.Common.Paths;
 
 internal static class Program
 {
@@ -37,8 +38,13 @@ internal static class Program
         var command = args[0].ToLowerInvariant();
         var options = CliOptions.Parse(args.Skip(1));
         var workspacePath = ResolveWorkspacePath(options.WorkspacePath);
-        var workspaceDirectory = Path.GetDirectoryName(workspacePath) ?? Directory.GetCurrentDirectory();
-        var rootPath = options.RootPath ?? workspaceDirectory;
+        var workspaceDirectory = AbsolutePath.From(Path.GetDirectoryName(workspacePath.Value) ?? Directory.GetCurrentDirectory());
+        var rootPath = options.RootPath is null
+            ? workspaceDirectory
+            : AbsolutePath.From(options.RootPath);
+
+        EnsureRootWithinWorkspace(rootPath, workspaceDirectory);
+
         var excludes = BuildExclusions(options.Excludes);
 
         var locations = DiscoverInstructionLocations(rootPath, excludes);
@@ -52,40 +58,47 @@ internal static class Program
         };
     }
 
+    private static void EnsureRootWithinWorkspace(AbsolutePath rootPath, AbsolutePath workspaceDirectory)
+    {
+        if (!rootPath.IsUnder(workspaceDirectory))
+        {
+            throw new InvalidOperationException($"Root '{rootPath}' must be within workspace directory '{workspaceDirectory}'.");
+        }
+    }
+
     private static bool IsHelp(string value) => value is "-h" or "--help" or "help";
 
-    private static IReadOnlyList<string> DiscoverInstructionLocations(string rootPath, HashSet<string> excludes)
+    private static IReadOnlyList<string> DiscoverInstructionLocations(AbsolutePath rootPath, HashSet<string> excludes)
     {
-        var normalizedRoot = Path.GetFullPath(rootPath);
-        if (!Directory.Exists(normalizedRoot))
+        if (!Directory.Exists(rootPath.Value))
         {
-            throw new DirectoryNotFoundException($"Root path not found: {normalizedRoot}");
+            throw new DirectoryNotFoundException($"Root path not found: {rootPath}");
         }
 
         var locations = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var file in EnumerateInstructionFiles(normalizedRoot))
+        foreach (var file in EnumerateInstructionFiles(rootPath))
         {
-            if (ShouldExclude(file, normalizedRoot, excludes))
+            if (ShouldExclude(file, rootPath, excludes))
             {
                 continue;
             }
 
-            var parent = Path.GetDirectoryName(file) ?? normalizedRoot;
-            var relative = Path.GetRelativePath(normalizedRoot, parent);
+            var parent = Path.GetDirectoryName(file) ?? rootPath.Value;
+            var relative = Path.GetRelativePath(rootPath.Value, parent);
             locations.Add(NormalizePath(relative));
         }
 
         return locations.ToList();
     }
 
-    private static IEnumerable<string> EnumerateInstructionFiles(string root)
+    private static IEnumerable<string> EnumerateInstructionFiles(AbsolutePath root)
     {
         var patterns = new[] { "*.instructions.md", "copilot-instructions.md" };
 
         foreach (var pattern in patterns)
         {
-            foreach (var file in Directory.EnumerateFiles(root, pattern, SearchOption.AllDirectories))
+            foreach (var file in Directory.EnumerateFiles(root.Value, pattern, SearchOption.AllDirectories))
             {
                 yield return file;
             }
@@ -102,7 +115,7 @@ internal static class Program
         return 0;
     }
 
-    private static int UpdateWorkspace(string workspacePath, IReadOnlyCollection<string> discoveredLocations)
+    private static int UpdateWorkspace(AbsolutePath workspacePath, IReadOnlyCollection<string> discoveredLocations)
     {
         var workspace = LoadWorkspace(workspacePath);
         var settings = workspace["settings"] as JsonObject ?? new JsonObject();
@@ -123,7 +136,7 @@ internal static class Program
         return 0;
     }
 
-    private static int ValidateWorkspace(string workspacePath, IReadOnlyCollection<string> discoveredLocations)
+    private static int ValidateWorkspace(AbsolutePath workspacePath, IReadOnlyCollection<string> discoveredLocations)
     {
         var workspace = LoadWorkspace(workspacePath);
         var settings = workspace["settings"] as JsonObject;
@@ -148,14 +161,14 @@ internal static class Program
         return 1;
     }
 
-    private static JsonObject LoadWorkspace(string workspacePath)
+    private static JsonObject LoadWorkspace(AbsolutePath workspacePath)
     {
-        if (!File.Exists(workspacePath))
+        if (!File.Exists(workspacePath.Value))
         {
             throw new FileNotFoundException($"Workspace file not found: {workspacePath}");
         }
 
-        var json = File.ReadAllText(workspacePath);
+        var json = File.ReadAllText(workspacePath.Value);
         var node = JsonNode.Parse(json) as JsonObject;
         if (node is null)
         {
@@ -189,29 +202,29 @@ internal static class Program
         return results;
     }
 
-    private static void WriteWorkspace(string workspacePath, JsonObject workspace)
+    private static void WriteWorkspace(AbsolutePath workspacePath, JsonObject workspace)
     {
         var options = new JsonSerializerOptions
         {
             WriteIndented = true
         };
 
-        File.WriteAllText(workspacePath, workspace.ToJsonString(options));
+        File.WriteAllText(workspacePath.Value, workspace.ToJsonString(options));
     }
 
-    private static void CreateBackup(string workspacePath)
+    private static void CreateBackup(AbsolutePath workspacePath)
     {
-        var backupPath = workspacePath + ".bak";
-        File.Copy(workspacePath, backupPath, overwrite: true);
+        var backupPath = workspacePath.Value + ".bak";
+        File.Copy(workspacePath.Value, backupPath, overwrite: true);
     }
 
-    private static string ResolveWorkspacePath(string? workspacePath)
+    private static AbsolutePath ResolveWorkspacePath(string? workspacePath)
     {
-        var root = Directory.GetCurrentDirectory();
+        var root = AbsolutePath.From(Directory.GetCurrentDirectory());
         if (!string.IsNullOrWhiteSpace(workspacePath))
         {
-            var resolved = Path.GetFullPath(workspacePath);
-            if (!File.Exists(resolved))
+            var resolved = AbsolutePath.From(workspacePath);
+            if (!File.Exists(resolved.Value))
             {
                 throw new FileNotFoundException($"Workspace file not found: {resolved}");
             }
@@ -219,16 +232,17 @@ internal static class Program
             return resolved;
         }
 
-        var defaultPath = Path.Combine(root, ".xeyth.code-workspace");
-        if (File.Exists(defaultPath))
+        var defaultPath = root.Combine(".xeyth.code-workspace");
+        if (File.Exists(defaultPath.Value))
         {
             return defaultPath;
         }
 
-        var firstWorkspace = Directory.EnumerateFiles(root, "*.code-workspace", SearchOption.TopDirectoryOnly)
+        var firstWorkspace = Directory.EnumerateFiles(root.Value, "*.code-workspace", SearchOption.TopDirectoryOnly)
+            .Select(AbsolutePath.From)
             .FirstOrDefault();
 
-        if (firstWorkspace is null)
+        if (firstWorkspace == default)
         {
             throw new FileNotFoundException("No .code-workspace file found. Specify one with --workspace.");
         }
@@ -247,9 +261,9 @@ internal static class Program
         return excludes;
     }
 
-    private static bool ShouldExclude(string path, string root, HashSet<string> excludes)
+    private static bool ShouldExclude(string path, AbsolutePath root, HashSet<string> excludes)
     {
-        var relative = NormalizePath(Path.GetRelativePath(root, path));
+        var relative = NormalizePath(Path.GetRelativePath(root.Value, path));
         return excludes.Any(exclude => relative.Equals(exclude, StringComparison.OrdinalIgnoreCase) || relative.StartsWith(exclude + "/", StringComparison.OrdinalIgnoreCase));
     }
 

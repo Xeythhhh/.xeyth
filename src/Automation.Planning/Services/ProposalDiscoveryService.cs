@@ -1,3 +1,4 @@
+using Automation.Cli.Common.Paths;
 using Automation.Planning.Models;
 
 namespace Automation.Planning.Services;
@@ -18,14 +19,14 @@ public sealed class ProposalDiscoveryService
             throw new ArgumentException("Root path is required", nameof(rootPath));
         }
 
-        var fullRoot = Path.GetFullPath(rootPath);
-        if (!Directory.Exists(fullRoot))
+        var fullRoot = AbsolutePath.From(rootPath);
+        if (!Directory.Exists(fullRoot.Value))
         {
             throw new DirectoryNotFoundException($"Root path not found: {fullRoot}");
         }
 
         var proposalFiles = Directory
-            .EnumerateFiles(fullRoot, "*.proposal", SearchOption.AllDirectories)
+            .EnumerateFiles(fullRoot.Value, "*.proposal", SearchOption.AllDirectories)
             .ToList();
 
         var parseTasks = proposalFiles

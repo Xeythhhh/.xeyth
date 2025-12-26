@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Automation.Cli.Common.Paths;
 using Contracts.Core.Services;
 using Spectre.Console;
 
@@ -95,8 +96,16 @@ public static class CliApp
             return new ParseResult(false, false, null, ex.Message);
         }
 
-        var resolvedPath = Path.GetFullPath(targetPath ?? Directory.GetCurrentDirectory());
-        var options = new ValidateOptions(resolvedPath, contractName, strict);
+        var workspaceRoot = AbsolutePath.From(Directory.GetCurrentDirectory());
+        var requestedPath = targetPath ?? ".";
+        var absoluteTarget = AbsolutePath.From(requestedPath);
+
+        if (!absoluteTarget.IsUnder(workspaceRoot))
+        {
+            return new ParseResult(false, false, null, $"Path must be within workspace root: {workspaceRoot}");
+        }
+
+        var options = new ValidateOptions(absoluteTarget.Value, contractName, strict);
         return new ParseResult(true, false, options, null);
     }
 
@@ -108,17 +117,16 @@ public static class CliApp
             console.WriteLine();
         }
 
-        var table = new Table().NoBorder().HideHeaders();
-        table.AddColumn(new TableColumn(string.Empty));
-        table.AddColumn(new TableColumn(string.Empty));
-
-        table.AddRow("[bold]Usage[/]", "xeyth-contracts validate [options]");
-        table.AddEmptyRow();
-        table.AddRow("[bold]Options[/]", "--path, -p       File or directory to validate (defaults to current)\n--contract, -c  Filter by contract file name (without .metadata)\n--strict        Treat warnings as errors\n--help, -h      Show help");
-        table.AddEmptyRow();
-        table.AddRow("[bold]Exit Codes[/]", "0 = success/warnings, 1 = errors or strict warnings, 2 = usage errors");
-
-        console.Write(table);
+        console.WriteLine("Usage: xeyth-contracts validate [options]");
+        console.WriteLine();
+        console.WriteLine("Options:");
+        console.WriteLine("  --path, -p       File or directory to validate (defaults to current)");
+        console.WriteLine("  --contract, -c   Filter by contract file name (without .metadata)");
+        console.WriteLine("  --strict         Treat warnings as errors");
+        console.WriteLine("  --help, -h       Show help");
+        console.WriteLine();
+        console.WriteLine("Exit Codes:");
+        console.WriteLine("  0 = success/warnings, 1 = errors or strict warnings, 2 = usage errors");
         console.WriteLine();
     }
 

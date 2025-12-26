@@ -1,5 +1,6 @@
 using System.Reflection;
 using Automation.Cli.Common;
+using Automation.Cli.Common.Paths;
 using Spectre.Console;
 
 namespace Automation.Verify;
@@ -78,9 +79,9 @@ internal sealed class CommandDispatcher
     {
         var options = SetupOptions.Parse(args);
         var tool = ResolveTool(options.Tool);
-        var targetDirectory = Path.GetFullPath(options.TargetDirectory ?? Directory.GetCurrentDirectory());
+        var targetDirectory = ResolveTargetDirectory(options.TargetDirectory);
 
-        var result = VerifyConfigurator.Configure(targetDirectory, tool);
+        var result = VerifyConfigurator.Configure(targetDirectory.Value, tool);
         _reporter.Success(
             message: $"Created {result.ConfigPath}",
             detail: $"Diff tool order: {string.Join(", ", tool.ToolOrder)}");
@@ -112,7 +113,7 @@ internal sealed class CommandDispatcher
     private int RunValidate(string[] args)
     {
         var options = ValidateOptions.Parse(args);
-        var targetDirectory = Path.GetFullPath(options.TargetDirectory ?? Directory.GetCurrentDirectory());
+        var targetDirectory = ResolveTargetDirectory(options.TargetDirectory);
         var result = StatusSpinner.Run(_console, "Validating DiffEngine.json...", () => VerifyValidator.Validate(targetDirectory));
 
         if (result.IsValid)
@@ -125,18 +126,31 @@ internal sealed class CommandDispatcher
         return 1;
     }
 
-    private int Unknown(string command)
-    {
-        _reporter.Warning($"Unknown command: {command}");
-        _reporter.Help();
-        return 1;
+        private int Unknown(string command)
+        {
+            _reporter.Warning($"Unknown command: {command}");
+            _reporter.Help();
+            return 1;
     }
 
     private static bool IsHelp(string value)
-    {
-        return value is "help" or "--help" or "-h";
+        {
+            return value is "help" or "--help" or "-h";
+        }
+
+        private static AbsolutePath ResolveTargetDirectory(string? targetDirectory)
+        {
+            var workspaceRoot = AbsolutePath.From(Directory.GetCurrentDirectory());
+            var resolved = AbsolutePath.From(targetDirectory ?? workspaceRoot.Value);
+
+            if (!resolved.IsUnder(workspaceRoot))
+            {
+                throw new InvalidOperationException($"Target directory must be within workspace root '{workspaceRoot}'.");
+            }
+
+            return resolved;
+        }
     }
-}
 
 internal sealed record SetupOptions(DiffTool? Tool, string? TargetDirectory)
 {
