@@ -40,12 +40,12 @@ Create xeyth-git global tool to replace PowerShell logic in git hooks (.git/hook
 
 ## Deliverables
 
-- D1: xeyth-git project in src/Automation.Git/
-- D2: `prepare-commit-msg` command - template injection logic in C#
-- D3: `commit-msg` command - validation engine in C#
-- D4: Update .git/hooks/ wrappers to call xeyth-git tool
-- D5: Tests for validation logic (xUnit + Verify)
-- D6: Documentation update (Ai/Git/README.md)
+- [x] D1: xeyth-git project in src/Automation.Git/
+- [x] D2: `prepare-commit-msg` command - template injection logic in C#
+- [x] D3: `commit-msg` command - validation engine in C#
+- [x] D4: Update .git/hooks/ wrappers to call xeyth-git tool
+- [x] D5: Tests for validation logic (xUnit + Verify)
+- [x] D6: Documentation update (Ai/Git/README.md)
 
 ## Architecture Decisions
 
@@ -82,3 +82,13 @@ exec xeyth-git prepare-commit-msg "$@"
 - 2025-12-26: Implemented xeyth-git tool with C# hook commands and wrapper scripts
 - 2025-12-26: Relocated xeyth-git tool and tests to Git slice per repo layout guidance
 - 2025-12-26: Finalized packaging (PackageId xeyth-git), validated hooks and tests, marked deliverables complete
+
+## Reviewer Delegation
+
+````markdown
+**Task**: [Planning/Task.task.template](../../Planning/Task.task.template)  
+**Role**: Reviewer (see [Strategic.prompt.md](../Framework/Strategic.prompt.md))  
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Implementation complete; verification attached in Automation/Automation/ScriptMigrationPhase2.task.
+````
