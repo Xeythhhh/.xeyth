@@ -11,14 +11,15 @@ public sealed class ProposalDecisionService
             throw new ArgumentNullException(nameof(proposal));
         }
 
-        var decisionDate = DateOnly.FromDateTime(DateTime.UtcNow);
+        var timestamp = DateTime.UtcNow;
+        var decisionDate = DateOnly.FromDateTime(timestamp);
         var updated = ProposalFormatter.UpdateStatus(proposal.Content, status);
         updated = ProposalFormatter.AppendDecision(updated, status, decisionDate, rationale, taskPath);
 
         var archiveDirectory = Path.Combine(Path.GetDirectoryName(proposal.Path) ?? rootPath, "archive");
         Directory.CreateDirectory(archiveDirectory);
 
-        var archiveFileName = $"{proposal.Name}.{decisionDate:yyyy-MM-dd}.proposal";
+        var archiveFileName = $"{proposal.Name}.{timestamp:yyyy-MM-dd-HHmmss-fff}.proposal";
         var archivePath = Path.Combine(archiveDirectory, archiveFileName);
 
         File.WriteAllText(archivePath, updated);

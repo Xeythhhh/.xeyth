@@ -28,7 +28,13 @@ public sealed class TaskCreationService
             throw new FileNotFoundException("Task template not found", templatePath);
         }
 
-        Directory.CreateDirectory(Path.GetDirectoryName(targetPath)!);
+        var targetDirectory = Path.GetDirectoryName(targetPath);
+        if (string.IsNullOrWhiteSpace(targetDirectory))
+        {
+            throw new InvalidOperationException($"Could not resolve directory for task path '{targetPath}'.");
+        }
+
+        Directory.CreateDirectory(targetDirectory);
 
         if (File.Exists(targetPath))
         {
