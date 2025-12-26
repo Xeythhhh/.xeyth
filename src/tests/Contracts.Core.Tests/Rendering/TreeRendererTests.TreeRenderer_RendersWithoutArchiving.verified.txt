@@ -1,0 +1,6 @@
+﻿📄 Task.template Contract
+├─ 🎯 Target: **/*.task
+├─ 📋 Schema
+│  ├─ Delegation Prompt (required)
+│  ├─ Task Details (required)
+└─ ✏️  Naming: ^[A-Z][a-zA-Z0-9]+\.task$
