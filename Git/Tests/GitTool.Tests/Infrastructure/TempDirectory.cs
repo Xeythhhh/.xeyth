@@ -1,4 +1,4 @@
-namespace Automation.Git.Tests.Infrastructure;
+namespace GitTool.Tests.Infrastructure;
 
 internal sealed class TempDirectory : IDisposable
 {

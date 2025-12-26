@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts.Cli", "src\Contra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automation.Framework", "src\Automation.Framework\Automation.Framework.csproj", "{3DE0309C-0788-4CB6-8FBC-AF71CDC0F800}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automation.Git", "Git\Automation.Git\Automation.Git.csproj", "{E45397BA-8E45-44A3-A183-1F547FD9131A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTool", "Git\Tool\GitTool.csproj", "{E45397BA-8E45-44A3-A183-1F547FD9131A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automation.Planning", "src\Automation.Planning\Automation.Planning.csproj", "{90826925-E363-4150-B3BF-E3D6DA7BB837}"
 EndProject
@@ -35,7 +35,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automation.Cli.Common", "sr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automation.Cli.Common.Tests", "src\tests\Automation.Cli.Common.Tests\Automation.Cli.Common.Tests.csproj", "{EEC2B114-9778-47DD-A1E3-B91D684A4D3C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automation.Git.Tests", "Git\tests\Automation.Git.Tests\Automation.Git.Tests.csproj", "{70416635-3881-4270-9C54-D7685AE11A0E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTool.Tests", "Git\Tests\GitTool.Tests\GitTool.Tests.csproj", "{70416635-3881-4270-9C54-D7685AE11A0E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

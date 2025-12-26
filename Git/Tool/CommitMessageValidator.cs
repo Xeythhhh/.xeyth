@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace Automation.Git;
+namespace GitTool;
 
 internal static partial class CommitMessageValidator
 {

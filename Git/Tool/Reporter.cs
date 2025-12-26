@@ -1,7 +1,7 @@
 using Automation.Cli.Common;
 using Spectre.Console;
 
-namespace Automation.Git;
+namespace GitTool;
 
 internal sealed class Reporter
 {

@@ -1,8 +1,9 @@
 using System.Text;
-using Automation.Git.Tests.Infrastructure;
+using GitTool;
+using GitTool.Tests.Infrastructure;
 using Spectre.Console;
 
-namespace Automation.Git.Tests;
+namespace GitTool.Tests;
 
 public sealed class CommandDispatcherTests
 {

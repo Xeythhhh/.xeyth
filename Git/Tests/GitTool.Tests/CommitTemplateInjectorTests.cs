@@ -1,6 +1,7 @@
-using Automation.Git.Tests.Infrastructure;
+using GitTool;
+using GitTool.Tests.Infrastructure;
 
-namespace Automation.Git.Tests;
+namespace GitTool.Tests;
 
 public sealed class CommitTemplateInjectorTests
 {

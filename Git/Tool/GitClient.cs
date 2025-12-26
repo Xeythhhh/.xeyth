@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace Automation.Git;
+namespace GitTool;
 
 internal interface IGitClient
 {

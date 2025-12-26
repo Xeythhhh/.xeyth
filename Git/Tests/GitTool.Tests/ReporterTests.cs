@@ -1,6 +1,7 @@
+using GitTool;
 using Spectre.Console;
 
-namespace Automation.Git.Tests;
+namespace GitTool.Tests;
 
 public sealed class ReporterTests
 {

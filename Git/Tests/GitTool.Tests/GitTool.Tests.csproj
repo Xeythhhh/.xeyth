@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Automation.Git\Automation.Git.csproj" />
+    <ProjectReference Include="..\..\Tool\GitTool.csproj" />
   </ItemGroup>
 
   <ItemGroup>

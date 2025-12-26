@@ -1,4 +1,6 @@
-namespace Automation.Git.Tests;
+using GitTool;
+
+namespace GitTool.Tests;
 
 public sealed class ValidationLevelsTests
 {
