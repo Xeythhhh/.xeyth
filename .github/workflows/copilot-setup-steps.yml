@@ -1,0 +1,95 @@
+name: Copilot Agent Setup
+on:
+  workflow_dispatch:  # Manual trigger only - for environment preparation
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install GitHub CLI
+        run: |
+          # GitHub CLI installation
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+          sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+          sudo apt update
+          sudo apt install gh -y
+          
+          # Verify installation
+          gh --version
+          
+          # Configure gh CLI
+          gh config set editor vim
+          gh config set git_protocol https
+
+      - name: Install Copilot CLI
+        run: |
+          # Ensure Node.js is available
+          node --version
+          npm --version
+          
+          # Install Copilot CLI globally
+          npm install -g @github/copilot
+          
+          # Verify installation
+          copilot --version
+
+      - name: Setup .NET environment
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install .NET global tools
+        run: |
+          # Install framework-specific tools
+          # Note: These are examples - actual tools may not exist yet
+          dotnet tool install -g xeyth-planning || echo "xeyth-planning not available"
+          dotnet tool install -g xeyth-contracts || echo "xeyth-contracts not available"
+          
+          # List installed global tools
+          dotnet tool list -g
+
+      - name: Configure PATH
+        run: |
+          # Add .NET tools to PATH
+          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+          
+          # Verify PATH additions
+          echo $PATH
+
+      - name: Verify tool availability
+        run: |
+          # Verify all tools are accessible
+          echo "=== GitHub CLI ==="
+          gh --version
+          
+          echo "=== Copilot CLI ==="
+          copilot --version || echo "Copilot CLI requires authentication"
+          
+          echo "=== .NET CLI ==="
+          dotnet --version
+          
+          echo "=== .NET Global Tools ==="
+          dotnet tool list -g
+          
+          echo "=== PATH ==="
+          echo $PATH
+
+      - name: Setup complete
+        run: |
+          echo "✅ Copilot agent environment setup complete"
+          echo ""
+          echo "IMPORTANT NOTES:"
+          echo "- This setup runs ONLY during workflow execution"
+          echo "- Tools are NOT persistent across agent invocations"
+          echo "- Each agent task gets a fresh, ephemeral environment"
+          echo "- Use MCP servers for runtime tool access instead"
+          echo ""
+          echo "Available tools:"
+          echo "  - gh CLI: $(gh --version | head -1)"
+          echo "  - Copilot CLI: installed (requires auth)"
+          echo "  - .NET SDK: $(dotnet --version)"
