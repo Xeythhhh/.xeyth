@@ -11,12 +11,12 @@ Purpose: execute explicit boilerplate tasks only.
 
 ## Completion Message Example
 
-```markdown
+````markdown
 **Task**: [Planning/Task.task.template](../Planning/Task.task.template)  
 **Role**: Implementer (see [Implementation.prompt.md](Implementation.prompt.md))  
-**Target Audience**: Implementation Agent (<ModelName>)
+**Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
 
 ✅ Scaffolding done: created/updated files listed in the task.
-```
+````
 
 Use the standard footer from `copilot-instructions.md`.
