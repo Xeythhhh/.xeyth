@@ -34,6 +34,8 @@ internal sealed class ShowProposalCommand : PlanningCommandBase
             return 1;
         }
 
+        var relativePath = NormalizePath(Path.GetRelativePath(options.RootPath, proposal.Path));
+
         var summary = new Table().NoBorder().HideHeaders();
         summary.AddColumn(new TableColumn(string.Empty));
         summary.AddColumn(new TableColumn(string.Empty));
@@ -45,7 +47,7 @@ internal sealed class ShowProposalCommand : PlanningCommandBase
         {
             summary.AddRow("[bold]Related Task[/]", Markup.Escape(proposal.RelatedTask));
         }
-        summary.AddRow("[bold]Path[/]", Markup.Escape(Path.GetRelativePath(options.RootPath, proposal.Path)));
+        summary.AddRow("[bold]Path[/]", Markup.Escape(relativePath));
 
         var panel = new Panel(summary)
             .Header($"[bold]{Markup.Escape(proposal.Name)}[/]")

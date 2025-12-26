@@ -37,9 +37,10 @@ internal sealed class DeferProposalCommand : PlanningCommandBase
         }
 
         var archivePath = _decisionService.ArchiveDecision(proposal, ProposalStatus.Deferred, options.RootPath, options.Reason);
+        var relativeArchivePath = NormalizePath(Path.GetRelativePath(options.RootPath, archivePath));
         Reporter.Success(
             $"Deferred proposal {proposal.Name}",
-            $"Archived to {Path.GetRelativePath(options.RootPath, archivePath)}");
+            $"Archived to {relativeArchivePath}");
 
         return 0;
     }
