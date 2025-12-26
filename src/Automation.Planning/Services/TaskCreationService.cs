@@ -1,5 +1,6 @@
 using System.Text;
 using Automation.Planning.Models;
+using Automation.Planning.Paths;
 
 namespace Automation.Planning.Services;
 
@@ -19,9 +20,9 @@ public sealed class TaskCreationService
             throw new ArgumentException("Task path is required", nameof(requestedPath));
         }
 
-        var fullRoot = Path.GetFullPath(string.IsNullOrWhiteSpace(rootPath) ? Directory.GetCurrentDirectory() : rootPath);
-        var targetPath = ResolveTaskPath(fullRoot, requestedPath);
-        var templatePath = Path.Combine(fullRoot, DefaultTemplatePath);
+        var root = AbsolutePath.From(string.IsNullOrWhiteSpace(rootPath) ? Directory.GetCurrentDirectory() : rootPath);
+        var targetPath = ResolveTaskPath(root, requestedPath);
+        var templatePath = root.Combine(DefaultTemplatePath).Value;
 
         if (!File.Exists(templatePath))
         {
@@ -38,17 +39,17 @@ public sealed class TaskCreationService
 
         if (File.Exists(targetPath))
         {
-            throw new IOException($"Task already exists at {targetPath}");
+            throw new InvalidOperationException($"A task already exists at '{targetPath}'.");
         }
 
         var content = File.ReadAllText(templatePath);
-        content = PopulateTemplate(content, proposal, fullRoot, targetPath);
+        content = PopulateTemplate(content, proposal, root.Value, targetPath);
 
         File.WriteAllText(targetPath, content);
         return targetPath;
     }
 
-    private static string ResolveTaskPath(string rootPath, string requestedPath)
+    private static string ResolveTaskPath(AbsolutePath root, string requestedPath)
     {
         var normalized = requestedPath;
         if (!normalized.EndsWith(".task", StringComparison.OrdinalIgnoreCase))
@@ -57,10 +58,15 @@ public sealed class TaskCreationService
         }
 
         var absolute = Path.IsPathRooted(normalized)
-            ? normalized
-            : Path.Combine(rootPath, normalized);
+            ? AbsolutePath.From(normalized)
+            : root.Combine(normalized);
 
-        return Path.GetFullPath(absolute);
+        if (!absolute.IsUnder(root))
+        {
+            throw new InvalidOperationException($"Task path must be within root '{root}': '{absolute.Value}'");
+        }
+
+        return absolute.Value;
     }
 
     private static string PopulateTemplate(string template, Proposal proposal, string rootPath, string targetPath)

@@ -78,28 +78,21 @@ internal sealed class ListProposalsCommand : PlanningCommandBase
 
     private static List<Proposal> FilterProposals(IReadOnlyList<Proposal> proposals, ListProposalsOptions options)
     {
-        IEnumerable<Proposal> query = proposals;
-
         if (options.StatusFilter is { } status)
         {
-            query = query.Where(p => p.Status == status);
-        }
-        else if (options.PendingOnly)
-        {
-            query = query.Where(p => p.Status == ProposalStatus.Pending);
+            return proposals.Where(p => p.Status == status).ToList();
         }
 
-        return query.ToList();
+        return proposals.ToList();
     }
 
-    private sealed record ListProposalsOptions(string RootPath, ProposalStatus? StatusFilter, bool PendingOnly)
+    private sealed record ListProposalsOptions(string RootPath, ProposalStatus? StatusFilter)
     {
         internal static ListProposalsOptions Parse(string[] args)
         {
             var queue = new Queue<string>(args);
             var rootPath = Directory.GetCurrentDirectory();
             ProposalStatus? status = ProposalStatus.Pending;
-            var pendingOnly = true;
 
             while (queue.Count > 0)
             {
@@ -113,12 +106,10 @@ internal sealed class ListProposalsCommand : PlanningCommandBase
 
                     case "--pending":
                         status = ProposalStatus.Pending;
-                        pendingOnly = true;
                         break;
 
                     case "--all":
                         status = null;
-                        pendingOnly = false;
                         break;
 
                     case "--status":
@@ -130,7 +121,6 @@ internal sealed class ListProposalsCommand : PlanningCommandBase
                         }
 
                         status = parsed;
-                        pendingOnly = false;
                         break;
 
                     default:
@@ -138,7 +128,7 @@ internal sealed class ListProposalsCommand : PlanningCommandBase
                 }
             }
 
-            return new ListProposalsOptions(Path.GetFullPath(rootPath), status, pendingOnly);
+            return new ListProposalsOptions(Path.GetFullPath(rootPath), status);
         }
     }
 }

@@ -27,7 +27,7 @@ internal sealed class RejectProposalCommand : PlanningCommandBase
             return 0;
         }
 
-        var options = DeferProposalCommand.DecisionOptions.Parse(args);
+        var options = DecisionOptions.Parse(args);
         var proposal = await _discoveryService.FindByNameAsync(options.RootPath, options.Name, cancellationToken);
 
         if (proposal is null)

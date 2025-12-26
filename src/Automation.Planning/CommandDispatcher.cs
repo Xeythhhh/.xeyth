@@ -22,7 +22,7 @@ internal sealed class CommandDispatcher
         if (args.Length == 0 || IsHelp(args[0]))
         {
             _reporter.Help(_commands.Values.Select(c => (c.Name, c.Description)));
-            return Task.FromResult(args.Length == 0 ? 1 : 0);
+            return Task.FromResult(0);
         }
 
         var commandName = args[0];

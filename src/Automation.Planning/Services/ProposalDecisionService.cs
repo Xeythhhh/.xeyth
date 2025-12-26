@@ -19,7 +19,7 @@ public sealed class ProposalDecisionService
         var archiveDirectory = Path.Combine(Path.GetDirectoryName(proposal.Path) ?? rootPath, "archive");
         Directory.CreateDirectory(archiveDirectory);
 
-        var archiveFileName = $"{proposal.Name}.{timestamp:yyyy-MM-dd-HHmmss-fff}.proposal";
+        var archiveFileName = $"{proposal.Name}.{timestamp:yyyy-MM-dd-HHmmss-fff}.{Guid.NewGuid():N}.proposal";
         var archivePath = Path.Combine(archiveDirectory, archiveFileName);
 
         File.WriteAllText(archivePath, updated);

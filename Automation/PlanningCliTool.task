@@ -148,7 +148,7 @@ Create xeyth-planning CLI tool to manage proposal workflow, enabling Orchestrato
 ## Success Criteria
 
 - [x] `dotnet build` succeeds (0 errors, 0 warnings)
-- [ ] `nuke Compile Test` passes (all tests passing)
+- [x] `nuke Compile Test` passes (all tests passing)
 - [x] Can list proposals: `xeyth-planning list-proposals --pending`
 - [x] Can show details: `xeyth-planning show-proposal {name}`
 - [x] Can accept: `xeyth-planning accept-proposal {name} --task {path}`

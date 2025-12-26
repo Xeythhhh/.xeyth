@@ -43,7 +43,7 @@ internal sealed class ShowProposalCommand : PlanningCommandBase
         summary.AddRow("[bold]Author[/]", string.IsNullOrWhiteSpace(proposal.Author) ? "-" : proposal.Author);
         if (!string.IsNullOrWhiteSpace(proposal.RelatedTask))
         {
-            summary.AddRow("[bold]Related Task[/]", Markup.Escape(proposal.RelatedTask!));
+            summary.AddRow("[bold]Related Task[/]", Markup.Escape(proposal.RelatedTask));
         }
         summary.AddRow("[bold]Path[/]", Markup.Escape(Path.GetRelativePath(options.RootPath, proposal.Path)));
 
@@ -56,8 +56,14 @@ internal sealed class ShowProposalCommand : PlanningCommandBase
         Console.WriteLine();
 
         var contentLines = proposal.Content.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
-        var trimmed = string.Join(Environment.NewLine, contentLines.Take(80));
+        const int maxContentLines = 80;
+        var wasTruncated = contentLines.Length > maxContentLines;
+        var trimmed = string.Join(Environment.NewLine, contentLines.Take(maxContentLines));
         Console.MarkupLine($"[dim]{Markup.Escape(trimmed)}[/]");
+        if (wasTruncated)
+        {
+            Console.MarkupLine($"[dim]... (showing first {maxContentLines} of {contentLines.Length} lines)[/]");
+        }
         Console.WriteLine();
 
         return 0;

@@ -14,8 +14,8 @@ internal static class VersionHelper
 
         if (!string.IsNullOrWhiteSpace(informational))
         {
-            var plusIndex = informational.IndexOf('+');
-            return plusIndex > 0 ? informational[..plusIndex] : informational;
+            var buildMetadataIndex = informational.IndexOf('+');
+            return buildMetadataIndex > 0 ? informational[..buildMetadataIndex] : informational;
         }
 
         return assembly.GetName().Version?.ToString(3) ?? "1.0.0";

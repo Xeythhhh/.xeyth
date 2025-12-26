@@ -23,7 +23,7 @@ internal abstract class PlanningCommandBase : IPlanningCommand
         return args.Any(a => a is "--help" or "-h" or "help");
     }
 
-    protected static void EnsureHasValue(Queue<string> queue, string token)
+    internal static void EnsureHasValue(Queue<string> queue, string token)
     {
         if (queue.Count == 0)
         {

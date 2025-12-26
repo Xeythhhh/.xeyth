@@ -11,7 +11,7 @@ public sealed class ProposalDiscoveryService
         _parser = parser ?? throw new ArgumentNullException(nameof(parser));
     }
 
-    public Task<IReadOnlyList<Proposal>> DiscoverAsync(string rootPath, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<Proposal>> DiscoverAsync(string rootPath, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(rootPath))
         {
@@ -24,13 +24,25 @@ public sealed class ProposalDiscoveryService
             throw new DirectoryNotFoundException($"Root path not found: {fullRoot}");
         }
 
-        var proposals = Directory
+        var proposalFiles = Directory
             .EnumerateFiles(fullRoot, "*.proposal", SearchOption.AllDirectories)
-            .Select(_parser.Parse)
-            .OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        return Task.FromResult<IReadOnlyList<Proposal>>(proposals);
+        var parseTasks = proposalFiles
+            .Select(file => Task.Run(() =>
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                return _parser.Parse(file);
+            }, cancellationToken))
+            .ToArray();
+
+        var parsed = await Task.WhenAll(parseTasks).ConfigureAwait(false);
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return parsed
+            .OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
     }
 
     public async Task<Proposal?> FindByNameAsync(string rootPath, string proposalName, CancellationToken cancellationToken = default)

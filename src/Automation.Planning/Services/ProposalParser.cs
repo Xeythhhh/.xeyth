@@ -5,7 +5,7 @@ namespace Automation.Planning.Services;
 
 public sealed class ProposalParser
 {
-    private static readonly Regex MetadataLine = new(@"^\*\*(?<key>[^*]+)\*\*:\s*(?<value>.+)$", RegexOptions.Compiled);
+    private static readonly Regex MetadataLine = new(@"^\*\*(?<key>[A-Za-z0-9 ]+)\*\*:\s*(?<value>.+)$", RegexOptions.Compiled);
 
     public Proposal Parse(string path)
     {
@@ -42,9 +42,9 @@ public sealed class ProposalParser
     {
         var metadata = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var line in lines)
+        foreach (var line in lines.Select(l => l.Trim()))
         {
-            var match = MetadataLine.Match(line.Trim());
+            var match = MetadataLine.Match(line);
             if (!match.Success)
             {
                 continue;
@@ -64,15 +64,14 @@ public sealed class ProposalParser
 
     private static string? ExtractTitle(IEnumerable<string> lines)
     {
-        foreach (var line in lines)
+        foreach (var line in lines.Select(l => l.Trim().TrimStart('\uFEFF')))
         {
-            var trimmed = line.Trim().TrimStart('\uFEFF');
-            if (!trimmed.StartsWith("#", StringComparison.Ordinal))
+            if (!line.StartsWith("#", StringComparison.Ordinal))
             {
                 continue;
             }
 
-            var title = trimmed.TrimStart('#', ' ');
+            var title = line.TrimStart('#', ' ');
             if (title.StartsWith("Proposal:", StringComparison.OrdinalIgnoreCase))
             {
                 title = title["Proposal:".Length..].Trim();
