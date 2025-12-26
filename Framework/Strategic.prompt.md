@@ -78,12 +78,38 @@ When reviewing a PR for merge, verify ALL items:
 ### Backlog Management
 
 - **Target**: Maintain 20 ready tasks; create when backlog < 15; focus execution when backlog > 25
-- **PR Target**: Maintain at least 5 open PRs (or draft PRs) at all times, each handling a single `.task`
+- **PR Target**: Maintain 5-10 open PRs (or draft PRs), each handling a single `.task` (maximum 10)
 - Overrides: if [Configuration.xeyth](../Configuration.xeyth) exists, use `orchestrator.backlog` values
 - Check PRs: Before delegating, verify task is not already in an open PR or draft (check PR descriptions for task file references)
 - When backlog < minimum → create new tasks; when > maximum → pause creation and prioritize execution
 - Regularly refine unfinished tasks and delegate refined tasks to Implementation Agent
 - If open PRs < 5 → prioritize delegation to Implementation Agent for new task implementation
+- If open PRs ≥ 10 → pause new delegations, focus on PR review/merge
+
+### Automatic Agent Delegation (when tools available)
+
+**If agent invocation tools are available** (e.g., `runSubagent` with model selection):
+
+1. **Automatically invoke Implementation Agents** instead of outputting code blocks:
+   ```
+   runSubagent(
+     model: "GPT-5.1-Codex-Max",
+     prompt: "{Full delegation prompt from task file}",
+     description: "{TaskName} - Implementation"
+   )
+   ```
+
+2. **Monitor active agents** on each Flow invocation:
+   - Check PR status for agent-delegated tasks
+   - Post refinement comments if PRs need updates
+   - Approve/merge when ready
+
+3. **Support agents** with:
+   - Planner approval when agents request design decisions
+   - Reviewer feedback when PRs are submitted
+   - Blocker resolution when agents report issues
+
+**If tools NOT available**: Fall back to code block delegation (current behavior)
 
 ## Planner
 

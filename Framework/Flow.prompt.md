@@ -10,15 +10,16 @@
 
 **IF you are Strategic Agent (Orchestrator)**:
 1. **Check ALL open PRs first** - Review for merge readiness or refinement needs
-2. **Draft PR comments** for incomplete PRs (with @copilot tags and delegation prompts)
-3. **Merge ready PRs** (if all acceptance criteria met)
-4. **Review backlog** using priority scores (see [TaskPrioritySystem.md](../Planning/TaskPrioritySystem.md))
-5. **Select tasks for delegation** to reach 5-PR minimum target
-6. **Output ALL pending work** in single response:
-   - PR review comments (for manual posting until tool supports it)
-   - New task delegations (code blocks for Implementation Agent)
+2. **Auto-delegate to Implementation Agents** - If tools available, invoke GPT-5.1-Codex-Max agents directly
+3. **Draft PR comments** for incomplete PRs (with @copilot tags and delegation prompts)
+4. **Merge ready PRs** (if all acceptance criteria met)
+5. **Review backlog** using priority scores (see [TaskPrioritySystem.md](../Planning/TaskPrioritySystem.md))
+6. **Select tasks for delegation** to reach 5-10 PR target (maximum 10)
+7. **Output ALL pending work** in single response:
+   - PR review comments (auto-posted or drafted)
+   - New task delegations (auto-invoked or code blocks)
    - Backlog status summary
-7. **Do NOT wait for user** between delegations - batch everything together
+8. **Do NOT wait for user** between delegations - batch everything together
 
 **IF you are Strategic Agent (Planner)**:
 1. Continue planning active task
@@ -212,8 +213,9 @@ When invoked in Copilot Cloud (via `file:Flow.prompt.md`), Strategic Agent (Orch
 
 **Backlog Health**:
 - Total tasks: {count}
-- Open PRs: {count} / 5 minimum
+- Open PRs: {count} / 5-10 target (max 10)
 - Next priority: {highest unassigned task}
+- Auto-delegation: {enabled/disabled} (tool availability)
 ```
 
 ### Critical Rules
@@ -320,12 +322,14 @@ For each open PR, **automate preparation** then verify readiness:
 - **Target Backlog**: Maintain 20 ready tasks at all times
 - If backlog < 15 tasks: Create new enhancement/feature tasks to reach 20
 - If backlog > 25 tasks: Focus on execution, defer new planning
-- **Target PRs**: Maintain at least 5 open PRs (or draft PRs) at all times
+- **Target PRs**: Maintain 5-10 open PRs (or draft PRs), maximum 10
 - Each PR should handle a single `.task` file
 - If open PRs < 5: Prioritize delegation to Implementation Agent for new tasks
+- If open PRs ≥ 10: Pause new delegations, focus on PR review/merge
 - Select highest-priority task and delegate to Planner or Implementation Agent
 - **Task Refinement**: Regularly review "Not Started" tasks for clarity and completeness
 - **Task Delegation**: Continuously delegate refined tasks to Implementation Agent
+- **Automatic Invocation**: If agent invocation tools available, directly invoke GPT-5.1-Codex-Max agents instead of outputting code blocks
 
 **Implementation Agent** - After completing implementation:
 
