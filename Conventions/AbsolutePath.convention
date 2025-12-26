@@ -28,6 +28,7 @@ Use the shared `Xeyth.Common.IO.Paths.AbsolutePath` helper for any user-supplied
 
 - Manual: Inspect path-sensitive code to ensure `AbsolutePath` is used for user inputs and `IsUnder` guards root traversal.
 - Automated: `dotnet test` (contracts/planning/verify suites include path safety coverage).
+- CI: `./build.sh Test` executes the full test battery on supported agents.
 
 ## See Also
 
