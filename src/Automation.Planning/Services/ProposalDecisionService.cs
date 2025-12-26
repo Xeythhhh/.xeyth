@@ -1,0 +1,29 @@
+using Automation.Planning.Models;
+
+namespace Automation.Planning.Services;
+
+public sealed class ProposalDecisionService
+{
+    public string ArchiveDecision(Proposal proposal, ProposalStatus status, string rootPath, string? rationale = null, string? taskPath = null)
+    {
+        if (proposal is null)
+        {
+            throw new ArgumentNullException(nameof(proposal));
+        }
+
+        var decisionDate = DateOnly.FromDateTime(DateTime.UtcNow);
+        var updated = ProposalFormatter.UpdateStatus(proposal.Content, status);
+        updated = ProposalFormatter.AppendDecision(updated, status, decisionDate, rationale, taskPath);
+
+        var archiveDirectory = Path.Combine(Path.GetDirectoryName(proposal.Path) ?? rootPath, "archive");
+        Directory.CreateDirectory(archiveDirectory);
+
+        var archiveFileName = $"{proposal.Name}.{decisionDate:yyyy-MM-dd}.proposal";
+        var archivePath = Path.Combine(archiveDirectory, archiveFileName);
+
+        File.WriteAllText(archivePath, updated);
+        File.Delete(proposal.Path);
+
+        return archivePath;
+    }
+}
