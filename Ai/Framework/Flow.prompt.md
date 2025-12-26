@@ -179,7 +179,7 @@ Example recommendation:
 
 - Commit changes to feature branch (`task/{task-name}`)
 - Push feature branch to origin
-- Create PR referencing task file (`gh pr create --base master --head task/{task-name}`)
+- Create PR referencing task file using the PR template (`gh pr create --base master --head task/{task-name}`)
 - Create `{TaskName}.task.{ReportName}.report` with progress summary
 - Delegate to Strategic Agent (Reviewer role) via code block
 - Do NOT assume another role (cross-model boundary)
