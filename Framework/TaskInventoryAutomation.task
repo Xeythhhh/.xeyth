@@ -1,0 +1,75 @@
+# Task Inventory Automation
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Framework/TaskInventoryAutomation.task](Framework/TaskInventoryAutomation.task)
+**Role**: Planner (see [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md))
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Plan CLI tool for automated task inventory management - currently manual, needs automation for add/remove/update operations.
+````
+
+---
+
+## Role: Planner
+
+**Task File**: Framework/TaskInventoryAutomation.task
+**Objective**: Create CLI tool to automate task inventory management (Plans.inventory, .plan.Tasks.inventory)
+
+**Role Reference**: See [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md) for workflow guidance.
+
+### Context
+
+Task inventories (.plan.Tasks.inventory, Plans.inventory) are currently maintained manually. Need CLI tool to:
+- Auto-detect new .task files and prompt for plan assignment
+- Update inventories when tasks are archived
+- Validate inventory consistency (all listed tasks exist, no orphans)
+- Generate reports of task distribution across plans
+
+### Your Responsibilities
+
+1. Research task discovery and inventory management patterns
+2. Design CLI architecture for inventory operations
+3. Plan integration with existing xeyth-planning tool
+4. Define validation rules and consistency checks
+
+### Deliverables
+
+- [ ] **D1**: Research report on task discovery patterns
+- [ ] **D2**: CLI command design (add-task, remove-task, sync-inventory, validate)
+- [ ] **D3**: Architecture decisions (standalone vs xeyth-planning integration)
+- [ ] **D4**: Validation rules documented
+- [ ] **D5**: Implementation plan ready for delegation
+
+### Verification Steps
+
+- [ ] Plan complete and approved by Planner
+- [ ] Ready for Implementation Agent delegation
+
+---
+
+## Task Details
+
+---
+
+Status: Not Started
+Owner: Strategic Agent (Planner)
+Priority: Medium
+Effort: Medium
+Priority Score: 8 (Impact:7 + Urgency:1 + Dependency:5 - Complexity:2 - Unblocks inventory management)
+
+## Objective
+
+Automate task inventory management to reduce manual overhead and ensure consistency.
+
+## Task Context
+
+- Current state: Manual updates to .plan.Tasks.inventory and Plans.inventory files
+- Desired state: CLI tool automates discovery, assignment, archival updates, and validation
+
+## Progress Log
+
+- 2025-12-26: Task created by Orchestrator for backlog maintenance

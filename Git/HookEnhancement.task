@@ -1,0 +1,76 @@
+# Git Hook Enhancement
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Git/HookEnhancement.task](Git/HookEnhancement.task)
+**Role**: Planner (see [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md))
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Plan git hook enhancements - pre-push validation, commit-msg improvements, pre-commit linting integration.
+````
+
+---
+
+## Role: Planner
+
+**Task File**: Git/HookEnhancement.task
+**Objective**: Enhance git hooks with additional validation and automation
+
+**Role Reference**: See [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md) for workflow guidance.
+
+### Context
+
+Git hooks need enhancement for:
+- Pre-push: Verify build/tests pass before push
+- Commit-msg: Enhanced validation (breaking change enforcement)
+- Pre-commit: Lint staged files (markdown, C#)
+- Post-checkout: Dependency check (NuGet restore needed?)
+
+### Your Responsibilities
+
+1. Research git hook best practices and patterns
+2. Design pre-push validation workflow
+3. Plan lint integration (markdownlint, dotnet format)
+4. Define hook installation and update strategy
+
+### Deliverables
+
+- [ ] **D1**: Research report on git hook patterns
+- [ ] **D2**: Pre-push validation design
+- [ ] **D3**: Pre-commit lint integration plan
+- [ ] **D4**: Hook installation strategy (user opt-in)
+- [ ] **D5**: Hook update mechanism
+- [ ] **D6**: Implementation plan
+
+### Verification Steps
+
+- [ ] Plan complete and approved by Planner
+- [ ] Ready for Implementation Agent delegation
+
+---
+
+## Task Details
+
+---
+
+Status: Not Started
+Owner: Strategic Agent (Planner)
+Priority: Low
+Effort: Medium
+Priority Score: 5 (Impact:4 + Urgency:1 + Dependency:2 - Complexity:1 - Quality improvement)
+
+## Objective
+
+Enhance git hooks to prevent broken commits/pushes and enforce quality standards.
+
+## Task Context
+
+- Current state: Basic commit-msg validation only
+- Desired state: Comprehensive validation across git workflow lifecycle
+
+## Progress Log
+
+- 2025-12-26: Task created by Orchestrator for backlog maintenance

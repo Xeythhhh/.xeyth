@@ -1,0 +1,76 @@
+# Snapshot Test Improvements
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Testing/SnapshotTestImprovements.task](Testing/SnapshotTestImprovements.task)
+**Role**: Planner (see [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md))
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Plan improvements to Verify snapshot testing - better diff tools, snapshot management, CI integration.
+````
+
+---
+
+## Role: Planner
+
+**Task File**: Testing/SnapshotTestImprovements.task
+**Objective**: Improve snapshot test workflow and tooling
+
+**Role Reference**: See [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md) for workflow guidance.
+
+### Context
+
+Verify snapshot tests need improvements:
+- Better diff tool integration (BeyondCompare, VS Code, etc.)
+- Snapshot organization (grouped by feature/test class)
+- CI integration (detect unexpected changes)
+- Snapshot migration strategy (when refactoring)
+
+### Your Responsibilities
+
+1. Research Verify best practices and configuration
+2. Design diff tool selection strategy
+3. Plan snapshot organization structure
+4. Define CI validation rules
+
+### Deliverables
+
+- [ ] **D1**: Research report on Verify advanced usage
+- [ ] **D2**: Diff tool integration design
+- [ ] **D3**: Snapshot organization strategy
+- [ ] **D4**: CI integration plan (fail on unexpected changes)
+- [ ] **D5**: Snapshot migration guidelines
+- [ ] **D6**: Implementation plan
+
+### Verification Steps
+
+- [ ] Plan complete and approved by Planner
+- [ ] Ready for Implementation Agent delegation
+
+---
+
+## Task Details
+
+---
+
+Status: Not Started
+Owner: Strategic Agent (Planner)
+Priority: Low
+Effort: Small
+Priority Score: 4 (Impact:3 + Urgency:1 + Dependency:1 - Complexity:0 - Quality improvement)
+
+## Objective
+
+Improve snapshot test workflow for better maintainability and CI integration.
+
+## Task Context
+
+- Current state: Basic Verify usage, manual diff review
+- Desired state: Optimized diff tools, organized snapshots, CI validation
+
+## Progress Log
+
+- 2025-12-26: Task created by Orchestrator for backlog maintenance

@@ -1,0 +1,76 @@
+# Architecture Decision Records
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Documentation/ArchitectureDecisionRecords.task](Documentation/ArchitectureDecisionRecords.task)
+**Role**: Planner (see [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md))
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Plan ADR (Architecture Decision Record) system - document significant decisions, rationale, alternatives, consequences.
+````
+
+---
+
+## Role: Planner
+
+**Task File**: Documentation/ArchitectureDecisionRecords.task
+**Objective**: Establish ADR system for documenting architectural decisions
+
+**Role Reference**: See [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md) for workflow guidance.
+
+### Context
+
+Architectural decisions need documentation for:
+- Future maintainers (why was this chosen?)
+- Decision rationale (alternatives considered)
+- Consequences and trade-offs
+- Change history (superseded decisions)
+
+### Your Responsibilities
+
+1. Research ADR formats and tools (adr-tools, MADR)
+2. Design ADR template and structure
+3. Plan integration with existing docs
+4. Define ADR workflow (creation, review, superseding)
+
+### Deliverables
+
+- [ ] **D1**: Research report on ADR systems
+- [ ] **D2**: ADR template design
+- [ ] **D3**: Directory structure and naming
+- [ ] **D4**: ADR workflow guidelines
+- [ ] **D5**: Integration plan (link from code/docs)
+- [ ] **D6**: Implementation plan
+
+### Verification Steps
+
+- [ ] Plan complete and approved by Planner
+- [ ] Ready for Implementation Agent delegation
+
+---
+
+## Task Details
+
+---
+
+Status: Not Started
+Owner: Strategic Agent (Planner)
+Priority: Medium
+Effort: Small
+Priority Score: 6 (Impact:5 + Urgency:1 + Dependency:2 - Complexity:1 - Knowledge preservation)
+
+## Objective
+
+Document architectural decisions to preserve rationale and context.
+
+## Task Context
+
+- Current state: Decisions in task files, no structured ADR system
+- Desired state: Formal ADR system with templates and workflow
+
+## Progress Log
+
+- 2025-12-26: Task created by Orchestrator for backlog maintenance

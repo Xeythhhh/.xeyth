@@ -1,0 +1,77 @@
+# CLI Tool Distribution Strategy
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Distribution/CliToolStrategy.task](Distribution/CliToolStrategy.task)
+**Role**: Planner (see [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md))
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Plan CLI tool distribution strategy - NuGet packages, GitHub releases, installation scripts, update mechanism.
+````
+
+---
+
+## Role: Planner
+
+**Task File**: Distribution/CliToolStrategy.task
+**Objective**: Define distribution strategy for xeyth-* CLI tools
+
+**Role Reference**: See [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md) for workflow guidance.
+
+### Context
+
+CLI tools need distribution strategy for:
+- NuGet package publishing (dotnet tool install)
+- GitHub releases (versioned artifacts)
+- Installation scripts (one-command setup)
+- Update mechanism (self-update or package manager)
+- Version compatibility (framework version requirements)
+
+### Your Responsibilities
+
+1. Research .NET tool distribution patterns
+2. Design NuGet package strategy (naming, versioning)
+3. Plan GitHub release automation
+4. Define installation/update workflow
+
+### Deliverables
+
+- [ ] **D1**: Research report on tool distribution
+- [ ] **D2**: NuGet package strategy
+- [ ] **D3**: GitHub release automation plan
+- [ ] **D4**: Installation script design
+- [ ] **D5**: Update mechanism plan
+- [ ] **D6**: Implementation plan
+
+### Verification Steps
+
+- [ ] Plan complete and approved by Planner
+- [ ] Ready for Implementation Agent delegation
+
+---
+
+## Task Details
+
+---
+
+Status: Not Started
+Owner: Strategic Agent (Planner)
+Priority: Medium
+Effort: Medium
+Priority Score: 6 (Impact:5 + Urgency:2 + Dependency:1 - Complexity:1 - Enables external adoption)
+
+## Objective
+
+Establish distribution strategy for easy installation and updates.
+
+## Task Context
+
+- Current state: No distribution, manual build required
+- Desired state: Published NuGet packages, automated releases, install scripts
+
+## Progress Log
+
+- 2025-12-26: Task created by Orchestrator for backlog maintenance
