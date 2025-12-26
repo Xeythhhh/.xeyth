@@ -1,0 +1,112 @@
+# Review Comment Remediation
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Framework/ReviewCommentRemediation.task](Framework/ReviewCommentRemediation.task)
+**Role**: Implementer (see [Framework/Implementation.prompt.md](Framework/Implementation.prompt.md))
+**Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
+
+Address unimplemented Copilot reviewer suggestions from PR #28 and PR #29 that were merged without fixes.
+````
+
+---
+
+## Role: Implementer
+
+**Task File**: Framework/ReviewCommentRemediation.task
+**Objective**: Implement Copilot reviewer suggestions that were auto-resolved without addressing
+
+**Role Reference**: See [Framework/Implementation.prompt.md](Framework/Implementation.prompt.md) for workflow guidance.
+
+### Context
+
+PRs #28 and #29 were merged after auto-resolving review threads WITHOUT implementing the suggestions. This violates code review principles and leaves known issues in the codebase.
+
+**PR #28 Unimplemented Suggestions**:
+1. Fix capitalization: "Pwsh" → "pwsh" in task file
+2. Fix date typo: "2024-12-24" → "2025-12-24" in progress log
+3. Fix task path reference in delegation section
+
+**PR #29 Unimplemented Suggestions**:
+1. Update error message to mention both "BREAKING CHANGE:" and "BREAKING-CHANGE:" formats
+2. Add test case for "BREAKING-CHANGE:" hyphenated variant
+3. Add test case for empty BREAKING CHANGE footer validation
+
+### Your Responsibilities
+
+1. Create feature branch: `git checkout -b task/review-comment-remediation`
+2. Implement all suggestions from PR #28
+3. Implement all suggestions from PR #29
+4. Run full verification: build, tests, lint
+5. Commit and push changes
+6. Create PR referencing this task
+7. Update progress log
+
+### Deliverables
+
+- [ ] **D1**: PR #28 suggestions implemented
+- [ ] **D2**: PR #29 suggestions implemented
+- [ ] **D3**: All tests pass with new test cases
+- [ ] **D4**: PR created and ready for review
+- [ ] **D5**: Progress report created
+
+### Implementation Guidance
+
+**PR #28 Files to Fix**:
+- `Automation/Automation/ScriptMigrationPhase2.task` (3 fixes)
+
+**PR #29 Files to Fix**:
+- Error message in commit validation code
+- Test file for BREAKING-CHANGE variant
+- Test file for empty footer validation
+
+**Verification Steps**:
+- [ ] `dotnet build` succeeds (0 errors, 0 warnings)
+- [ ] `dotnet test` passes (including new test cases)
+- [ ] `markdownlint` clean
+
+---
+
+## Task Details
+
+---
+
+Status: Not Started
+Owner: Implementation Agent
+Priority: Critical
+Effort: Small
+Priority Score: 13 (Impact:10 + Urgency:5 - Complexity:0 - Code quality debt)
+
+## Objective
+
+Remediate code review comments that were merged without implementation.
+
+## Task Context
+
+- Current state: PRs #28 and #29 merged with unimplemented reviewer suggestions
+- Desired state: All Copilot reviewer feedback properly addressed
+- Root cause: Orchestrator auto-resolved threads without delegating to Implementation Agent
+
+## Task Deliverables
+
+- D1: All PR #28 suggestions implemented
+- D2: All PR #29 suggestions implemented
+- D3: Tests pass with new coverage
+- D4: PR created and merged
+- D5: Framework instructions updated (already done)
+
+## Success Criteria
+
+- [ ] All 6 review comments from PR #28 and #29 implemented
+- [ ] Build succeeds (0 warnings)
+- [ ] All tests pass (including new test cases)
+- [ ] Lint clean
+- [ ] PR merged to master
+
+## Progress Log
+
+- 2025-12-26: Task created by Orchestrator after discovering flawed auto-resolve workflow
+- 2025-12-26: Framework instructions updated to require delegation instead of auto-resolve

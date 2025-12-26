@@ -43,20 +43,38 @@ Covers Orchestrator, Planner, Reviewer roles.
 2. Include delegation prompt in comment for Implementation Agent
 3. Move to next PR
 
-**Resolve Review Threads** (if any unresolved):
-```bash
-# Query unresolved threads
-gh api graphql -f query='query($owner:String!, $repo:String!, $pr:Int!) { repository(owner:$owner, name:$repo) { pullRequest(number:$pr) { reviewThreads(first:20) { nodes { id isResolved } } } } }' -f owner=Xeythhhh -f repo=.xeyth -F pr={number}
+**Review Thread Handling** (if any unresolved):
+1. Query threads and extract suggestions:
+   ```bash
+   gh api graphql -f query='query($owner:String!, $repo:String!, $pr:Int!) { repository(owner:$owner, name:$repo) { pullRequest(number:$pr) { reviewThreads(first:20) { nodes { id isResolved comments(first:5) { nodes { id body author { login } } } } } } } }' -f owner=Xeythhhh -f repo=.xeyth -F pr={number}
+   ```
 
-# Resolve each thread (auto-resolve Copilot reviewer suggestions)
-gh api graphql -f query='mutation { resolveReviewThread(input: {threadId: "{threadId}"}) { thread { id isResolved } } }'
-```
+2. **Post @copilot comment** delegating fixes to Implementation Agent:
+   ```bash
+   gh pr comment {number} --body "@copilot Please address the following review comments:
+   
+   [List each suggestion with thread ID]
+   
+   ````markdown
+   **Task**: [PR #{number} - Review Comments]
+   **Role**: Implementer (see Framework/Implementation.prompt.md)
+   **Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
+   
+   Address Copilot reviewer suggestions on this PR.
+   ````
+   
+   Comment when complete so threads can be resolved."
+   ```
+
+3. **DO NOT resolve threads** until Implementation Agent confirms fixes
+4. **DO NOT merge** until all threads addressed and resolved
 
 **If PR IS ready**:
-1. Auto-mark as ready: `gh pr ready {number}` (if still draft)
-2. Squash merge PR: `gh pr merge {number} --squash --delete-branch`
-3. Archive task file to `{Slice}/archive/{TaskName}.YYYY-MM-DD.task`
-4. Update task inventories
+1. Verify all review threads resolved (Implementation Agent addressed suggestions)
+2. Auto-mark as ready: `gh pr ready {number}` (if still draft)
+3. Squash merge PR: `gh pr merge {number} --squash --delete-branch`
+4. Archive task file to `{Slice}/archive/{TaskName}.YYYY-MM-DD.task`
+5. Update task inventories
 
 **Critical**: PR review and merge takes priority over new task delegation to maintain healthy pipeline flow.
 
@@ -80,6 +98,7 @@ When reviewing a PR for merge, verify ALL items:
 **GitHub Status**:
 - [ ] CI/CD checks: All green
 - [ ] Merge conflicts: None
+- [ ] Review threads: All resolved (Implementation Agent addressed suggestions)
 - [ ] Reviews: At least 1 approval (human or Copilot)
 - [ ] Draft status: Not draft
 
