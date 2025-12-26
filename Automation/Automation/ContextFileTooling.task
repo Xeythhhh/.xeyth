@@ -83,77 +83,97 @@ Design and implement dotnet CLI tooling suite for context file management:
 
 ## Architecture Decisions
 
-### AD-1: CLI Tool vs Library
+### AD-1: Integration with Existing xeyth-planning Tool
 
-**Decision**: Both - library (`Automation.Planning`) + CLI wrapper (`Automation.Planning.Cli`)  
+**Decision**: Extend existing `Automation.Planning` CLI tool with context file commands  
 **Rationale**:
-- Library provides reusable components for other automation
-- CLI wrapper exposes functionality for scripts/pipelines
-- Separation allows consumption from both code and command line
-- Aligns with existing Contracts pattern (Contracts.Core + Contracts.Cli)
+- `Automation.Planning` already exists as CLI tool (`xeyth-planning`) for proposal management
+- Adding context file commands alongside proposal commands creates comprehensive planning tool
+- Reuses existing infrastructure (Spectre.Console, command dispatcher, reporter, Automation.Cli.Common)
+- Avoids tool proliferation (single `xeyth-planning` tool for all planning/context operations)
+- Library code within `Automation.Planning` can be consumed by other automation projects
+- Pattern: Proposals use `.proposal` extension; context files use `.task`, `.plan`, `.report`, etc.
 
 ### AD-2: Technology Stack
 
 **Decision**: 
-- **Parser**: Markdown frontmatter parsing + convention-based structure detection
+- **Parser**: Regex-based markdown parsing for structured metadata extraction
 - **Querying**: LINQ over discovered files with strongly-typed models
-- **Output**: System.Text.Json for JSON serialization
-- **File System**: Microsoft.Extensions.FileSystemGlobbing for pattern matching
-- **CLI Framework**: System.CommandLine (modern, type-safe)
-- **Dependencies**: Minimal - file I/O, JSON, glob patterns only
+- **Output**: Spectre.Console for rich terminal output (already in use for proposals)
+- **File System**: Directory.EnumerateFiles with SearchOption.AllDirectories (following existing pattern)
+- **CLI Framework**: Custom command dispatcher (already implemented in Automation.Planning)
+- **Dependencies**: Spectre.Console (already present), Automation.Cli.Common (shared utilities)
 
-**Rationale**: Modern .NET 10 patterns, minimal dependencies, cross-platform, maintainable.
+**Rationale**: Consistency with existing `xeyth-planning` proposal commands; proven patterns already working.
 
 ### AD-3: Project Structure
 
-**Decision**: Create two new projects:
+**Decision**: Extend existing `Automation.Planning` project structure:
 ```
 src/
-  Automation.Planning/         (Library - core logic)
-    Models/                    (Task, Plan, Report, Convention models)
-    Parsers/                   (Parse context files into models)
-    Queries/                   (GetAllTasks, GetCompletedTasks, etc.)
-    Filters/                   (Filter by status, slice, date)
-  
-  Automation.Planning.Cli/     (CLI wrapper)
-    Commands/                  (Each utility as System.CommandLine command)
-    Program.cs                 (CLI entry point)
+  Automation.Planning/         (Existing CLI tool - add new features)
+    Models/                    (Add: ContextTask, ContextPlan, ContextReport, Convention)
+                              (Existing: Proposal, ProposalStatus)
+    Services/                  (Add: ContextFileDiscoveryService, ContextFileParser)
+                              (Existing: ProposalDiscoveryService, ProposalParser, etc.)
+    Commands/                  (Add: ListTasksCommand, GetTaskMetadataCommand, etc.)
+                              (Existing: ListProposalsCommand, AcceptProposalCommand, etc.)
+    Program.cs                 (Update: Register new commands in dispatcher)
     
   tests/
-    Automation.Planning.Tests/ (Unit + integration tests)
+    Automation.Planning.Tests/ (Existing - add context file tests)
 ```
 
-**Rationale**: Clean separation of concerns, testable library, thin CLI wrapper.
+**Rationale**: Leverage existing infrastructure; avoid duplication; single cohesive planning tool.
 
 ### AD-4: Output Format
 
-**Decision**: JSON by default, optional formats (text, table)  
-**Example**:
+**Decision**: Spectre.Console table format (matching existing proposal commands), with optional JSON flag for automation  
+**Default Table Output**:
+```text
+┌─────────────────────────┬──────────────┬────────────┬──────────────────┐
+│ Name                    │ Status       │ Created    │ Owner            │
+├─────────────────────────┼──────────────┼────────────┼──────────────────┤
+│ MarkdownLintRemediation │ Not Started  │ 2024-12-24 │ Strategic Agent  │
+└─────────────────────────┴──────────────┴────────────┴──────────────────┘
+```
+**JSON Output** (with `--json` flag for automation integration):
 ```json
-{
-  "tasks": [
-    {
-      "path": "Framework/MarkdownLintRemediation.task",
-      "status": "Not Started",
-      "owner": "Strategic Agent (Planner)",
-      "created": "2024-12-24",
-      "slice": "Framework"
-    }
-  ],
-  "count": 1
-}
+[
+  {
+    "name": "MarkdownLintRemediation",
+    "path": "Ai/Framework/MarkdownLintRemediation.task",
+    "status": "Not Started",
+    "owner": "Strategic Agent (Planner)",
+    "created": "2024-12-24",
+    "slice": "Ai/Framework"
+  }
+]
 ```
 
-**Rationale**: Machine-parseable, works with jq/PowerShell/CI tools, optional human-friendly formats.
+**Rationale**: Consistency with existing proposal commands (human-readable tables by default); optional JSON for CI/CD and scripting.
 
-### AD-5: CLI Packaging
+### AD-5: CLI Packaging and Usage
 
-**Decision**: Dotnet global/local tool via NuGet  
-**Package Name**: `xeyth-planning` (or similar)  
-**Installation**: `dotnet tool install --global xeyth-planning`  
-**Usage**: `xeyth-planning get-all-tasks --format json`
+**Decision**: Extend existing `xeyth-planning` dotnet tool  
+**Package Name**: `xeyth-planning` (no change)  
+**Installation**: `dotnet tool install --global xeyth-planning` (existing)  
+**Usage Examples**:
+```bash
+# Existing proposal commands (no change)
+xeyth-planning list-proposals --pending
+xeyth-planning accept-proposal MyProposal
 
-**Rationale**: Standard .NET distribution, easy installation, versioned, auto-updates.
+# New context file commands
+xeyth-planning list-tasks --root . --json
+xeyth-planning list-tasks --status "Not Started"
+xeyth-planning list-tasks --slice "Framework"
+xeyth-planning list-plans --root .
+xeyth-planning get-task-metadata MarkdownLintRemediation --json
+xeyth-planning list-reports --task MarkdownLintRemediation
+```
+
+**Rationale**: Single tool for all planning operations; consistent interface; backward compatible with existing proposal commands.
 
 ### AD-6: Discovery Strategy
 
@@ -190,82 +210,136 @@ src/
 
 ### Phase 1: Foundation (Implementation Agent)
 
-**Create Projects**:
-- `src/Automation.Planning.Cli/` - CLI wrapper project
-- Configure as dotnet tool in .csproj (PackAsTool, ToolCommandName)
-- Add System.CommandLine package
-- Add System.Text.Json for output
+**Add New Models** (in `Automation.Planning/Models/`):
+- `ContextTask.cs` - Model for .task files (Name, Path, Status, Owner, Created, Priority, Effort, Content)
+- `ContextPlan.cs` - Model for .plan files (Name, Path, Owner, Objective, Content)
+- `ContextReport.cs` - Model for .report files (Name, Path, Date, Agent, Status, Content)
+- `Convention.cs` - Model for .convention files (Name, Path, ApplyTo, Content)
 
-**Update Automation.Planning Library**:
-- Add Models/ folder with Task, Plan, Report, Convention classes
-- Add Parsers/ folder with base ContextFileParser
-- Add System.Text.Json for serialization
-- Add Microsoft.Extensions.FileSystemGlobbing (already in Contracts.Core)
+**Add Parsing Services** (in `Automation.Planning/Services/`):
+- `ContextFileParser.cs` - Base parser with regex-based metadata extraction
+- `TaskParser.cs` - Parser for .task files (inherits ContextFileParser)
+- `PlanParser.cs` - Parser for .plan files (inherits ContextFileParser)
+- `ReportParser.cs` - Parser for .report files (inherits ContextFileParser)
+- `ConventionParser.cs` - Parser for .convention files (inherits ContextFileParser)
 
-### Phase 2: Core Discovery (Implementation Agent)
+**Add Discovery Services** (in `Automation.Planning/Services/`):
+- `ContextFileDiscoveryService.cs` - Generic discovery service for context files (pattern: `*.{extension}`, excludes `**/archive/**`)
 
-**Implement File Discovery**:
-- `ContextFileScanner` - discovers files by pattern, excludes archives
-- `TaskParser` - parses .task files into Task model
-- `PlanParser` - parses .plan files into Plan model
-- `ReportParser` - parses .report files into Report model
+### Phase 2: Core Commands (Implementation Agent)
 
-**Metadata Extraction**:
-- Regex-based extraction for Status, Owner, Created fields
-- Path-based slice detection
-- Extension-based type detection
+**Implement Discovery Commands** (in `Automation.Planning/Commands/`):
+- `ListTasksCommand.cs` - List all .task files (options: `--root`, `--json`, `--include-archive`)
+- `ListPlansCommand.cs` - List all .plan files (options: `--root`, `--json`)
+- `ListReportsCommand.cs` - List all .report files (options: `--root`, `--json`, `--task <name>`)
+- `ListConventionsCommand.cs` - List all .convention files (options: `--root`, `--json`)
 
-### Phase 3: Query API (Implementation Agent)
+**Command Base Pattern**:
+- Inherit from `PlanningCommandBase` (existing base class)
+- Follow existing pattern from `ListProposalsCommand`
+- Use `StatusSpinner` for discovery operations
+- Use `PlanningReporter` for output
+- Support `--help` flag (inherited from base)
 
-**Implement Query Classes** (in Automation.Planning/Queries/):
-- `GetAllTasks` - returns all discovered tasks
-- `GetAllPlans` - returns all discovered plans
-- `GetTasksForPlan` - filter tasks by plan reference
-- `GetCompletedTasks` - filter by Status contains "Complete" or archived
-- `GetPendingTasks` - filter by Status NOT "Complete"
-- `GetTasksBySlice` - filter by slice path
-- `GetTasksByStatus` - filter by exact status match
+**Update Program.cs**:
+- Register new commands in `CommandDispatcher`
+- Add new commands to command array alongside existing proposal commands
 
-### Phase 4: CLI Commands (Implementation Agent)
+### Phase 3: Filtering & Querying (Implementation Agent)
 
-**Implement Commands** (in Automation.Planning.Cli/Commands/):
-- Each query as System.CommandLine command
-- Common options: --format (json|text|table), --output (file path), --root (scan path)
-- Example: `GetAllTasksCommand` wraps `GetAllTasks` query
+**Add Filtering to List Commands**:
+- `ListTasksCommand` additional options:
+  - `--status <status>` - Filter by exact status ("Not Started", "In Progress", "Completed")
+  - `--slice <slice>` - Filter by vertical slice path (e.g., "Framework", "Git")
+  - `--pending` - Shortcut for non-completed tasks
+  - `--completed` - Shortcut for completed/archived tasks
+  - `--owner <owner>` - Filter by owner field
+  - `--since <date>` - Filter by created date (ISO format)
 
-**Program.cs**:
-- Configure root command with all subcommands
-- Handle --version, --help flags
-- Configure JSON output formatting (indented by default)
+- `ListReportsCommand` additional options:
+  - `--task <name>` - Filter reports related to specific task
+  - `--agent <agent>` - Filter by agent (Strategic/Implementation)
+  - `--since <date>` - Filter by report date
+
+**Filtering Logic**:
+- Implement in-memory LINQ filtering after discovery
+- Case-insensitive matching for text filters
+- Support partial matches for slice paths (e.g., "Frame" matches "Ai/Framework")
+
+### Phase 4: Metadata & Relationships (Implementation Agent)
+
+**Add Metadata Command** (in `Automation.Planning/Commands/`):
+- `GetTaskMetadataCommand.cs` - Get detailed metadata for specific task
+  - Usage: `xeyth-planning get-task-metadata <task-name> [--json] [--root .]`
+  - Output: Full metadata (Status, Owner, Created, Priority, Effort, Objective, Deliverables, Progress Log)
+  - Supports both table and JSON output
+
+**Add Relationship Discovery**:
+- `FindTaskReportsCommand.cs` - Find all reports for a specific task
+  - Usage: `xeyth-planning find-task-reports <task-name> [--root .]`
+  - Searches for `<TaskName>.task.*.report` pattern
+  - Lists all related progress reports, blocker reports, review reports
+
+- Update `ListReportsCommand` to show task relationships
+  - Parse report filename to extract related task name
+  - Display task association in output table
+
+**Add Task-Plan Linking** (Future Enhancement - Phase 6):
+- Parse "Related Task" field in plans
+- Parse "Plan File" field in tasks
+- Show bidirectional relationships
 
 ### Phase 5: Testing & Documentation (Implementation Agent)
 
-**Unit Tests** (Automation.Planning.Tests):
-- Parser tests with sample markdown content
-- Query tests with in-memory file lists
-- Filter logic tests
+**Unit Tests** (in `tests/Automation.Planning.Tests/`):
+- `ContextFileParserTests.cs` - Test metadata extraction with sample markdown
+- `TaskParserTests.cs` - Test .task file parsing (Status, Owner, Created, Priority, Effort)
+- `PlanParserTests.cs` - Test .plan file parsing (Objective, Owner, Context)
+- `ReportParserTests.cs` - Test .report file parsing (Date, Agent, Status)
+- `ContextFileDiscoveryServiceTests.cs` - Test file discovery with mock file system
+- `ListTasksCommandTests.cs` - Test command execution and filtering
+- `GetTaskMetadataCommandTests.cs` - Test metadata extraction command
 
 **Integration Tests**:
-- End-to-end tests using actual Ai/ folder files
-- Verify output format (JSON deserialization)
+- End-to-end test with actual framework files (Ai/, Git/, Automation/)
+- Verify discovery excludes `archive/` directories
+- Verify JSON serialization round-trips correctly
+- Test filtering with real data
 
 **Documentation**:
-- README.md in Automation.Planning.Cli with usage examples
-- Inline XML docs on public APIs
-- Example scripts (PowerShell, bash) showing automation usage
+- Update `README.md` in Automation.Planning with:
+  - New context file command examples
+  - Integration/automation examples (CI/CD, PowerShell scripts)
+  - JSON output schema documentation
+- Add XML doc comments to all public models and services
+- Create `Automation.Planning.Commands.md` with command reference
 
-### Phase 6: Packaging & Distribution (Implementation Agent)
+### Phase 6: Advanced Features & Polish (Implementation Agent)
 
-**NuGet Package Configuration**:
-- Configure .csproj with PackAsTool=true
-- Set ToolCommandName (e.g., "xeyth-planning")
-- Add package metadata (authors, description, license, repo URL)
-- Configure release notes, version
+**JSON Output Support**:
+- Add `--json` flag support to all list commands
+- Serialize models using System.Text.Json
+- Pretty-print JSON output (indented)
+- Document JSON schema in README
 
-**Build Integration**:
-- Add Nuke target for packing tool
-- Add Nuke target for local tool installation (test)
-- Verify cross-platform build
+**Helper Utilities** (Optional/Future):
+- `ValidateTaskCommand.cs` - Validate .task file structure against conventions
+  - Check required fields (Status, Created, Owner)
+  - Verify delegation prompt format
+  - Check progress log exists
+  - Validate architecture decision format
+
+- `ArchiveTaskCommand.cs` - Archive completed task (move to archive/ with date suffix)
+  - Usage: `xeyth-planning archive-task <task-name> [--date YYYY-MM-DD]`
+  - Validates task is completed
+  - Moves to appropriate archive/ directory
+  - Updates related inventories
+
+**Packaging & Distribution**:
+- No changes needed (.csproj already configured with PackAsTool=true, ToolCommandName=xeyth-planning)
+- Update version in .csproj when ready for release
+- Add release notes documenting new context file commands
+- Build and test cross-platform (Windows, macOS, Linux) via CI/CD
 
 ---
 
@@ -273,3 +347,32 @@ src/
 
 - 2024-12-24: Task created by Orchestrator - user requested dotnet CLI utilities for context file management
 - 2024-12-24: Planning complete (Planner) - Architecture decisions finalized, 6-phase implementation plan created
+- 2025-12-26: Planning reviewed and finalized (Planner - Strategic Agent):
+  - ✅ Analyzed existing repository structure - `Automation.Planning` already exists as CLI tool for proposal management
+  - ✅ Resolved architectural conflict - Updated AD-1 to extend existing `xeyth-planning` tool instead of creating new projects
+  - ✅ Updated AD-2 Technology Stack to align with existing patterns (Spectre.Console, custom dispatcher)
+  - ✅ Updated AD-3 Project Structure to reflect extending existing codebase
+  - ✅ Updated AD-4 Output Format to match existing proposal command pattern (tables + optional JSON)
+  - ✅ Updated AD-5 CLI Packaging to extend existing tool
+  - ✅ Refined all 6 implementation phases with concrete, actionable steps
+  - ✅ Validated plan against existing codebase patterns (ProposalDiscoveryService, ListProposalsCommand, etc.)
+  - ✅ Plan ready for delegation to Implementation Agent
+
+## Planner Sign-Off
+
+**Status**: ✅ Planning Complete - Ready for Implementation  
+**Date**: 2025-12-26  
+**Agent**: Strategic Agent (Claude Sonnet 4.5) - Planner Role
+
+**Summary**: 
+Architecture decisions finalized to extend existing `xeyth-planning` CLI tool with context file management commands. Plan leverages existing infrastructure (Spectre.Console, command dispatcher, Automation.Cli.Common) and follows proven patterns from proposal management commands. 6-phase implementation plan provides concrete, actionable steps for Implementation Agent.
+
+**Key Decisions**:
+- Extend existing `Automation.Planning` project (not create new projects)
+- Add Models (ContextTask, ContextPlan, ContextReport, Convention)
+- Add Services (ContextFileParser, ContextFileDiscoveryService, specialized parsers)
+- Add Commands (ListTasksCommand, ListPlansCommand, GetTaskMetadataCommand, etc.)
+- Follow existing patterns (PlanningCommandBase, StatusSpinner, PlanningReporter)
+- Support table output (default) + JSON output (--json flag for automation)
+
+**Implementation Readiness**: ✅ All phases detailed with specific classes, file locations, and patterns to follow.
