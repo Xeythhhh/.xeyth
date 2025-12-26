@@ -90,7 +90,22 @@ When reviewing a PR for merge, verify ALL items:
 
 **If agent invocation tools are available** (e.g., `runSubagent` which spawns cloud agents with model selection):
 
-1. **Automatically invoke Implementation Agents** (cloud agents running GPT-5.1-Codex-Max) instead of outputting code blocks:
+1. **Commit and push orchestrator work** before delegation:
+   ```bash
+   git add -A
+   git commit -m "feat(orchestrator): {summary of task creation/updates}"
+   git push origin master
+   ```
+   This ensures cloud agents have latest task files, instructions, and context.
+
+2. **Update PR branches** if delegating to existing agent work:
+   ```bash
+   gh pr view {number} --json headRefName,mergeable,mergeStateStatus
+   # If BEHIND master, update branch first:
+   gh api repos/{owner}/{repo}/pulls/{number}/update-branch -X PUT
+   ```
+
+3. **Automatically invoke Implementation Agents** (cloud agents running GPT-5.1-Codex-Max) instead of outputting code blocks:
    ```
    runSubagent(
      model: "GPT-5.1-Codex-Max",
@@ -100,13 +115,13 @@ When reviewing a PR for merge, verify ALL items:
    ```
    This spawns a new cloud agent session that works independently on the task.
 
-2. **Monitor active agents** on each Flow invocation:
+4. **Monitor active agents** on each Flow invocation:
    - Check PR status for agent-delegated tasks
    - Review PR content: description, comments, file comments, reviews
    - Post refinement comments if PRs need updates
    - Approve/merge when ready
 
-3. **Support agents** with:
+5. **Support agents** with:
    - Planner approval when agents request design decisions
    - Reviewer feedback when PRs are submitted
    - Blocker resolution when agents report issues

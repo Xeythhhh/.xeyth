@@ -10,16 +10,21 @@
 
 **IF you are Strategic Agent (Orchestrator)**:
 1. **Check ALL open PRs first** - Review for merge readiness or refinement needs
-2. **Auto-delegate to Implementation Agents** - If tools available, invoke GPT-5.1-Codex-Max agents directly
-3. **Draft PR comments** for incomplete PRs (with @copilot tags and delegation prompts)
-4. **Merge ready PRs** (if all acceptance criteria met)
-5. **Review backlog** using priority scores (see [TaskPrioritySystem.md](../Planning/TaskPrioritySystem.md))
-6. **Select tasks for delegation** to reach 5-10 PR target (maximum 10)
-7. **Output ALL pending work** in single response:
+   - Read full PR content: description, comments, file comments, reviews
+   - Use `gh pr view {number} --json title,body,comments,reviews,files`
+2. **Commit and push orchestrator work** - Before delegating to cloud agents:
+   - Commit any task creation/updates: `git add -A && git commit && git push`
+   - Update PR branches if behind: `gh api repos/{owner}/{repo}/pulls/{number}/update-branch -X PUT`
+3. **Auto-delegate to Implementation Agents** - If tools available (runSubagent spawns cloud agents), invoke GPT-5.1-Codex-Max agents directly
+4. **Draft PR comments** for incomplete PRs (with @copilot tags and delegation prompts)
+5. **Merge ready PRs** (if all acceptance criteria met)
+6. **Review backlog** using priority scores (see [TaskPrioritySystem.md](../Planning/TaskPrioritySystem.md))
+7. **Select tasks for delegation** to reach 5-10 PR target (maximum 10)
+8. **Output ALL pending work** in single response:
    - PR review comments (auto-posted or drafted)
-   - New task delegations (auto-invoked or code blocks)
+   - New task delegations (auto-invoked cloud agents or code blocks)
    - Backlog status summary
-8. **Do NOT wait for user** between delegations - batch everything together
+9. **Do NOT wait for user** between delegations - batch everything together
 
 **IF you are Strategic Agent (Planner)**:
 1. Continue planning active task
@@ -230,6 +235,43 @@ When invoked in Copilot Cloud (via `file:Flow.prompt.md`), Strategic Agent (Orch
 
 For each open PR, **automate preparation** then verify readiness:
 
+### Comprehensive PR Content Review (use `gh` CLI):
+
+1. **Read full PR details**:
+   ```bash
+   gh pr view {number} --json title,body,comments,reviews,files
+   ```
+
+2. **Check PR description/body**:
+   - Task file referenced
+   - Deliverables listed and marked complete
+   - Verification steps documented
+   - Build/test status reported
+
+3. **Review all PR comments**:
+   ```bash
+   gh pr view {number} --comments
+   ```
+   - Check for @copilot delegation prompts
+   - Look for blocker reports or questions
+   - Verify Implementation Agent responses
+
+4. **Check file-level comments**:
+   ```bash
+   gh pr view {number} --json reviewThreads
+   ```
+   - Review code comments and discussions
+   - Check for unresolved threads
+   - Verify feedback has been addressed
+
+5. **Review PR reviews**:
+   ```bash
+   gh pr view {number} --json reviews
+   ```
+   - Check approval status
+   - Review change requests
+   - Verify reviewer feedback addressed
+
 ### Automated PR Preparation (use `gh` CLI when available):
 
 1. **Approve workflows** if awaiting approval:
@@ -326,10 +368,13 @@ For each open PR, **automate preparation** then verify readiness:
 - Each PR should handle a single `.task` file
 - If open PRs < 5: Prioritize delegation to Implementation Agent for new tasks
 - If open PRs ≥ 10: Pause new delegations, focus on PR review/merge
+- **Comprehensive PR Review**: Check description, comments, file comments, reviews - everything in the PR
+- **Commit/Push Before Delegation**: When cloud agents available, commit and push orchestrator work (task creation, updates) before spawning agents to ensure they have latest context
+- **Update PR Branches**: Before delegating to existing agent work, update PR branches if behind master
 - Select highest-priority task and delegate to Planner or Implementation Agent
 - **Task Refinement**: Regularly review "Not Started" tasks for clarity and completeness
 - **Task Delegation**: Continuously delegate refined tasks to Implementation Agent
-- **Automatic Invocation**: If agent invocation tools available, directly invoke GPT-5.1-Codex-Max agents instead of outputting code blocks
+- **Automatic Invocation**: If agent invocation tools available (runSubagent spawns cloud agents), directly invoke GPT-5.1-Codex-Max cloud agents instead of outputting code blocks
 
 **Implementation Agent** - After completing implementation:
 
