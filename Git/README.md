@@ -8,11 +8,13 @@ The `.xeyth` repository uses templated commits based on **Conventional Commits 1
 
 - Visibility: public
 - Enforce admins: enabled
-- Reviews: minimum 2 approvals; stale reviews dismissed on new commits; code owner reviews required
-- Conversations: must be resolved before merge
+- Reviews: minimum 0 approvals (solo development); conversations must be resolved before merge
 - Force pushes: blocked; branch deletions: blocked
-- Status checks: strict mode enabled; contexts list currently empty (add CI contexts once pipelines exist)
-- CODEOWNERS: `.github/CODEOWNERS` with `* @Xeythhhh` (ensures your approval is required)
+- Status checks: strict mode enabled; required checks:
+  - `build` - Build workflow (ubuntu)
+  - `test (ubuntu-latest)` - Test workflow (Ubuntu)
+  - `test (windows-latest)` - Test workflow (Windows)
+  - `test (macos-latest)` - Test workflow (macOS)
 
 CI workflows (GitHub Actions):
 
