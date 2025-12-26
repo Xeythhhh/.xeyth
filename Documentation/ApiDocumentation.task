@@ -1,0 +1,76 @@
+# API Documentation Generation
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Documentation/ApiDocumentation.task](Documentation/ApiDocumentation.task)
+**Role**: Planner (see [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md))
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Plan automated API documentation generation for all libraries (Automation, Contracts, Framework) using DocFX or similar.
+````
+
+---
+
+## Role: Planner
+
+**Task File**: Documentation/ApiDocumentation.task
+**Objective**: Generate API documentation automatically from XML comments
+
+**Role Reference**: See [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md) for workflow guidance.
+
+### Context
+
+Libraries (Automation.*, Contracts.*, Xeyth.*) need API documentation for:
+- Public APIs (CLI tools as libraries)
+- Extension points (custom validators, renderers)
+- Integration patterns (consuming tools in other projects)
+- Architecture decisions and design rationale
+
+### Your Responsibilities
+
+1. Research .NET documentation tools (DocFX, Sandcastle, etc.)
+2. Design documentation structure and navigation
+3. Plan integration with build pipeline
+4. Define documentation standards (XML comments, code examples)
+
+### Deliverables
+
+- [ ] **D1**: Research report on .NET documentation tools
+- [ ] **D2**: Tool selection and rationale
+- [ ] **D3**: Documentation structure design
+- [ ] **D4**: Build integration plan (Nuke tasks)
+- [ ] **D5**: XML comment standards and guidelines
+- [ ] **D6**: Implementation plan for setup
+
+### Verification Steps
+
+- [ ] Plan complete and approved by Planner
+- [ ] Ready for Implementation Agent delegation
+
+---
+
+## Task Details
+
+---
+
+Status: Not Started
+Owner: Strategic Agent (Planner)
+Priority: Medium
+Effort: Medium
+Priority Score: 6 (Impact:5 + Urgency:1 + Dependency:2 - Complexity:1 - Improves discoverability)
+
+## Objective
+
+Automate API documentation generation to improve discoverability and adoption.
+
+## Task Context
+
+- Current state: No API docs, users must read source code
+- Desired state: Generated docs from XML comments, hosted/browsable
+
+## Progress Log
+
+- 2025-12-26: Task created by Orchestrator for backlog maintenance

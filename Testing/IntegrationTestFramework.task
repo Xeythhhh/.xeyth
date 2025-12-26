@@ -1,0 +1,76 @@
+# Integration Test Framework
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Testing/IntegrationTestFramework.task](Testing/IntegrationTestFramework.task)
+**Role**: Planner (see [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md))
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Plan integration test framework - test fixtures, database/file system isolation, Docker test containers.
+````
+
+---
+
+## Role: Planner
+
+**Task File**: Testing/IntegrationTestFramework.task
+**Objective**: Establish integration test framework with proper isolation
+
+**Role Reference**: See [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md) for workflow guidance.
+
+### Context
+
+Integration tests need framework for:
+- File system isolation (temp directories, cleanup)
+- Git repository fixtures (test repos)
+- Process execution testing (CLI tools)
+- Docker test containers (future: databases, services)
+
+### Your Responsibilities
+
+1. Research .NET integration test patterns
+2. Design test fixture architecture
+3. Plan isolation strategies (file system, processes)
+4. Define test data management
+
+### Deliverables
+
+- [ ] **D1**: Research report on integration test frameworks
+- [ ] **D2**: Test fixture design
+- [ ] **D3**: Isolation strategy (file system, processes)
+- [ ] **D4**: Test data management plan
+- [ ] **D5**: Docker test containers plan (future)
+- [ ] **D6**: Implementation plan
+
+### Verification Steps
+
+- [ ] Plan complete and approved by Planner
+- [ ] Ready for Implementation Agent delegation
+
+---
+
+## Task Details
+
+---
+
+Status: Not Started
+Owner: Strategic Agent (Planner)
+Priority: Medium
+Effort: Medium
+Priority Score: 6 (Impact:5 + Urgency:1 + Dependency:2 - Complexity:1 - Quality improvement)
+
+## Objective
+
+Establish integration test framework for reliable end-to-end testing.
+
+## Task Context
+
+- Current state: Basic integration tests, ad-hoc isolation
+- Desired state: Robust test framework with proper isolation and fixtures
+
+## Progress Log
+
+- 2025-12-26: Task created by Orchestrator for backlog maintenance
