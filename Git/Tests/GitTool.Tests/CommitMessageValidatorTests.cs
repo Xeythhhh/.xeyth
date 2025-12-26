@@ -22,11 +22,25 @@ public sealed class CommitMessageValidatorTests
     }
 
     [Fact]
-    public void Validate_Allows_Breaking_Indicator()
+    public void Validate_Allows_Breaking_Indicator_WhenFooterPresent()
+    {
+        var message = """
+                      feat(git)!: breaking change
+
+                      BREAKING CHANGE: update commit message contract
+                      """;
+
+        var result = CommitMessageValidator.Validate(message, Array.Empty<string>());
+
+        Assert.False(result.HasErrors);
+    }
+
+    [Fact]
+    public void Validate_Fails_WhenBreaking_Indicator_LacksFooter()
     {
         var result = CommitMessageValidator.Validate("feat(git)!: breaking change", Array.Empty<string>());
 
-        Assert.False(result.HasErrors);
+        Assert.Contains(result.Errors, error => error.Contains("BREAKING CHANGE", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
