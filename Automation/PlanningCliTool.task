@@ -147,17 +147,17 @@ Create xeyth-planning CLI tool to manage proposal workflow, enabling Orchestrato
 
 ## Success Criteria
 
-- [ ] `dotnet build` succeeds (0 errors, 0 warnings)
-- [ ] `nuke Compile Test` passes (all tests passing)
-- [ ] Can list proposals: `xeyth-planning list-proposals --pending`
-- [ ] Can show details: `xeyth-planning show-proposal {name}`
-- [ ] Can accept: `xeyth-planning accept-proposal {name} --task {path}`
-- [ ] Can defer: `xeyth-planning defer-proposal {name} --reason {text}`
-- [ ] Can reject: `xeyth-planning reject-proposal {name} --reason {text}`
-- [ ] Visual output uses Automation.Cli.Common components
-- [ ] Package installs as dotnet tool
+- [x] `dotnet build` succeeds (0 errors, 0 warnings)
+- [x] `nuke Compile Test` passes (all tests passing)
+- [x] Can list proposals: `xeyth-planning list-proposals --pending`
+- [x] Can show details: `xeyth-planning show-proposal {name}`
+- [x] Can accept: `xeyth-planning accept-proposal {name} --task {path}`
+- [x] Can defer: `xeyth-planning defer-proposal {name} --reason {text}`
+- [x] Can reject: `xeyth-planning reject-proposal {name} --reason {text}`
+- [x] Visual output uses Automation.Cli.Common components
+- [x] Package installs as dotnet tool
 
 ## Progress Log
 
 - 2024-12-24: Task created for proposal management CLI tool
-
+- 2025-12-26: Implemented xeyth-planning CLI (list/show/accept/defer/reject), proposal services, task creation, packaging, and tests (`dotnet test`).
