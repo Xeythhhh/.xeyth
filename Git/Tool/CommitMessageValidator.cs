@@ -167,22 +167,23 @@ internal static partial class CommitMessageValidator
             const string breakingChange = "BREAKING CHANGE:";
             const string breakingChangeHyphen = "BREAKING-CHANGE:";
 
-            if (trimmed.StartsWith(breakingChange, StringComparison.OrdinalIgnoreCase))
-            {
-                return !string.IsNullOrWhiteSpace(trimmed[breakingChange.Length..].Trim());
-            }
-
-            if (trimmed.StartsWith(breakingChangeHyphen, StringComparison.OrdinalIgnoreCase))
-            {
-                return !string.IsNullOrWhiteSpace(trimmed[breakingChangeHyphen.Length..].Trim());
-            }
-
-            return false;
+            return HasTrailerValue(trimmed, breakingChange) || HasTrailerValue(trimmed, breakingChangeHyphen);
         });
 
         if (!hasBreakingFooter)
         {
             result.Errors.Add("Add a 'BREAKING CHANGE:' footer when using '!'.");
+        }
+
+        static bool HasTrailerValue(string line, string prefix)
+        {
+            if (!line.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            var value = line[prefix.Length..].Trim();
+            return value.Length > 0;
         }
     }
 
@@ -195,7 +196,7 @@ internal static partial class CommitMessageValidator
             .ToList();
     }
 
-    [GeneratedRegex("^(?<type>[a-z]+)(\\((?<scope>[^)]+)\\))?(?<breaking>!)?(?:: (?<subject>.+))$")]
+    [GeneratedRegex("^(?<type>[a-z]+)(\\((?<scope>[^)]+)\\))?(?<breaking>!)?: (?<subject>.+)$")]
     private static partial Regex HeaderRegex();
 
     private static bool IsBypassCandidate(string header)
