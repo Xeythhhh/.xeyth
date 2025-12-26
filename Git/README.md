@@ -168,6 +168,7 @@ The `commit-msg` hook validates:
 ✓ Subject uses lowercase first letter
 ✓ Subject has no trailing period
 ✓ Scope is valid (if provided)
+✓ BREAKING CHANGE footer present when using "!"
 ⚠ Body lines wrap at 72 characters
 
 ### Validation Levels
@@ -242,7 +243,7 @@ The `.gitmessage` template file contains:
 - All type and scope options
 - Validation rules
 - Comprehensive examples
-- Footer format guide
+- Git trailer guide (BREAKING CHANGE, Refs/Closes, Co-authored-by, etc.)
 
 View it: `cat .gitmessage`
 
