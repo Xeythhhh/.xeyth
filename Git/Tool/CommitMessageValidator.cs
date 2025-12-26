@@ -172,7 +172,7 @@ internal static partial class CommitMessageValidator
 
         if (!hasBreakingFooter)
         {
-            result.Errors.Add("Add a 'BREAKING CHANGE:' footer when using '!'.");
+            result.Errors.Add("Add a 'BREAKING CHANGE:' or 'BREAKING-CHANGE:' footer when using '!'.");
         }
 
         static bool HasTrailerValue(string line, string prefix)

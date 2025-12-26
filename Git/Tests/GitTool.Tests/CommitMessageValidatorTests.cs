@@ -44,6 +44,34 @@ public sealed class CommitMessageValidatorTests
     }
 
     [Fact]
+    public void Validate_Allows_Breaking_Indicator_WithHyphenatedFooter()
+    {
+        var message = """
+                      feat(git)!: breaking change
+
+                      BREAKING-CHANGE: update commit message contract
+                      """;
+
+        var result = CommitMessageValidator.Validate(message, Array.Empty<string>());
+
+        Assert.False(result.HasErrors);
+    }
+
+    [Fact]
+    public void Validate_Fails_WhenBreaking_FooterIsEmpty()
+    {
+        var message = """
+                      feat(git)!: breaking change
+
+                      BREAKING CHANGE:
+                      """;
+
+        var result = CommitMessageValidator.Validate(message, Array.Empty<string>());
+
+        Assert.Contains(result.Errors, error => error.Contains("BREAKING CHANGE", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
     public void Validate_Fails_ForInvalidType()
     {
         var result = CommitMessageValidator.Validate("invalid(git): message", Array.Empty<string>());
