@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if command -v xeyth-git >/dev/null 2>&1; then
+  exec xeyth-git commit-msg "$@"
+fi
+
+echo "xeyth-git not installed; skipping commit message validation" >&2
+exit 0
