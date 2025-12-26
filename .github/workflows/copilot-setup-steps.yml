@@ -5,6 +5,8 @@ on:
 jobs:
   setup:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read  # Minimal permissions for documentation workflow
     
     steps:
       - name: Checkout repository
