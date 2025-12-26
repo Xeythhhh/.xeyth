@@ -8,7 +8,7 @@ public sealed class ReporterTests
     [Fact]
     public void ReportValidation_WritesSuccess_WhenNoIssues()
     {
-        var writer = new StringWriter();
+        using var writer = new StringWriter();
         var reporter = new Reporter(TestConsole(writer));
 
         reporter.ReportValidation(new ValidationResult(), ValidationLevel.Strict);
@@ -23,7 +23,7 @@ public sealed class ReporterTests
         result.Warnings.Add("warn");
         result.Errors.Add("error");
 
-        var writer = new StringWriter();
+        using var writer = new StringWriter();
         var reporter = new Reporter(TestConsole(writer));
 
         reporter.ReportValidation(result, ValidationLevel.Warn);

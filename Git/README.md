@@ -207,10 +207,10 @@ chmod +x .git/hooks/prepare-commit-msg .git/hooks/commit-msg
 
 If `xeyth-git` is not installed, the wrappers emit a warning and allow the commit to continue.
 
-Install the tool globally:
+Install the tool globally from a local package source (after packing to `./nupkg`):
 
 ```bash
-dotnet tool install -g xeyth-git
+dotnet tool install --global --add-source ./nupkg xeyth-git
 ```
 
 ## Configuration

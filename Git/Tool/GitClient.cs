@@ -82,6 +82,22 @@ internal interface IGitProcessRunner
 
 internal sealed class GitProcessRunner : IGitProcessRunner
 {
+    private readonly IProcessFactory _processFactory;
+    private readonly int _timeoutMilliseconds;
+
+    private const int DefaultTimeoutMilliseconds = 5000;
+
+    internal GitProcessRunner()
+        : this(new ProcessFactory(), DefaultTimeoutMilliseconds)
+    {
+    }
+
+    internal GitProcessRunner(IProcessFactory processFactory, int timeoutMilliseconds = DefaultTimeoutMilliseconds)
+    {
+        _processFactory = processFactory;
+        _timeoutMilliseconds = timeoutMilliseconds;
+    }
+
     public string? Run(params string[] args)
     {
         try
@@ -99,14 +115,14 @@ internal sealed class GitProcessRunner : IGitProcessRunner
                 startInfo.ArgumentList.Add(arg);
             }
 
-            using var process = Process.Start(startInfo);
+            using var process = _processFactory.Start(startInfo);
             if (process is null)
             {
                 return null;
             }
 
             var output = process.StandardOutput.ReadToEnd().Trim();
-            var exited = process.WaitForExit(2000);
+            var exited = process.WaitForExit(_timeoutMilliseconds);
             if (!exited)
             {
                 try
@@ -128,6 +144,46 @@ internal sealed class GitProcessRunner : IGitProcessRunner
             return null;
         }
     }
+}
+
+internal interface IProcessFactory
+{
+    IProcess? Start(ProcessStartInfo startInfo);
+}
+
+internal sealed class ProcessFactory : IProcessFactory
+{
+    public IProcess? Start(ProcessStartInfo startInfo)
+    {
+        var process = Process.Start(startInfo);
+        return process is null ? null : new ProcessAdapter(process);
+    }
+}
+
+internal interface IProcess : IDisposable
+{
+    StreamReader StandardOutput { get; }
+    StreamReader StandardError { get; }
+    bool WaitForExit(int milliseconds);
+    void Kill(bool entireProcessTree);
+    int ExitCode { get; }
+}
+
+internal sealed class ProcessAdapter : IProcess
+{
+    private readonly Process _process;
+
+    internal ProcessAdapter(Process process)
+    {
+        _process = process;
+    }
+
+    public StreamReader StandardOutput => _process.StandardOutput;
+    public StreamReader StandardError => _process.StandardError;
+    public bool WaitForExit(int milliseconds) => _process.WaitForExit(milliseconds);
+    public void Kill(bool entireProcessTree) => _process.Kill(entireProcessTree);
+    public int ExitCode => _process.ExitCode;
+    public void Dispose() => _process.Dispose();
 }
 
 internal static class CommitTemplateInjector

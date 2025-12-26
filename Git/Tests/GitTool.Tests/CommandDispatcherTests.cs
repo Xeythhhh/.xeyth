@@ -10,7 +10,7 @@ public sealed class CommandDispatcherTests
     [Fact]
     public void Execute_ShowsHelp_WhenNoArgs()
     {
-        var writer = new StringWriter();
+        using var writer = new StringWriter();
         var console = TestConsole(writer);
         var reporter = new Reporter(console);
         var dispatcher = new CommandDispatcher(reporter, new FakeGitClient());
@@ -24,7 +24,7 @@ public sealed class CommandDispatcherTests
     [Fact]
     public void Execute_ReturnsError_ForUnknownCommand()
     {
-        var writer = new StringWriter();
+        using var writer = new StringWriter();
         var console = TestConsole(writer);
         var reporter = new Reporter(console);
         var dispatcher = new CommandDispatcher(reporter, new FakeGitClient());

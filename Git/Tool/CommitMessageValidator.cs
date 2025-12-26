@@ -161,7 +161,7 @@ internal static partial class CommitMessageValidator
             .ToList();
     }
 
-    [GeneratedRegex("^(?<type>[a-z]+)(\\((?<scope>[^)]+)\\))?(?<breaking>!)?: (?<subject>.+)$")]
+    [GeneratedRegex("^(?<type>[a-z]+)(\\((?<scope>[^)]+)\\))?!?: (?<subject>.+)$")]
     private static partial Regex HeaderRegex();
 
     private static bool IsBypassCandidate(string header)

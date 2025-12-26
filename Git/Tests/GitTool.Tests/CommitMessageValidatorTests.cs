@@ -14,6 +14,14 @@ public sealed class CommitMessageValidatorTests
     }
 
     [Fact]
+    public void Validate_Succeeds_ForScopeLessMessage()
+    {
+        var result = CommitMessageValidator.Validate("feat: add feature", Array.Empty<string>());
+
+        Assert.False(result.HasErrors);
+    }
+
+    [Fact]
     public void Validate_Fails_ForInvalidType()
     {
         var result = CommitMessageValidator.Validate("invalid(git): message", Array.Empty<string>());
