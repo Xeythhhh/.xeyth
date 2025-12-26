@@ -13,7 +13,7 @@
 
 ````markdown
 **Task**: [Planning/RefactorToWorkflowFormat.task](Planning/RefactorToWorkflowFormat.task)  
-**Role**: Planner (see [Framework/Strategic.prompt.md](../Ai/Framework/Strategic.prompt.md))  
+**Role**: Planner (see [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md))  
 **Target Audience**: Strategic Agent (Claude Sonnet 4.5)
 
 Plan refactoring of existing markdown documentation files into the new .workflow context file type where appropriate.

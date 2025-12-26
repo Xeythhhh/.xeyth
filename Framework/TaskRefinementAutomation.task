@@ -12,7 +12,7 @@
 ## DELEGATION PROMPT
 
 ````markdown
-**Task**: [Ai/Framework/TaskRefinementAutomation.task](Ai/Framework/TaskRefinementAutomation.task)  
+**Task**: [Framework/TaskRefinementAutomation.task](Framework/TaskRefinementAutomation.task)  
 **Role**: Planner (see [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md))  
 **Target Audience**: Strategic Agent (Claude Sonnet 4.5)
 
@@ -230,7 +230,7 @@ public class TaskQualityAnalyzer
 ```markdown
 ## Task Refinement Required
 
-**Task**: Ai/Framework/ExampleTask.task  
+**Task**: Framework/ExampleTask.task  
 **Quality Score**: 65/100 (Fair)
 
 ### Errors (Must Fix)

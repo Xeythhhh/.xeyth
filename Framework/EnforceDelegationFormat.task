@@ -57,12 +57,12 @@ Ensure all delegation prompts across the framework strictly follow [Delegation.i
 
 **Files with Delegation Format**:
 
-1. `Ai/Framework/Implementation.prompt.md` - 2 delegation examples (both use 4-backtick code blocks ✓)
-2. `Ai/Framework/Flow.prompt.md` - 2 delegation examples (1 recommendation template + 1 to Implementation)
-3. `Ai/Framework/Strategic.prompt.md` - Delegation examples section
-4. `Ai/Framework/Delegation.instructions.md` - 3 complete examples (all use 4-backtick code blocks ✓)
-5. `Ai/Framework/ModelRequirements.md` - 2 examples (mixed format ⚠️)
-6. `Ai/Framework/ModelQuickReference.md` - Template examples
+1. `Framework/Implementation.prompt.md` - 2 delegation examples (both use 4-backtick code blocks ✓)
+2. `Framework/Flow.prompt.md` - 2 delegation examples (1 recommendation template + 1 to Implementation)
+3. `Framework/Strategic.prompt.md` - Delegation examples section
+4. `Framework/Delegation.instructions.md` - 3 complete examples (all use 4-backtick code blocks ✓)
+5. `Framework/ModelRequirements.md` - 2 examples (mixed format ⚠️)
+6. `Framework/ModelQuickReference.md` - Template examples
 7. `Ai/Planning/Task.task.template` - Delegation prompt section placeholder
 8. `Ai/Research/LegacySystemAnalysis.md` - Documentation examples
 9. Legacy files (`.legacy/Balhacii/`) - Not in scope for enforcement

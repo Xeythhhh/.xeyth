@@ -14,7 +14,7 @@
    - Roles, workflows, conventions
    - Context file system (`.task`, `.plan`, `.report`, etc.)
    - Templates and planning tools
-   - **Location**: `.xeyth/Ai/Framework/copilot-instructions.md`
+   - **Location**: `.xeyth/Framework/copilot-instructions.md`
    - **Maintenance**: Read-only for consumers; updated via submodule pulls
 
 2. **Project-Specific Integration** (your host repo):
@@ -31,10 +31,10 @@
 GitHub Copilot reads:
   your-repo/.github/copilot-instructions.md
     ↓ references via relative paths
-  your-repo/.xeyth/Ai/Framework/copilot-instructions.md
+  your-repo/.xeyth/Framework/copilot-instructions.md
     ↓ includes
-  your-repo/.xeyth/Ai/Framework/Strategic.prompt.md
-  your-repo/.xeyth/Ai/Framework/Implementation.prompt.md
+  your-repo/.xeyth/Framework/Strategic.prompt.md
+  your-repo/.xeyth/Framework/Implementation.prompt.md
   ... (other roles and conventions)
 ```
 
@@ -72,7 +72,7 @@ Your `.github/copilot-instructions.md` is minimal by design. Add sections based 
 ```markdown
 # Copilot Instructions
 
-This project uses the AI Framework from the `.xeyth` submodule. See [.xeyth/Ai/Framework/copilot-instructions.md](.xeyth/Ai/Framework/copilot-instructions.md) for roles, workflows, and conventions.
+This project uses the AI Framework from the `.xeyth` submodule. See [.xeyth/Framework/copilot-instructions.md](.xeyth/Framework/copilot-instructions.md) for roles, workflows, and conventions.
 
 ---
 
@@ -162,9 +162,9 @@ git commit -m "chore: update AI framework submodule"
 
 **Context files not rendering as markdown**: Check file associations in workspace settings
 
-**Integration link broken**: Verify submodule is at `.xeyth/` with `Ai/Framework/copilot-instructions.md`
+**Integration link broken**: Verify submodule is at `.xeyth/` with `Framework/copilot-instructions.md`
 
-**Reference link doesn't work**: Use relative path `.xeyth/Ai/Framework/copilot-instructions.md` from host repo root
+**Reference link doesn't work**: Use relative path `.xeyth/Framework/copilot-instructions.md` from host repo root
 
 ---
 

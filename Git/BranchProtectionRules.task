@@ -11,7 +11,7 @@
 **Task File**: Git/BranchProtectionRules.task  
 **Objective**: Configure branch protection rules for master branch
 
-**Role Reference**: See [Ai/Framework/Implementation.prompt.md](../Ai/Framework/Implementation.prompt.md) for workflow guidance.
+**Role Reference**: See [Framework/Implementation.prompt.md](../Framework/Implementation.prompt.md) for workflow guidance.
 
 ### Context
 

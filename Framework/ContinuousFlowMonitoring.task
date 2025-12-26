@@ -12,7 +12,7 @@
 ## DELEGATION PROMPT
 
 ````markdown
-**Task**: [Ai/Framework/ContinuousFlowMonitoring.task](Ai/Framework/ContinuousFlowMonitoring.task)  
+**Task**: [Framework/ContinuousFlowMonitoring.task](Framework/ContinuousFlowMonitoring.task)  
 **Role**: Planner (see [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md))  
 **Target Audience**: Strategic Agent (Claude Sonnet 4.5)
 
@@ -173,7 +173,7 @@ Create a monitoring and optimization system for the continuous AI workflow that 
     "archived": 1
   },
   "staleTasks": [
-    "Ai/Framework/MarkdownLintRemediation.task"
+    "Framework/MarkdownLintRemediation.task"
   ]
 }
 ```

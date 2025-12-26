@@ -13,7 +13,7 @@
 
 ````markdown
 **Task**: [Git/PrWorkflowAutomation.task](Git/PrWorkflowAutomation.task)  
-**Role**: Implementer (see [Framework/Implementation.prompt.md](../Ai/Framework/Implementation.prompt.md))  
+**Role**: Implementer (see [Framework/Implementation.prompt.md](../Framework/Implementation.prompt.md))  
 **Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
 
 Implement automation to streamline PR creation, ensure each PR handles a single .task file, and maintain the target of 5+ open PRs.

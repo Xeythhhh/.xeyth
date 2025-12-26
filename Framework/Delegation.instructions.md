@@ -47,8 +47,8 @@ When switching roles within Strategic Agent:
 ### Strategic Agent → Implementation Agent (Plan Review)
 
 ````markdown
-**Task**: [Framework/LegacyIntegration.task](Ai/Framework/LegacyIntegration.task)  
-**Role**: Implementer (Plan Review - Iteration 1) (see [Framework/Implementation.prompt.md](Ai/Framework/Implementation.prompt.md))  
+**Task**: [Framework/LegacyIntegration.task](Framework/LegacyIntegration.task)  
+**Role**: Implementer (Plan Review - Iteration 1) (see [Framework/Implementation.prompt.md](Framework/Implementation.prompt.md))  
 **Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
 
 Review architecture for integrating legacy patterns - validate approach and provide sign-off.
@@ -57,8 +57,8 @@ Review architecture for integrating legacy patterns - validate approach and prov
 ### Implementation Agent → Strategic Agent (Planner Validation)
 
 ````markdown
-**Task**: [Framework/LegacyIntegration.task](Ai/Framework/LegacyIntegration.task)  
-**Role**: Planner (Validation) - Iteration 1 Response (see [Framework/Strategic.prompt.md](Ai/Framework/Strategic.prompt.md))  
+**Task**: [Framework/LegacyIntegration.task](Framework/LegacyIntegration.task)  
+**Role**: Planner (Validation) - Iteration 1 Response (see [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md))  
 **Target Audience**: Strategic Agent (Claude Sonnet 4.5)
 
 ## Iteration 1 Review
@@ -72,7 +72,7 @@ Review architecture for integrating legacy patterns - validate approach and prov
 
 ````markdown
 **Task**: [Contracts/ContractValidation.task](Ai/Contracts/ContractValidation.task)  
-**Role**: Reviewer (see [Framework/Strategic.prompt.md](Ai/Framework/Strategic.prompt.md))  
+**Role**: Reviewer (see [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md))  
 **Target Audience**: Strategic Agent (Claude Sonnet 4.5)
 
 Implementation complete - all deliverables met, tests passing, ready for review.

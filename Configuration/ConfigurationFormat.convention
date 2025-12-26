@@ -253,4 +253,4 @@ testing:
 - [Configuration.xeyth](Configuration.xeyth) - Framework defaults
 - [Configuration.xeyth.template](Configuration.xeyth.template) - Template file
 - [StructuredConceptPattern.md](StructuredConceptPattern.md) - Architecture pattern
-- [Ai/Framework/copilot-instructions.md](../Ai/Framework/copilot-instructions.md) - References configuration
+- [Framework/copilot-instructions.md](../Framework/copilot-instructions.md) - References configuration

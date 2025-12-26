@@ -433,6 +433,6 @@ Tasks may be refined when:
 
 - [Task.task.template](Task.task.template) - Task file template
 - [TaskPrioritySystem.md](TaskPrioritySystem.md) - Priority scoring
-- [Delegation.instructions.md](../Ai/Framework/Delegation.instructions.md) - Delegation format
-- [Flow.prompt.md](../Ai/Framework/Flow.prompt.md) - Continuous workflow
-- [Strategic.prompt.md](../Ai/Framework/Strategic.prompt.md) - Planner role guidance
+- [Delegation.instructions.md](../Framework/Delegation.instructions.md) - Delegation format
+- [Flow.prompt.md](../Framework/Flow.prompt.md) - Continuous workflow
+- [Strategic.prompt.md](../Framework/Strategic.prompt.md) - Planner role guidance
