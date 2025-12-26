@@ -1,0 +1,288 @@
+---
+type: File Format
+scope: Framework-wide
+applies_to: "*.workflow files"
+status: Active
+version: 1.0
+enforcement: Manual
+---
+
+# Workflow File Format
+
+## Convention Summary
+
+Workflow files (`.workflow`) document multi-stage processes and procedures that guide agents and developers through complex workflows. They define stage transitions, quality standards, triggers, and expected outputs for systematic, repeatable processes.
+
+## Rules
+
+### File Structure
+
+- ✅ MUST use `.workflow` extension
+- ✅ MUST define at least 2 connected stages
+- ✅ MUST include Overview section
+- ✅ MUST document triggers, processes, and outputs for each stage
+- ✅ SHOULD include quality standards and metrics
+- ✅ SHOULD provide best practices and troubleshooting
+- ❌ MUST NOT document single-step processes (use `.convention` instead)
+
+### Stage Definition
+
+Each stage MUST include:
+- ✅ Stage name and purpose
+- ✅ Trigger conditions (when this stage begins)
+- ✅ Process steps (what happens in this stage)
+- ✅ Output artifacts (what this stage produces)
+- ✅ Quality level or criteria
+- ⚠️ MAY include examples
+
+### Content Organization
+
+- ✅ MUST start with workflow overview
+- ✅ MUST define stages in sequential order
+- ✅ SHOULD include workflow diagram or visual representation
+- ✅ SHOULD document integration points with other systems
+- ✅ SHOULD specify metrics and health indicators
+- ✅ SHOULD provide troubleshooting guidance
+
+### Naming Convention
+
+Pattern: `{WorkflowName}.workflow`
+
+- ✅ MUST use PascalCase for multi-word names
+- ✅ MUST be descriptive of the process
+- ✅ SHOULD use noun or verb+noun pattern
+- ❌ MUST NOT use "Workflow" suffix (redundant with extension)
+
+## Examples
+
+### ✅ Good Example
+
+File: `Planning/TaskRefinement.workflow`
+
+```markdown
+# Task Refinement Workflow
+
+**Purpose**: Define the workflow for creating, refining, and delegating tasks to ensure high-quality, actionable work items.
+
+## Overview
+
+The task refinement workflow ensures all tasks meet quality standards before delegation to the Implementation Agent. This creates a smooth pipeline from task creation → refinement → delegation → implementation → review.
+
+## Workflow Stages
+
+### Stage 1: Task Creation (Orchestrator)
+
+**Trigger**: Backlog below target (< 15 tasks)
+
+**Process**:
+1. Orchestrator identifies gap in backlog
+2. Creates new task file in appropriate slice
+3. Populates basic metadata (Status, Priority, Effort, Owner)
+4. Adds delegation prompt with 4-backtick code block
+
+**Output**: Task file created but not refined
+
+**Quality Level**: Basic - needs refinement
+
+### Stage 2: Task Refinement (Planner)
+
+**Trigger**: Orchestrator delegates task to Planner
+
+**Process**:
+1. Planner reads task delegation prompt
+2. Expands Context section with current/desired state
+3. Details Objective with specific outcomes
+4. Defines concrete Deliverables with acceptance criteria
+
+**Output**: Refined task ready for implementation
+
+**Quality Level**: High - ready for delegation
+
+## Quality Standards
+
+- Task quality score > 85
+- All required sections present
+- Deliverables are measurable
+- Success criteria are testable
+
+## Metrics & Monitoring
+
+- Refinement cycle time: < 2 days
+- Delegation success rate: > 95%
+- Task staleness rate: < 5%
+
+## Best Practices
+
+1. Start simple - create basic task, let Planner refine
+2. Be specific - vague deliverables lead to unclear implementations
+3. Define acceptance - how will you know deliverable is complete?
+```
+
+### ❌ Bad Example - Single Process (use .convention instead)
+
+File: `Git/CommitFormat.workflow` ❌
+
+```markdown
+# Commit Message Workflow
+
+1. Write commit message
+2. Follow format
+3. Commit
+
+[This should be a .convention file, not .workflow]
+```
+
+### ❌ Bad Example - Missing Stage Details
+
+```markdown
+# Release Workflow
+
+## Stages
+
+### Stage 1
+Do some stuff
+
+### Stage 2
+Do more stuff
+
+[Missing triggers, processes, outputs, quality criteria]
+```
+
+## Naming Examples
+
+### ✅ Good Names
+
+- `TaskRefinement.workflow` - Clear process name
+- `ReleaseProcess.workflow` - Describes the workflow
+- `CodeReview.workflow` - Specific workflow type
+- `FeatureDelivery.workflow` - End-to-end process
+
+### ❌ Bad Names
+
+- `TaskRefinementWorkflow.workflow` - Redundant "Workflow" suffix
+- `process.workflow` - Too generic, not descriptive
+- `TR.workflow` - Abbreviation, unclear meaning
+- `task-refinement.workflow` - Use PascalCase, not kebab-case
+
+## Template Structure
+
+```markdown
+# {Workflow Name}
+
+**Purpose**: {One-line description of what this workflow achieves}
+
+## Overview
+
+{Paragraph describing the workflow, its goals, and why it exists}
+
+## Workflow Stages
+
+### Stage {N}: {Stage Name} ({Role})
+
+**Trigger**: {What initiates this stage}
+
+**Process**:
+1. {Step 1}
+2. {Step 2}
+3. {Step 3}
+
+**Output**: {What this stage produces}
+
+**Quality Level**: {Quality criteria or standards}
+
+**Example** (optional):
+{Demonstration of this stage}
+
+## Quality Standards
+
+{Required quality gates, standards, or criteria}
+
+## Continuous Flow Integration
+
+{How this workflow integrates with continuous agent operation}
+
+## Metrics & Monitoring
+
+{Key metrics, health indicators, optimization targets}
+
+## Best Practices
+
+{Recommended approaches, tips, guidelines}
+
+## Troubleshooting
+
+{Common issues and solutions}
+
+## See Also
+
+{Links to related workflows, conventions, templates, tools}
+```
+
+## File Locations
+
+### Framework Workflows
+
+**Location**: `Planning/` directory for cross-cutting workflows
+
+**Examples**:
+- `Planning/TaskRefinement.workflow`
+- `Planning/ProposalEvaluation.workflow`
+
+### Slice-Specific Workflows
+
+**Location**: Co-located with related work in slice directories
+
+**Examples**:
+- `Git/ReleaseProcess.workflow`
+- `Automation/ToolDevelopment.workflow`
+
+## Validation
+
+### Manual Verification
+
+- [ ] File uses `.workflow` extension
+- [ ] At least 2 stages defined
+- [ ] Each stage has trigger, process, output
+- [ ] Quality standards specified
+- [ ] Integration points documented
+- [ ] Metrics or success criteria included
+
+### Content Quality
+
+- [ ] Workflow name is descriptive
+- [ ] Overview explains purpose clearly
+- [ ] Stages are in logical order
+- [ ] Transitions between stages are clear
+- [ ] Examples demonstrate stages effectively
+- [ ] Best practices are actionable
+
+## Workflow vs Convention vs Plan
+
+### Use `.workflow` when:
+- Documenting multi-stage processes (2+ stages)
+- Defining stage transitions and triggers
+- Specifying quality gates at each stage
+- Tracking metrics across workflow
+- **Example**: Task refinement, release process, code review
+
+### Use `.convention` when:
+- Defining rules and standards
+- Specifying format or structure
+- Documenting single-step requirements
+- Providing validation criteria
+- **Example**: Commit format, naming rules, file structure
+
+### Use `.plan` when:
+- Planning a specific implementation
+- Making architecture decisions for a task
+- Documenting approach for deliverables
+- Scoped to a single task or feature
+- **Example**: API implementation plan, refactoring plan
+
+## See Also
+
+- [Workflow.workflow.template](Workflow.workflow.template) - Template file (planned)
+- [Convention.convention.template](../Conventions/Convention.convention.template) - Convention template
+- [Plan.plan.template](Plan.plan.template) - Plan template
+- [ContextFiles.md](ContextFiles.md) - All context file types
+- [TaskRefinement.workflow](TaskRefinement.workflow) - Example workflow

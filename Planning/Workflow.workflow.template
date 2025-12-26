@@ -1,0 +1,149 @@
+# {Workflow Name}
+
+**Purpose**: {One-line description of what this workflow achieves}
+
+## Overview
+
+{Paragraph describing the workflow, its goals, why it exists, and the value it provides}
+
+## Workflow Stages
+
+### Stage 1: {Stage Name} ({Responsible Role})
+
+**Trigger**: {What initiates this stage - conditions, events, or prerequisites}
+
+**Process**:
+1. {Action step 1}
+2. {Action step 2}
+3. {Action step 3}
+4. {Action step 4}
+
+**Output**: {What this stage produces - artifacts, decisions, or state changes}
+
+**Quality Level**: {Expected quality or completeness at this stage}
+
+**Example** (optional):
+```
+{Concrete example demonstrating this stage}
+```
+
+### Stage 2: {Stage Name} ({Responsible Role})
+
+**Trigger**: {What initiates this stage}
+
+**Process**:
+1. {Action step 1}
+2. {Action step 2}
+3. {Action step 3}
+
+**Output**: {What this stage produces}
+
+**Quality Level**: {Expected quality criteria}
+
+### Stage {N}: {Stage Name} ({Responsible Role})
+
+**Trigger**: {What initiates this stage}
+
+**Process**:
+1. {Action step 1}
+2. {Action step 2}
+
+**Output**: {What this stage produces}
+
+**Quality Level**: {Expected quality criteria}
+
+## Quality Standards
+
+{Define required quality gates, standards, or criteria that apply across all stages}
+
+### Required Elements
+
+- [ ] {Quality requirement 1}
+- [ ] {Quality requirement 2}
+- [ ] {Quality requirement 3}
+
+### Quality Thresholds
+
+- **Green**: {Definition of excellent quality}
+- **Yellow**: {Definition of acceptable quality}
+- **Red**: {Definition of poor quality requiring intervention}
+
+## Continuous Flow Integration
+
+{Describe how this workflow integrates with continuous agent operation}
+
+### Entry Points
+
+{How agents enter this workflow - delegation prompts, triggers, etc.}
+
+### Exit Points
+
+{How workflow completes - delegation to next role, archival, etc.}
+
+### Flow Control
+
+{Describe backlog management, priority handling, or flow optimization}
+
+## Metrics & Monitoring
+
+### Key Metrics
+
+- **{Metric 1 Name}**: {Description and target}
+- **{Metric 2 Name}**: {Description and target}
+- **{Metric 3 Name}**: {Description and target}
+
+### Health Indicators
+
+- **Green**: {Healthy workflow indicators}
+- **Yellow**: {Warning indicators}
+- **Red**: {Critical issues requiring attention}
+
+### Optimization Targets
+
+- {Target 1}: {Description and threshold}
+- {Target 2}: {Description and threshold}
+
+## Best Practices
+
+### For {Stage Name}
+
+1. **{Practice 1}**: {Description and rationale}
+2. **{Practice 2}**: {Description and rationale}
+3. **{Practice 3}**: {Description and rationale}
+
+### For {Another Stage Name}
+
+1. **{Practice 1}**: {Description and rationale}
+2. **{Practice 2}**: {Description and rationale}
+
+## Troubleshooting
+
+### Issue: {Common Problem}
+
+**Symptoms**: {How to recognize this issue}
+
+**Causes**:
+- {Potential cause 1}
+- {Potential cause 2}
+
+**Solutions**:
+- {Solution 1}
+- {Solution 2}
+
+### Issue: {Another Common Problem}
+
+**Symptoms**: {How to recognize this issue}
+
+**Causes**:
+- {Potential cause}
+
+**Solutions**:
+- {Solution}
+
+## See Also
+
+- [{Related Workflow}]({path/to/workflow.workflow})
+- [{Related Convention}]({path/to/convention.convention})
+- [{Related Template}]({path/to/template.template})
+- [{Documentation}]({path/to/docs.md})
+- [{Tool or CLI}]({path/to/tool})

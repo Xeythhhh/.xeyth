@@ -1,0 +1,256 @@
+---
+type: File Format
+scope: Framework-wide
+applies_to: "*.xeyth configuration files"
+status: Active
+version: 2.0
+enforcement: Manual
+related_tools: [xeyth-config]
+---
+
+# Configuration File Format
+
+## Convention Summary
+
+The `.xeyth` file format defines YAML-based configuration for customizing AI Framework behavior without modifying core framework files. Projects can override framework defaults for orchestrator backlog management, PR workflow targets, testing tools, archiving conventions, and model requirements.
+
+## Rules
+
+### File Structure
+
+- ✅ MUST use valid YAML syntax
+- ✅ MUST use `.xeyth` file extension
+- ✅ SHOULD include comments explaining configuration choices
+- ✅ MUST support optional configuration (framework provides defaults)
+- ⚠️ MAY include custom sections for project-specific needs
+
+### Configuration Sections
+
+- ✅ MUST use lowercase section names (`orchestrator`, `testing`, `conventions`, `models`)
+- ✅ MUST use camelCase for property names (`backlog`, `pullRequests`, `diffTool`)
+- ❌ MUST NOT use abbreviated property names
+- ✅ SHOULD document defaults in comments
+
+### Property Values
+
+- ✅ MUST use integers for numeric thresholds (no decimals)
+- ✅ MUST use quoted strings for text values
+- ✅ MUST use semantic property names that indicate purpose
+- ✅ SHOULD include inline comments explaining thresholds
+
+## Examples
+
+### ✅ Good Example
+
+```yaml
+# .xeyth Framework Configuration
+# This file is optional; defaults apply when absent.
+
+orchestrator:
+  backlog:
+    minimum: 15         # Create new tasks when backlog drops below this
+    maximum: 25         # Pause task creation when backlog exceeds this
+    target: 20          # Target backlog size to maintain
+  pullRequests:
+    minimum: 5          # Maintain at least this many open PRs (or draft PRs)
+    createThreshold: 5  # Prioritize Implementation Agent delegation when PRs fall below this
+
+testing:
+  verify:
+    diffTool: VisualStudioCodeInsiders  # Preferred diff viewer for Verify snapshots
+
+conventions:
+  archiving:
+    dateFormat: "yyyy-MM-dd"  # Date format for archive filenames
+    directoryName: "archive"  # Archive directory name
+
+models:
+  strategic: "Claude Sonnet 4.5"         # Strategic Agent model requirement
+  implementation: "GPT-5.1-Codex-Max"    # Implementation Agent model requirement
+```
+
+### ❌ Bad Example
+
+```yaml
+# Bad: No comments, abbreviated names, unclear structure
+orch:
+  bl:
+    min: 15
+    max: 25
+test:
+  dt: VSCodeInsiders
+```
+
+## Schema Specification
+
+### orchestrator Section
+
+Controls Orchestrator agent behavior (task selection, backlog management, PR workflow).
+
+**backlog subsection**:
+- `minimum` (integer, default: 15): Create new tasks when backlog drops below this threshold
+  - Typical range: 10-20
+  - Lower values: More proactive task creation
+  - Higher values: Focus on execution before creating more work
+
+- `maximum` (integer, default: 25): Pause task creation when backlog exceeds this threshold
+  - Typical range: 20-50
+  - Lower values: Stay focused, avoid overwhelming backlog
+  - Higher values: Accommodate PR workflows with cloud agents
+
+- `target` (integer, default: 20): Target backlog size to maintain
+  - Typical range: 15-30
+  - Orchestrator aims to keep backlog around this size
+
+**pullRequests subsection**:
+- `minimum` (integer, default: 5): Maintain at least this many open PRs (or draft PRs)
+  - Typical range: 3-10
+  - Ensures continuous implementation workflow
+  - Each PR should handle a single `.task` file
+
+- `createThreshold` (integer, default: 5): Prioritize Implementation Agent delegation threshold
+  - When open PRs fall below this, prioritize new task delegation
+  - Keeps implementation pipeline flowing
+
+### testing Section
+
+Controls testing tool configuration (test runners, snapshot viewers).
+
+**verify subsection**:
+- `diffTool` (string, default: "VisualStudioCode"): Preferred diff viewer for Verify snapshot tests
+  - Options: VisualStudioCode, VisualStudioCodeInsiders, Rider, VisualStudio, etc.
+  - See [Verify documentation](https://github.com/VerifyTests/Verify) for full list
+
+### conventions Section
+
+Controls framework conventions (archiving, naming, formatting).
+
+**archiving subsection**:
+- `dateFormat` (string, default: "yyyy-MM-dd"): Date format for archive filenames
+  - Format: .NET date format string
+  - Example filename: `TaskName.2024-12-24.task`
+
+- `directoryName` (string, default: "archive"): Archive directory name
+  - Common alternatives: "archived", "completed", "history"
+  - Location: `{Slice}/{directoryName}/`
+
+### models Section
+
+Controls model requirements for agent roles (Strategic vs Implementation).
+
+- `strategic` (string, default: "Claude Sonnet 4.5"): Model requirement for Strategic Agent roles
+  - Roles: Orchestrator, Planner, Reviewer
+  - Optimized for: Planning, architecture, reasoning
+
+- `implementation` (string, default: "GPT-5.1-Codex-Max"): Model requirement for Implementation Agent
+  - Role: Implementer (plan review + code execution)
+  - Optimized for: Code generation, API knowledge, deterministic execution
+
+## File Locations
+
+### Framework Configuration
+
+**Location**: `Configuration/Configuration.xeyth`  
+**Purpose**: Framework defaults that apply to all users  
+**Versioning**: Tracked in git, updated with framework releases
+
+### Project Overrides
+
+**Location**: `{ProjectRoot}/.xeyth/Configuration.xeyth` (when framework used as submodule)  
+**Purpose**: Project-specific overrides that take precedence over framework defaults  
+**Versioning**: Tracked in project repository
+
+## Loading Behavior
+
+Configuration is loaded with the following precedence (highest to lowest):
+
+1. **Project overrides**: `{ProjectRoot}/.xeyth/Configuration.xeyth` (if exists)
+2. **Framework config**: `Configuration/Configuration.xeyth` (if exists)
+3. **Built-in defaults**: Hard-coded in framework prompt files
+
+**Merge Strategy**: Deep merge - project overrides replace specific properties, not entire sections
+
+## Validation
+
+### Manual Verification
+
+- [ ] File uses `.xeyth` extension
+- [ ] Valid YAML syntax (no parsing errors)
+- [ ] All section names are lowercase
+- [ ] All property names use camelCase
+- [ ] Integer values have no decimals
+- [ ] String values are quoted
+- [ ] Comments explain configuration choices
+
+### Automated Verification
+
+```bash
+# Validate YAML syntax
+yamllint Configuration/Configuration.xeyth
+
+# Validate configuration schema (planned)
+xeyth-config validate Configuration/Configuration.xeyth
+
+# Show effective configuration
+xeyth-config show
+```
+
+## Usage Examples
+
+### High-Volume PR Workflow (Default)
+
+For projects with continuous implementation flow:
+
+```yaml
+orchestrator:
+  backlog:
+    minimum: 15
+    maximum: 25
+    target: 20
+  pullRequests:
+    minimum: 5
+    createThreshold: 5
+```
+
+### Focus Mode
+
+For solo developers wanting minimal backlog:
+
+```yaml
+orchestrator:
+  backlog:
+    minimum: 3
+    maximum: 8
+    target: 5
+  pullRequests:
+    minimum: 2
+    createThreshold: 2
+```
+
+### Custom Archive Naming
+
+For ISO 8601 date format:
+
+```yaml
+conventions:
+  archiving:
+    dateFormat: "yyyy-MM-dd"
+    directoryName: "archive"
+```
+
+### Different Diff Tool
+
+For Rider IDE users:
+
+```yaml
+testing:
+  verify:
+    diffTool: Rider
+```
+
+## See Also
+
+- [Configuration.xeyth](Configuration.xeyth) - Framework defaults
+- [Configuration.xeyth.template](Configuration.xeyth.template) - Template file
+- [StructuredConceptPattern.md](StructuredConceptPattern.md) - Architecture pattern
+- [Ai/Framework/copilot-instructions.md](../Ai/Framework/copilot-instructions.md) - References configuration
