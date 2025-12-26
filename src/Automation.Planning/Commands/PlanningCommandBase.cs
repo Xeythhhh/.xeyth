@@ -30,4 +30,6 @@ internal abstract class PlanningCommandBase : IPlanningCommand
             throw new ArgumentException($"Missing value for {token}");
         }
     }
+
+    protected internal static string NormalizePath(string path) => path.Replace('\\', '/');
 }

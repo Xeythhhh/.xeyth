@@ -45,16 +45,18 @@ internal sealed class AcceptProposalCommand : PlanningCommandBase
         }
 
         var taskPath = StatusSpinner.Run(Console, "Creating task from template...", () => _taskCreationService.CreateTask(options.RootPath, options.TaskPath, proposal));
+        var relativeTaskPath = NormalizePath(Path.GetRelativePath(options.RootPath, taskPath));
         var archivePath = _decisionService.ArchiveDecision(
             proposal,
             ProposalStatus.Accepted,
             options.RootPath,
             options.Reason,
-            Path.GetRelativePath(options.RootPath, taskPath).Replace('\\', '/'));
+            relativeTaskPath);
+        var relativeArchivePath = NormalizePath(Path.GetRelativePath(options.RootPath, archivePath));
 
         Reporter.Success(
             $"Accepted proposal {proposal.Name}",
-            $"Created {Path.GetRelativePath(options.RootPath, taskPath)} and archived to {Path.GetRelativePath(options.RootPath, archivePath)}");
+            $"Created {relativeTaskPath} and archived to {relativeArchivePath}");
 
         return 0;
     }
