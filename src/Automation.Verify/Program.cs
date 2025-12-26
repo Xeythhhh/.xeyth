@@ -138,7 +138,7 @@ internal sealed class CommandDispatcher
         return value is "help" or "--help" or "-h";
     }
 
-    private static AbsolutePath ResolveTargetDirectory(string? targetDirectory)
+    internal static AbsolutePath ResolveTargetDirectory(string? targetDirectory)
     {
         var workspaceRoot = AbsolutePath.From(Directory.GetCurrentDirectory());
         var resolved = AbsolutePath.From(targetDirectory ?? workspaceRoot.Value);

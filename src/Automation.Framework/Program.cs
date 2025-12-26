@@ -58,7 +58,7 @@ internal static class Program
         };
     }
 
-    private static void EnsureRootWithinWorkspace(AbsolutePath rootPath, AbsolutePath workspaceDirectory)
+    internal static void EnsureRootWithinWorkspace(AbsolutePath rootPath, AbsolutePath workspaceDirectory)
     {
         if (!rootPath.IsUnder(workspaceDirectory))
         {
@@ -227,6 +227,11 @@ internal static class Program
             if (!File.Exists(resolved.Value))
             {
                 throw new FileNotFoundException($"Workspace file not found: {resolved}");
+            }
+
+            if (!resolved.IsUnder(root))
+            {
+                throw new InvalidOperationException($"Workspace file must be within '{root}'.");
             }
 
             return resolved;
