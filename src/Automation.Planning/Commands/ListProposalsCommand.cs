@@ -54,7 +54,7 @@ internal sealed class ListProposalsCommand : PlanningCommandBase
                 proposal.Status.ToString(),
                 string.IsNullOrWhiteSpace(proposal.Submitted) ? "-" : proposal.Submitted,
                 string.IsNullOrWhiteSpace(proposal.Author) ? "-" : proposal.Author,
-                Markup.Escape(Path.GetRelativePath(options.RootPath, proposal.Path)));
+                Markup.Escape(NormalizePath(Path.GetRelativePath(options.RootPath, proposal.Path))));
         }
 
         Console.Write(table);

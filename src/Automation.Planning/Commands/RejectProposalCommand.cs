@@ -37,9 +37,10 @@ internal sealed class RejectProposalCommand : PlanningCommandBase
         }
 
         var archivePath = _decisionService.ArchiveDecision(proposal, ProposalStatus.Rejected, options.RootPath, options.Reason);
+        var relativeArchivePath = NormalizePath(Path.GetRelativePath(options.RootPath, archivePath));
         Reporter.Success(
             $"Rejected proposal {proposal.Name}",
-            $"Archived to {Path.GetRelativePath(options.RootPath, archivePath)}");
+            $"Archived to {relativeArchivePath}");
 
         return 0;
     }
