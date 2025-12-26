@@ -1,5 +1,5 @@
 using System.Text.Json;
-using Automation.Cli.Common.Paths;
+using Xeyth.Common.IO.Paths;
 
 namespace Automation.Verify;
 

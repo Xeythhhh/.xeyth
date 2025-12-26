@@ -1,6 +1,6 @@
 using System.Reflection;
 using Automation.Cli.Common;
-using Automation.Cli.Common.Paths;
+using Xeyth.Common.IO.Paths;
 using Spectre.Console;
 
 namespace Automation.Verify;

@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Linq;
-using Automation.Cli.Common.Paths;
+using Xeyth.Common.IO.Paths;
 
 internal static class Program
 {

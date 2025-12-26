@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Automation.Cli.Common;
-using Automation.Cli.Common.Paths;
+using Xeyth.Common.IO.Paths;
 using Contracts.Core.Models;
 using Contracts.Core.Services;
 using Microsoft.Extensions.FileSystemGlobbing;

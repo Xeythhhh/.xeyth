@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Automation.Cli.Common.Paths;
+using Xeyth.Common.IO.Paths;
 using Contracts.Core.Services;
 using Spectre.Console;
 

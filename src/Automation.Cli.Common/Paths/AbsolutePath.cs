@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace Automation.Cli.Common.Paths;
+namespace Xeyth.Common.IO.Paths;
 
 /// <summary>
 /// Normalizes and validates absolute filesystem paths and provides helpers for workspace-bound checks.
