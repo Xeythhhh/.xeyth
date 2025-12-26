@@ -50,9 +50,9 @@ internal static class Program
 internal sealed class CommandDispatcher
 {
     private readonly Reporter _reporter;
-    private readonly GitClient _git;
+    private readonly IGitClient _git;
 
-    internal CommandDispatcher(Reporter reporter, GitClient git)
+    internal CommandDispatcher(Reporter reporter, IGitClient git)
     {
         _reporter = reporter;
         _git = git;
@@ -146,7 +146,7 @@ internal sealed class CommandDispatcher
     }
 }
 
-internal enum ValidationLevel
+public enum ValidationLevel
 {
     Strict,
     Warn,

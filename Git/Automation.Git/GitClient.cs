@@ -2,7 +2,14 @@ using System.Diagnostics;
 
 namespace Automation.Git;
 
-internal sealed class GitClient
+internal interface IGitClient
+{
+    string? GetConfig(string key);
+    string? GetRepositoryRoot();
+    IReadOnlyList<string> GetContextFiles();
+}
+
+internal sealed class GitClient : IGitClient
 {
     private static readonly string[] ContextExtensions =
     [
@@ -15,17 +22,29 @@ internal sealed class GitClient
         ".proposal"
     ];
 
-    internal string? GetConfig(string key)
+    private readonly IGitProcessRunner _runner;
+
+    internal GitClient()
+        : this(new GitProcessRunner())
     {
-        return TryRun("config", "--get", key);
     }
 
-    internal string? GetRepositoryRoot()
+    internal GitClient(IGitProcessRunner runner)
     {
-        return TryRun("rev-parse", "--show-toplevel");
+        _runner = runner;
     }
 
-    internal IReadOnlyList<string> GetContextFiles()
+    public string? GetConfig(string key)
+    {
+        return _runner.Run("config", "--get", key);
+    }
+
+    public string? GetRepositoryRoot()
+    {
+        return _runner.Run("rev-parse", "--show-toplevel");
+    }
+
+    public IReadOnlyList<string> GetContextFiles()
     {
         var staged = GetStagedFiles();
         return staged
@@ -35,7 +54,7 @@ internal sealed class GitClient
 
     private IReadOnlyList<string> GetStagedFiles()
     {
-        var output = TryRun("diff", "--cached", "--name-only");
+        var output = _runner.Run("diff", "--cached", "--name-only");
         if (string.IsNullOrWhiteSpace(output))
         {
             return Array.Empty<string>();
@@ -54,7 +73,16 @@ internal sealed class GitClient
         return ContextExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase);
     }
 
-    private static string? TryRun(params string[] args)
+}
+
+internal interface IGitProcessRunner
+{
+    string? Run(params string[] args);
+}
+
+internal sealed class GitProcessRunner : IGitProcessRunner
+{
+    public string? Run(params string[] args)
     {
         try
         {
@@ -78,7 +106,20 @@ internal sealed class GitClient
             }
 
             var output = process.StandardOutput.ReadToEnd().Trim();
-            process.WaitForExit(2000);
+            var exited = process.WaitForExit(2000);
+            if (!exited)
+            {
+                try
+                {
+                    process.Kill(entireProcessTree: true);
+                }
+                catch
+                {
+                    // Ignore failures when attempting to kill the process.
+                }
+
+                return null;
+            }
 
             return process.ExitCode == 0 ? output : null;
         }

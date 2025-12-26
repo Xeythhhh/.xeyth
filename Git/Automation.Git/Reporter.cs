@@ -34,7 +34,7 @@ internal sealed class Reporter
 
     internal void Help()
     {
-        var usagePanel = new Panel("xeyth-git <command> [args]")
+        var usagePanel = new Panel(Markup.Escape("xeyth-git <command> [args]"))
             .Header("[bold]Usage[/]")
             .Border(BoxBorder.Rounded)
             .BorderStyle(new Style(ColorScheme.Primary));

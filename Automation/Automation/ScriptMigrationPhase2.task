@@ -80,3 +80,4 @@ exec xeyth-git prepare-commit-msg "$@"
 
 - 2024-12-24: Task created after Phase 1 approval - ready for implementation
 - 2025-12-26: Implemented xeyth-git tool with C# hook commands and wrapper scripts
+- 2025-12-26: Relocated xeyth-git tool and tests to Git slice per repo layout guidance

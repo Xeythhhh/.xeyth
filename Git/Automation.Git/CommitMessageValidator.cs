@@ -51,7 +51,7 @@ internal static partial class CommitMessageValidator
         var match = HeaderRegex().Match(headerLine);
         if (!match.Success)
         {
-            result.Errors.Add("Commit message must follow '<type>(<scope>): <subject>' format.");
+            result.Errors.Add("Commit message must follow '<type>(<scope>): <subject>' format (scope optional).");
             return result;
         }
 
@@ -111,9 +111,22 @@ internal static partial class CommitMessageValidator
 
     private static void ValidateBody(IReadOnlyList<string> lines, string headerLine, ValidationResult result)
     {
-        var list = lines as IList<string> ?? lines.ToList();
-        var headerIndex = list.IndexOf(headerLine);
-        var bodyLines = list
+        var headerIndex = -1;
+        for (var i = 0; i < lines.Count; i++)
+        {
+            if (lines[i] == headerLine)
+            {
+                headerIndex = i;
+                break;
+            }
+        }
+
+        if (headerIndex < 0)
+        {
+            return;
+        }
+
+        var bodyLines = lines
             .Skip(headerIndex + 1)
             .SkipWhile(string.IsNullOrWhiteSpace)
             .ToList();
