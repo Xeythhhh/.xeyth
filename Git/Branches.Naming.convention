@@ -46,5 +46,5 @@ gh pr create --base master --head task/{task-name}
 
 ## See Also
 
-- [Git/README.md](../Git/README.md) - PR workflow and task linking
+- [README.md](README.md) - PR workflow and task linking
 - [.github/pull_request_template.md](../.github/pull_request_template.md) - PR body requirements

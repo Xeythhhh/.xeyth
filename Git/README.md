@@ -40,7 +40,7 @@ All task work must be merged via Pull Requests; direct commits to `master` are b
 
 ### Branch Naming
 
-See [Conventions/BranchNamingConvention.convention](../Conventions/BranchNamingConvention.convention) for full rules.
+See [Branches.Naming.convention](Branches.Naming.convention) for full rules.
 
 - `task/{task-name}` — task execution (default for .task files)
 - `feature/{feature-name}` — feature delivery
