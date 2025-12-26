@@ -1,0 +1,235 @@
+# PR Workflow Automation
+
+**Status**: Not Started  
+**Created**: 2025-12-26  
+**Owner**: Implementation Agent  
+**Priority**: High  
+**Effort**: Medium  
+**Priority Score**: 9 (Impact:7 + Urgency:3 + Dependency:2 - Complexity:3)
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Git/PrWorkflowAutomation.task](Git/PrWorkflowAutomation.task)  
+**Role**: Implementer (see [Framework/Implementation.prompt.md](../Ai/Framework/Implementation.prompt.md))  
+**Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
+
+Implement automation to streamline PR creation, ensure each PR handles a single .task file, and maintain the target of 5+ open PRs.
+````
+
+---
+
+## Context
+
+**Problem**: The framework requires maintaining at least 5 open PRs (or draft PRs) at all times, with each PR handling a single `.task` file. This needs automation to ensure consistency and efficiency.
+
+**Current State**:
+- PR template exists
+- Manual PR creation via `gh pr create`
+- No automated PR tracking
+- No enforcement of 1-task-per-PR rule
+- No automated draft PR creation
+
+**Desired State**:
+- Automated PR creation with task metadata
+- Branch naming convention enforced (`task/{task-name}`)
+- PR title and description auto-populated from task file
+- Draft PR creation for work-in-progress
+- Automated PR tracking against 5-PR target
+- PR checklist validation
+
+## Objective
+
+Create automation tools and workflows to streamline PR creation, enforce the 1-task-per-PR rule, and maintain the minimum 5 open PRs target.
+
+## Deliverables
+
+1. **PR Creation Tool**: Automated PR creation from task file
+   - Parse task file for title, objective, deliverables
+   - Generate PR title from task name
+   - Generate PR description from task context
+   - Create branch with naming convention
+   - Link PR to task file
+   - Support draft PR creation
+
+2. **PR Tracking**: Monitor open PR count against target
+   - Count open PRs (including drafts)
+   - Report current vs target
+   - Alert when below threshold
+   - List PRs by task
+
+3. **PR Validation**: Ensure each PR handles single task
+   - Validate PR branch name matches task
+   - Verify task file exists and is referenced
+   - Check deliverables are met
+   - Enforce PR template usage
+
+4. **Workflow Integration**: Integrate with Implementation Agent flow
+   - Auto-create PR on task completion
+   - Update PR description with progress
+   - Mark PR ready for review when deliverables complete
+   - Link to task file in PR description
+
+5. **GitHub Actions**: CI/CD integration
+   - Validate PR-task linkage
+   - Check deliverables completion
+   - Run quality gates
+   - Auto-label based on task metadata
+
+## Success Criteria
+
+- [ ] PR creation automated via CLI tool
+- [ ] Branch naming convention enforced
+- [ ] PR metadata auto-populated from task file
+- [ ] Draft PR support for WIP tasks
+- [ ] PR tracking reports current vs target
+- [ ] Validation ensures 1-task-per-PR
+- [ ] GitHub Actions workflow validates PRs
+- [ ] Cross-platform compatible (.NET 10)
+- [ ] Integration with Flow.prompt.md workflow
+
+## Architecture Decisions
+
+### AD-1: PR Creation Tool
+
+**Decision**: Extend xeyth-planning CLI with PR commands  
+**Commands**:
+- `xeyth-planning create-pr {TaskFile}` - Create PR from task
+- `xeyth-planning create-draft-pr {TaskFile}` - Create draft PR
+- `xeyth-planning list-prs` - List open PRs by task
+- `xeyth-planning pr-status` - Report PR count vs target
+
+**Rationale**: Integrates with existing planning tooling, reuses task parsing logic.
+
+### AD-2: Branch Naming
+
+**Decision**: `task/{task-name}` convention  
+**Examples**:
+- `task/continuous-flow-monitoring`
+- `task/pr-workflow-automation`
+- `task/markdown-lint-remediation`
+
+**Extraction**: Extract from task filename, convert to kebab-case, remove `.task` extension.
+
+### AD-3: PR Metadata
+
+**Decision**: Extract from task file delegation prompt and objective  
+**Mapping**:
+- PR Title: Task delegation prompt objective line
+- PR Description: Task context + deliverables + link to task file
+- Labels: Extract from task priority/effort metadata
+- Assignee: Task owner (if applicable)
+
+### AD-4: Draft PR Creation
+
+**Decision**: Create draft PRs for tasks in early stages  
+**Criteria**:
+- Task status: In Progress
+- Deliverables: Partially complete
+- Implementation Agent: Has changes but not ready for review
+
+**Transition**: Convert to regular PR when deliverables complete.
+
+### AD-5: GitHub Actions Workflow
+
+**Decision**: Create `.github/workflows/pr-validation.yml`  
+**Checks**:
+- PR branch name matches `task/*` pattern
+- Task file exists and is linked in PR description
+- PR affects files related to task scope
+- Quality gates pass (build, test, lint)
+
+## Implementation Notes
+
+**Tool Structure**:
+```csharp
+// xeyth-planning CLI extension
+public class PrCommands
+{
+    [Command("create-pr")]
+    public async Task CreatePullRequest(string taskFile, bool draft = false)
+    {
+        // 1. Parse task file
+        var task = await TaskParser.ParseAsync(taskFile);
+        
+        // 2. Create branch
+        var branchName = $"task/{task.Name.ToKebabCase()}";
+        await Git.CreateBranch(branchName);
+        
+        // 3. Generate PR metadata
+        var title = task.DelegationPrompt.Objective;
+        var description = GeneratePrDescription(task);
+        
+        // 4. Create PR (draft if specified)
+        await GitHub.CreatePullRequest(
+            title, 
+            description, 
+            branchName, 
+            draft: draft
+        );
+    }
+    
+    [Command("pr-status")]
+    public async Task ShowPrStatus()
+    {
+        var openPrs = await GitHub.GetOpenPullRequests();
+        var target = Config.Get("orchestrator.pullRequests.minimum", 5);
+        
+        Console.WriteLine($"Open PRs: {openPrs.Count}");
+        Console.WriteLine($"Target: {target}");
+        Console.WriteLine($"Status: {GetStatusEmoji(openPrs.Count, target)}");
+    }
+}
+```
+
+**GitHub Actions Workflow**:
+```yaml
+name: PR Validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  validate-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Validate PR Branch Name
+        run: |
+          if [[ ! "${{ github.head_ref }}" =~ ^task/ ]]; then
+            echo "Error: PR branch must follow 'task/*' naming convention"
+            exit 1
+          fi
+      
+      - name: Validate Task File Link
+        run: |
+          task_name=$(echo "${{ github.head_ref }}" | sed 's/task\///')
+          # Check if task file is referenced in PR description
+          # Implementation needed
+      
+      - name: Run Quality Gates
+        run: |
+          dotnet build
+          dotnet test
+```
+
+## Verification
+
+- Create task file
+- Run `xeyth-planning create-pr {TaskFile}`
+- Verify PR created with correct metadata
+- Check branch naming convention
+- Verify PR description includes task link
+- Test draft PR creation
+- Validate GitHub Actions workflow
+- Check PR status reporting
+
+---
+
+## Progress Log
+
+- 2025-12-26: Task created by Implementation Agent to support 5-PR minimum target

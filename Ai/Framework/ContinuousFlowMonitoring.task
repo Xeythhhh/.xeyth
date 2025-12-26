@@ -1,0 +1,193 @@
+# Continuous Flow Monitoring and Optimization
+
+**Status**: Not Started  
+**Created**: 2025-12-26  
+**Owner**: Strategic Agent (Planner)  
+**Priority**: High  
+**Effort**: Medium  
+**Priority Score**: 9 (Impact:7 + Urgency:3 + Dependency:2 - Complexity:3)
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Ai/Framework/ContinuousFlowMonitoring.task](Ai/Framework/ContinuousFlowMonitoring.task)  
+**Role**: Planner (see [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md))  
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Design a system to monitor and optimize the continuous AI workflow, tracking backlog health, PR velocity, task refinement quality, and delegation patterns.
+````
+
+---
+
+## Context
+
+**Problem**: The AI framework now has targets (20 tasks, 5+ PRs) but lacks monitoring and optimization capabilities to ensure these targets are consistently met and the workflow remains efficient.
+
+**Current State**:
+- Backlog targets defined: 15-25 tasks (target: 20)
+- PR targets defined: minimum 5 open PRs
+- Task generation and delegation workflows established
+- No automated monitoring or metrics collection
+- No optimization feedback loop
+
+**Desired State**:
+- Automated backlog health monitoring
+- PR velocity and throughput tracking
+- Task refinement quality metrics
+- Delegation pattern analysis
+- Optimization recommendations based on metrics
+- Alerts when targets are not met
+
+## Objective
+
+Create a monitoring and optimization system for the continuous AI workflow that tracks key metrics, identifies bottlenecks, and provides actionable recommendations to maintain healthy backlog and PR targets.
+
+## Deliverables
+
+1. **Metrics Collection**: Define and collect key workflow metrics
+   - Backlog size over time (current vs target)
+   - Open PR count and age
+   - Task completion rate
+   - Delegation frequency (Strategic → Implementation)
+   - Task refinement iterations
+   - Time in each workflow stage
+
+2. **Health Indicators**: Dashboard or report showing workflow health
+   - Backlog status (below/at/above target)
+   - PR pipeline status
+   - Task age distribution
+   - Bottleneck identification
+
+3. **Optimization Recommendations**: Automated suggestions
+   - "Backlog below 15 - create new tasks"
+   - "Open PRs below 5 - prioritize delegation"
+   - "Tasks stale for >7 days - refine or archive"
+   - "Too many large tasks - create smaller incremental tasks"
+
+4. **Reporting**: Regular workflow health reports
+   - Daily/weekly summary reports
+   - Trend analysis
+   - Comparison against targets
+
+5. **Integration**: Wire into continuous workflow
+   - Orchestrator checks metrics before task selection
+   - Alerts when intervention needed
+   - Historical tracking for analysis
+
+## Success Criteria
+
+- [ ] Key metrics are tracked and accessible
+- [ ] Health dashboard shows current workflow state
+- [ ] Recommendations generated based on metrics
+- [ ] Reports can be generated on demand
+- [ ] Integration with Orchestrator workflow
+- [ ] Metrics persist for historical analysis
+- [ ] Cross-platform compatible (.NET 10)
+
+## Architecture Decisions
+
+### AD-1: Metrics Storage
+
+**Decision**: File-based metrics with JSON format  
+**Rationale**:
+- Simple, no database required
+- Version controllable for transparency
+- Easy to parse and analyze
+- Can be archived with tasks
+
+**Location**: `.xeyth/Metrics/{Date}.metrics.json`
+
+### AD-2: Collection Points
+
+**Decision**: Collect metrics at key workflow transitions  
+**Points**:
+- Task creation (Orchestrator → new task file)
+- Task delegation (Orchestrator → Planner → Implementation)
+- PR creation (Implementation Agent)
+- PR merge (post-review)
+- Task archival (completion)
+
+### AD-3: Health Checks
+
+**Decision**: Orchestrator runs health check before task selection  
+**Checks**:
+- Count active tasks (Status: Not Started, In Progress)
+- Count open PRs (via git/GitHub API)
+- Identify stale tasks (>7 days without update)
+- Compare against targets
+
+### AD-4: Reporting Format
+
+**Decision**: Markdown reports with charts (ASCII or Mermaid)  
+**Format**:
+```markdown
+# Workflow Health Report - 2025-12-26
+
+## Backlog Status
+- Current: 19 tasks
+- Target: 20 tasks
+- Status: ⚠️ Below target by 1
+
+## PR Pipeline
+- Open PRs: 3
+- Target: 5
+- Status: ⚠️ Below target by 2
+
+## Recommendations
+1. Create 1-2 new tasks to reach backlog target
+2. Delegate 2 refined tasks to Implementation Agent
+3. Review stale tasks: {list}
+```
+
+## Implementation Notes
+
+**Approach**:
+1. Create `.xeyth/Metrics/` directory structure
+2. Define metrics schema (JSON)
+3. Add collection helpers (PowerShell/C#)
+4. Create reporting tool (xeyth-metrics CLI)
+5. Integrate health checks into Orchestrator workflow
+6. Document in Framework/Flow.prompt.md
+
+**Metrics Schema**:
+```json
+{
+  "date": "2025-12-26T12:00:00Z",
+  "backlog": {
+    "total": 19,
+    "notStarted": 12,
+    "inProgress": 7,
+    "target": 20
+  },
+  "pullRequests": {
+    "open": 3,
+    "draft": 1,
+    "target": 5
+  },
+  "tasks": {
+    "created": 2,
+    "delegated": 3,
+    "completed": 1,
+    "archived": 1
+  },
+  "staleTasks": [
+    "Ai/Framework/MarkdownLintRemediation.task"
+  ]
+}
+```
+
+## Verification
+
+- Create sample metrics data
+- Run health check - identifies gaps
+- Generate report - shows actionable recommendations
+- Simulate workflow - metrics update correctly
+- Historical analysis - trends visible
+
+---
+
+## Progress Log
+
+- 2025-12-26: Task created by Implementation Agent to support continuous flow optimization

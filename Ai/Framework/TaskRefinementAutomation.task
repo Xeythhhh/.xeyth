@@ -1,0 +1,266 @@
+# Task Refinement Automation
+
+**Status**: Not Started  
+**Created**: 2025-12-26  
+**Owner**: Strategic Agent (Planner)  
+**Priority**: Medium  
+**Effort**: Medium  
+**Priority Score**: 7 (Impact:4 + Urgency:3 + Dependency:2 - Complexity:2)
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Ai/Framework/TaskRefinementAutomation.task](Ai/Framework/TaskRefinementAutomation.task)  
+**Role**: Planner (see [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md))  
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Design automation to identify tasks needing refinement, validate task quality, and ensure tasks are actionable before delegation to Implementation Agent.
+````
+
+---
+
+## Context
+
+**Problem**: The framework requires regular task refinement to ensure tasks are clear, actionable, and ready for implementation. Currently this is a manual process with no quality checks.
+
+**Current State**:
+- Tasks created with varying quality and completeness
+- No automated validation of task structure
+- No identification of stale or unclear tasks
+- Manual review required before delegation
+- Inconsistent task metadata
+
+**Desired State**:
+- Automated task quality validation
+- Identification of tasks needing refinement
+- Stale task detection and alerting
+- Task metadata completeness checks
+- Quality gate before delegation to Implementation
+- Automated suggestions for improvement
+
+## Objective
+
+Create automation tools to validate task quality, identify tasks needing refinement, detect stale tasks, and ensure all tasks meet quality standards before delegation to Implementation Agent.
+
+## Deliverables
+
+1. **Task Quality Validation**: Automated checks for task completeness
+   - Required sections present (Objective, Context, Deliverables, Success Criteria)
+   - Delegation prompt properly formatted (4-backtick code block)
+   - Metadata complete (Status, Priority, Effort, Owner)
+   - Priority score calculated correctly
+   - Links valid (task files, prompt files)
+
+2. **Refinement Detection**: Identify tasks needing improvement
+   - Missing required sections
+   - Vague or unclear objectives
+   - Incomplete deliverables
+   - Missing success criteria
+   - Outdated architecture decisions
+
+3. **Staleness Detection**: Find tasks without recent activity
+   - Tasks not updated in >7 days
+   - Tasks in "Not Started" for >14 days
+   - Tasks with no progress log entries
+   - Alert for review or archival
+
+4. **Automated Suggestions**: Generate refinement recommendations
+   - "Add missing Success Criteria section"
+   - "Clarify deliverable D2 - too vague"
+   - "Update Priority Score - calculation incorrect"
+   - "Add delegation prompt code block"
+   - "Task stale - review and update or archive"
+
+5. **Quality Gate**: Block poor-quality tasks from delegation
+   - Validate before Orchestrator delegates to Planner
+   - Validate before Planner delegates to Implementation
+   - Return refinement checklist if validation fails
+   - Track refinement iterations
+
+6. **Reporting**: Task quality dashboard
+   - Overall task quality score
+   - Tasks needing refinement (by priority)
+   - Stale task report
+   - Refinement backlog
+   - Quality trends over time
+
+## Success Criteria
+
+- [ ] Task validation checks all required sections
+- [ ] Staleness detection identifies inactive tasks
+- [ ] Automated suggestions are actionable
+- [ ] Quality gate blocks unrefined tasks
+- [ ] Reports show tasks needing attention
+- [ ] Integration with Orchestrator workflow
+- [ ] Cross-platform compatible (.NET 10)
+- [ ] Validation runs in CI/CD
+
+## Architecture Decisions
+
+### AD-1: Validation Rules
+
+**Decision**: Rule-based validation with severity levels  
+**Severities**:
+- **Error**: Missing required sections, invalid format - blocks delegation
+- **Warning**: Incomplete metadata, unclear text - suggests refinement
+- **Info**: Minor improvements, style suggestions
+
+**Example Rules**:
+```csharp
+public static class TaskValidationRules
+{
+    public static ValidationResult ValidateStructure(Task task)
+    {
+        var errors = new List<string>();
+        var warnings = new List<string>();
+        
+        // Error: Required sections
+        if (string.IsNullOrEmpty(task.Objective))
+            errors.Add("Missing Objective section");
+        if (!task.Deliverables.Any())
+            errors.Add("No deliverables defined");
+        
+        // Warning: Metadata
+        if (task.PriorityScore == null)
+            warnings.Add("Priority Score not calculated");
+        if (task.ProgressLog.IsEmpty())
+            warnings.Add("No progress log entries");
+        
+        return new ValidationResult(errors, warnings);
+    }
+}
+```
+
+### AD-2: Staleness Criteria
+
+**Decision**: Time-based with status consideration  
+**Rules**:
+- Not Started + 14 days = Stale
+- In Progress + 7 days = Needs update
+- Planning + 3 days = Needs decision
+- Any status + 30 days = Review or archive
+
+### AD-3: Quality Scoring
+
+**Decision**: Weighted score based on completeness  
+**Factors** (total 100 points):
+- Structure complete: 30 points
+- Metadata complete: 20 points
+- Clear objective: 15 points
+- Detailed deliverables: 15 points
+- Success criteria defined: 10 points
+- Recent activity: 10 points
+
+**Grades**:
+- 90-100: Excellent - ready for delegation
+- 70-89: Good - minor improvements suggested
+- 50-69: Fair - refinement recommended
+- <50: Poor - refinement required
+
+### AD-4: CLI Tool Integration
+
+**Decision**: Extend xeyth-planning CLI  
+**Commands**:
+- `xeyth-planning validate {TaskFile}` - Validate single task
+- `xeyth-planning validate-all` - Validate all active tasks
+- `xeyth-planning find-stale` - List stale tasks
+- `xeyth-planning quality-report` - Generate quality dashboard
+
+### AD-5: CI/CD Integration
+
+**Decision**: Add validation to GitHub Actions  
+**Workflow**:
+```yaml
+- name: Validate Task Files
+  run: |
+    dotnet run --project src/Automation.Planning -- validate-all --fail-on-error
+```
+
+## Implementation Notes
+
+**Task Parser Enhancement**:
+```csharp
+public class TaskQualityAnalyzer
+{
+    public TaskQualityReport Analyze(TaskFile task)
+    {
+        var report = new TaskQualityReport
+        {
+            TaskPath = task.Path,
+            Score = CalculateQualityScore(task),
+            Errors = ValidateStructure(task),
+            Warnings = CheckCompleteness(task),
+            Suggestions = GenerateSuggestions(task),
+            Staleness = CheckStaleness(task)
+        };
+        
+        return report;
+    }
+    
+    private int CalculateQualityScore(TaskFile task)
+    {
+        int score = 0;
+        
+        // Structure (30 points)
+        if (HasAllSections(task)) score += 30;
+        
+        // Metadata (20 points)
+        if (HasCompleteMetadata(task)) score += 20;
+        
+        // Clarity (15 points)
+        score += AssessObjectiveClarity(task.Objective);
+        
+        // Deliverables (15 points)
+        score += AssessDeliverables(task.Deliverables);
+        
+        // Success Criteria (10 points)
+        if (task.SuccessCriteria.Any()) score += 10;
+        
+        // Activity (10 points)
+        score += AssessRecentActivity(task.ProgressLog);
+        
+        return score;
+    }
+}
+```
+
+**Refinement Suggestions**:
+```markdown
+## Task Refinement Required
+
+**Task**: Ai/Framework/ExampleTask.task  
+**Quality Score**: 65/100 (Fair)
+
+### Errors (Must Fix)
+- [ ] Missing Success Criteria section
+
+### Warnings (Should Fix)
+- [ ] Deliverable D2 is vague - specify acceptance criteria
+- [ ] Priority Score missing - calculate based on metadata
+
+### Suggestions (Nice to Have)
+- [ ] Add Architecture Decisions to clarify approach
+- [ ] Expand Context section with current state details
+- [ ] Add verification steps to Success Criteria
+
+### Staleness Alert
+⚠️ Task not updated in 8 days - review and update or archive
+```
+
+## Verification
+
+- Create sample task files (good, fair, poor quality)
+- Run validation - correct quality scores assigned
+- Identify errors/warnings/suggestions correctly
+- Test staleness detection with old tasks
+- Generate quality report - shows tasks needing refinement
+- Integrate with Orchestrator - blocks poor tasks
+- CI/CD validation catches issues
+
+---
+
+## Progress Log
+
+- 2025-12-26: Task created by Implementation Agent to support continuous task quality improvement

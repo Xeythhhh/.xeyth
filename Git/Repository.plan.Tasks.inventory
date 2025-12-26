@@ -6,6 +6,10 @@ Git/BranchProtectionRules.task
 Git/PrTemplates.task
 Git/GitHubProject.task
 
+## PR Workflow
+Git/PrWorkflowAutomation.task
+Git/PrWorkflowEnforcement.task
+
 ## Azure DevOps
 Git/AzureDevOpsProject.task
 Git/AzureBoardsIntegration.task
