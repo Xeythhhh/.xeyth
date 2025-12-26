@@ -5,8 +5,8 @@
 ## DELEGATION PROMPT
 
 ````markdown
-**Task**: [Framework/CopilotCloudAgentConfiguration.task](Framework/CopilotCloudAgentConfiguration.task)  
-**Role**: Planner (see [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md))  
+**Task**: [Framework/CopilotCloudAgentConfiguration.task](Framework/CopilotCloudAgentConfiguration.task)
+**Role**: Planner (see [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md))
 **Target Audience**: Strategic Agent (Claude Sonnet 4.5)
 
 Research GitHub Copilot Cloud agent configuration requirements - MCP setup, global tool installation, environment customization for gh CLI access.
@@ -16,7 +16,7 @@ Research GitHub Copilot Cloud agent configuration requirements - MCP setup, glob
 
 ## Role: Planner
 
-**Task File**: Framework/CopilotCloudAgentConfiguration.task  
+**Task File**: Framework/CopilotCloudAgentConfiguration.task
 **Objective**: Research and document Copilot Cloud agent configuration for optimal framework integration
 
 **Role Reference**: See [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md) for workflow guidance.
@@ -75,10 +75,10 @@ GitHub Copilot Cloud agents (both Claude Sonnet 4.5 and GPT-5.1-Codex-Max) may r
 
 ---
 
-Status: Not Started  
-Owner: Strategic Agent (Planner)  
-Priority: High  
-Effort: Small  
+Status: Not Started
+Owner: Strategic Agent (Planner)
+Priority: High
+Effort: Small
 Priority Score: 9 (Impact:7 + Urgency:3 + Dependency:5 - Complexity:0 - Unblocks automation)
 
 ## Objective

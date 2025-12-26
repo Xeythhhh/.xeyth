@@ -88,9 +88,9 @@ When reviewing a PR for merge, verify ALL items:
 
 ### Automatic Agent Delegation (when tools available)
 
-**If agent invocation tools are available** (e.g., `runSubagent` with model selection):
+**If agent invocation tools are available** (e.g., `runSubagent` which spawns cloud agents with model selection):
 
-1. **Automatically invoke Implementation Agents** instead of outputting code blocks:
+1. **Automatically invoke Implementation Agents** (cloud agents running GPT-5.1-Codex-Max) instead of outputting code blocks:
    ```
    runSubagent(
      model: "GPT-5.1-Codex-Max",
@@ -98,9 +98,11 @@ When reviewing a PR for merge, verify ALL items:
      description: "{TaskName} - Implementation"
    )
    ```
+   This spawns a new cloud agent session that works independently on the task.
 
 2. **Monitor active agents** on each Flow invocation:
    - Check PR status for agent-delegated tasks
+   - Review PR content: description, comments, file comments, reviews
    - Post refinement comments if PRs need updates
    - Approve/merge when ready
 

@@ -161,7 +161,7 @@ When invoked in Copilot Cloud (via `file:Flow.prompt.md`), Strategic Agent (Orch
 
 **Analysis**: {Readiness check results}
 
-**Action**: 
+**Action**:
 - ✅ READY TO MERGE → Proceed with merge
 - ⏳ CHECKS RUNNING → Wait for completion, then auto-mark ready
 - ⚠️ NEEDS REFINEMENT → Comment posted below
