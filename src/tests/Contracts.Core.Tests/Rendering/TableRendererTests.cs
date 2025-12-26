@@ -32,9 +32,9 @@ public class TableRendererTests
     public Task TableRenderer_RendersMultipleContracts()
     {
         // Arrange
-        var contract1 = CreateSampleContract("Task.template");
-        var contract2 = CreateSampleContract("Plan.template");
-        var contract3 = CreateSampleContract("Report.template");
+        var contract1 = CreateSampleContract("Task.template", hasArchiving: true);
+        var contract2 = CreateSampleContract("Plan.template", hasArchiving: false);
+        var contract3 = CreateSampleContract("Report.template", hasArchiving: true);
         
         var output = new StringWriter();
         var context = new RenderContext
@@ -54,7 +54,7 @@ public class TableRendererTests
         return Verify(output.ToString());
     }
 
-    private static ContractMetadata CreateSampleContract(string name)
+    private static ContractMetadata CreateSampleContract(string name, bool hasArchiving = true)
     {
         var extension = Path.GetExtension(name);
         return new ContractMetadata
@@ -72,11 +72,11 @@ public class TableRendererTests
                     new RequiredSection { Name = "Section 2", Level = 2 }
                 }
             },
-            Archiving = name.Contains("Plan") ? null : new ArchivingRules
+            Archiving = hasArchiving ? new ArchivingRules
             {
                 Directory = "archive",
                 Pattern = $"*.{extension}"
-            }
+            } : null
         };
     }
 }

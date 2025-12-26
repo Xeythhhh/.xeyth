@@ -36,7 +36,7 @@ public sealed class CardRenderer : IContractRenderer
 
         // Title
         var title = GetContractTitle(contract);
-        RenderLine(output, title, innerWidth, bold: true);
+        RenderLine(output, title, innerWidth);
 
         // Type
         var type = GetContractType(contract);
@@ -105,7 +105,7 @@ public sealed class CardRenderer : IContractRenderer
         output.WriteLine($"{BottomLeft}{new string(Horizontal[0], width - 2)}{BottomRight}");
     }
 
-    private static void RenderLine(TextWriter output, string content, int maxWidth, bool bold = false)
+    private static void RenderLine(TextWriter output, string content, int maxWidth)
     {
         var lines = WrapText(content, maxWidth);
         foreach (var line in lines)

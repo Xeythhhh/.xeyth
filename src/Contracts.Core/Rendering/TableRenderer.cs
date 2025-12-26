@@ -12,6 +12,7 @@ public sealed class TableRenderer : IContractRenderer
     private const int TypeWidth = 10;
     private const int SectionsWidth = 12;
     private const int ArchiveWidth = 10;
+    private const int TruncateIndicatorLength = 3;
 
     public void Render(RenderContext context)
     {
@@ -78,6 +79,6 @@ public sealed class TableRenderer : IContractRenderer
             return text;
         }
 
-        return text[..(maxLength - 3)] + "...";
+        return text[..(maxLength - TruncateIndicatorLength)] + "...";
     }
 }
