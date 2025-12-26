@@ -1,5 +1,3 @@
-using GitTool;
-
 namespace GitTool.Tests;
 
 public sealed class ValidationLevelsTests

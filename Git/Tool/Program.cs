@@ -86,6 +86,12 @@ internal sealed class CommandDispatcher
         }
 
         var commitMessagePath = args[0];
+        if (!File.Exists(commitMessagePath))
+        {
+            _reporter.Error($"Commit message file not found: {commitMessagePath}");
+            return 1;
+        }
+
         var templatePath = CommitTemplateInjector.ResolveTemplatePath(
             _git.GetConfig("commit.template"),
             _git.GetRepositoryRoot());

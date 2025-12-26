@@ -22,6 +22,14 @@ public sealed class CommitMessageValidatorTests
     }
 
     [Fact]
+    public void Validate_Allows_Breaking_Indicator()
+    {
+        var result = CommitMessageValidator.Validate("feat(git)!: breaking change", Array.Empty<string>());
+
+        Assert.False(result.HasErrors);
+    }
+
+    [Fact]
     public void Validate_Fails_ForInvalidType()
     {
         var result = CommitMessageValidator.Validate("invalid(git): message", Array.Empty<string>());

@@ -76,6 +76,26 @@ public sealed class CommandDispatcherTests
     }
 
     [Fact]
+    public void CommitMsg_WarnInvalid_AllowsCommit()
+    {
+        using var sandbox = new TempDirectory();
+        var messagePath = Path.Combine(sandbox.Path, "COMMIT_EDITMSG");
+        File.WriteAllText(messagePath, "invalid");
+
+        var git = new FakeGitClient
+        {
+            ConfigValue = "warn",
+            ContextFiles = Array.Empty<string>()
+        };
+
+        var dispatcher = BuildDispatcher(git);
+
+        var exitCode = dispatcher.Execute(new[] { "commit-msg", messagePath });
+
+        Assert.Equal(0, exitCode);
+    }
+
+    [Fact]
     public void PrepareCommitMsg_InsertsTemplate_WhenEmpty()
     {
         using var sandbox = new TempDirectory();

@@ -121,7 +121,6 @@ internal sealed class GitProcessRunner : IGitProcessRunner
                 return null;
             }
 
-            var output = process.StandardOutput.ReadToEnd().Trim();
             var exited = process.WaitForExit(_timeoutMilliseconds);
             if (!exited)
             {
@@ -137,6 +136,7 @@ internal sealed class GitProcessRunner : IGitProcessRunner
                 return null;
             }
 
+            var output = process.StandardOutput.ReadToEnd().Trim();
             return process.ExitCode == 0 ? output : null;
         }
         catch
