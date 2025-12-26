@@ -164,8 +164,20 @@ internal static partial class CommitMessageValidator
         var hasBreakingFooter = lines.Any(line =>
         {
             var trimmed = line.TrimStart();
-            return trimmed.StartsWith("BREAKING CHANGE:", StringComparison.OrdinalIgnoreCase)
-                || trimmed.StartsWith("BREAKING-CHANGE:", StringComparison.OrdinalIgnoreCase);
+            const string breakingChange = "BREAKING CHANGE:";
+            const string breakingChangeHyphen = "BREAKING-CHANGE:";
+
+            if (trimmed.StartsWith(breakingChange, StringComparison.OrdinalIgnoreCase))
+            {
+                return !string.IsNullOrWhiteSpace(trimmed[breakingChange.Length..].Trim());
+            }
+
+            if (trimmed.StartsWith(breakingChangeHyphen, StringComparison.OrdinalIgnoreCase))
+            {
+                return !string.IsNullOrWhiteSpace(trimmed[breakingChangeHyphen.Length..].Trim());
+            }
+
+            return false;
         });
 
         if (!hasBreakingFooter)
@@ -183,7 +195,7 @@ internal static partial class CommitMessageValidator
             .ToList();
     }
 
-    [GeneratedRegex("^(?<type>[a-z]+)(\\((?<scope>[^)]+)\\))?(?<breaking>!)?: (?<subject>.+)$")]
+    [GeneratedRegex("^(?<type>[a-z]+)(\\((?<scope>[^)]+)\\))?(?<breaking>!)?(?:: (?<subject>.+))$")]
     private static partial Regex HeaderRegex();
 
     private static bool IsBypassCandidate(string header)
