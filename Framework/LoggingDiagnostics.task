@@ -1,0 +1,76 @@
+# Logging & Diagnostics Framework
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Framework/LoggingDiagnostics.task](Framework/LoggingDiagnostics.task)
+**Role**: Planner (see [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md))
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Plan logging and diagnostics framework for CLI tools - structured logging, verbosity levels, diagnostic output.
+````
+
+---
+
+## Role: Planner
+
+**Task File**: Framework/LoggingDiagnostics.task
+**Objective**: Establish logging framework for consistent diagnostics across all tools
+
+**Role Reference**: See [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md) for workflow guidance.
+
+### Context
+
+CLI tools need structured logging for:
+- Debug/troubleshooting (verbose mode)
+- User-facing progress/status messages
+- Error diagnostics (stack traces, context)
+- Integration with CI/CD pipelines (structured output)
+
+### Your Responsibilities
+
+1. Research .NET logging frameworks (Serilog, NLog, Microsoft.Extensions.Logging)
+2. Design verbosity levels (quiet, normal, verbose, debug)
+3. Plan structured output formats (JSON, plain text)
+4. Define diagnostic context capture (environment, version, args)
+
+### Deliverables
+
+- [ ] **D1**: Research report on logging frameworks
+- [ ] **D2**: Logging framework selection and rationale
+- [ ] **D3**: Verbosity level design
+- [ ] **D4**: Structured output format specification
+- [ ] **D5**: Error diagnostic standards
+- [ ] **D6**: Implementation plan for integration
+
+### Verification Steps
+
+- [ ] Plan complete and approved by Planner
+- [ ] Ready for Implementation Agent delegation
+
+---
+
+## Task Details
+
+---
+
+Status: Not Started
+Owner: Strategic Agent (Planner)
+Priority: Medium
+Effort: Medium
+Priority Score: 7 (Impact:6 + Urgency:2 + Dependency:2 - Complexity:2 - Improves troubleshooting)
+
+## Objective
+
+Establish logging framework for consistent diagnostics and troubleshooting.
+
+## Task Context
+
+- Current state: Ad-hoc Console.WriteLine, no structured logging
+- Desired state: Unified logging framework, verbosity control, structured output
+
+## Progress Log
+
+- 2025-12-26: Task created by Orchestrator for backlog maintenance
