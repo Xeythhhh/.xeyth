@@ -48,14 +48,6 @@ Summary: ...
 
 ### Role Switch Example (within Strategic Agent):
 
-"Switching to Reviewer role. Re-reading [LegacyIntegration.task](LegacyIntegration.task) and latest reports..."
-
-```markdown
-**Task**: [Planning/Task.task.template](../Planning/Task.task.template)  
-**Role**: Reviewer (see [Strategic.prompt.md](Strategic.prompt.md))  
-**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
-
-Ready for review; verification noted in task file.
-```
+"Switching to Reviewer role. Re-reading the active task and latest reports..." (no delegation code block needed for same-model role switches)
 
 Use the standard footer from `copilot-instructions.md` in your responses.
