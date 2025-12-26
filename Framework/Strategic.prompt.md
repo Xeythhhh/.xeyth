@@ -4,13 +4,67 @@ Covers Orchestrator, Planner, Reviewer roles.
 
 ## Orchestrator
 
-- Pick highest-value work; maintain 20 ready tasks (create when < 15, focus execution when > 25)
-- Maintain at least 5 open PRs (or draft PRs) at all times
+**Priority Order** (execute in this sequence):
+1. **Review and merge ready PRs** (see PR Management below)
+2. **Comment refinements on incomplete PRs** with @copilot delegation
+3. **Pick highest-value work** from backlog; maintain 20 ready tasks
+4. **Maintain at least 5 open PRs** (delegate new tasks if < 5)
+5. **Regularly refine unfinished tasks** and delegate to Implementation Agent
+
 - Create or update `.task` files in appropriate slices (e.g., `Framework/`, `Maintenance/`)
 - Delegate to Planner using code block format; include 1–2 sentences of context
-- Regularly refine unfinished tasks and delegate to Implementation Agent
 - If build/test is broken, prioritize a blocker task
 - Use `Flow.prompt.md` for continue/progress/blocker handoffs
+
+### PR Management
+
+**Before selecting new tasks for delegation**:
+1. Check status of ALL open PRs and drafts
+2. For each PR, verify:
+   - ✅ All deliverables checked in task file
+   - ✅ Progress Log updated with completion entry
+   - ✅ Reviewer delegation block present in task file
+   - ✅ Progress report created and linked
+   - ✅ PR checklist complete (build, tests, docs)
+   - ✅ CI/CD checks passing
+   - ✅ No merge conflicts
+
+**If PR is NOT ready**:
+1. Post comment to PR with @copilot tag listing required refinements
+2. Include delegation prompt in comment for Implementation Agent
+3. Move to next PR
+
+**If PR IS ready**:
+1. Squash merge PR to master
+2. Archive task file to `{Slice}/archive/{TaskName}.YYYY-MM-DD.task`
+3. Update task inventories
+
+**Critical**: PR review and merge takes priority over new task delegation to maintain healthy pipeline flow.
+
+### PR Readiness Checklist
+
+When reviewing a PR for merge, verify ALL items:
+
+**Task File**:
+- [ ] All deliverables (D1, D2, etc.) marked `- [x]` complete
+- [ ] Progress Log has completion entry with date
+- [ ] Reviewer delegation block present (4-backtick code block)
+- [ ] Progress report created (`{TaskName}.task.{Phase}.report`) and linked
+
+**PR Description**:
+- [ ] Build status: ✅ Passes (0 errors, 0 warnings)
+- [ ] Tests status: ✅ All pass
+- [ ] Lint status: ✅ Clean (or N/A)
+- [ ] Documentation updated (or marked N/A)
+- [ ] Commit messages follow conventions
+
+**GitHub Status**:
+- [ ] CI/CD checks: All green
+- [ ] Merge conflicts: None
+- [ ] Reviews: At least 1 approval (human or Copilot)
+- [ ] Draft status: Not draft
+
+**If ANY item fails**: Post comment with @copilot tag and delegation prompt to fix issues.
 
 ### Backlog Management
 
