@@ -225,39 +225,12 @@ internal sealed class ValidateCommandRunner
         string rootPath,
         CancellationToken cancellationToken)
     {
-        var results = new List<ValidationResult>(files.Count);
-
-        if (ConsoleEnvironment.IsInteractive(_console) && files.Count > 1)
-        {
-            await _console.Progress()
-                .Columns(new TaskDescriptionColumn(), new ProgressBarColumn(), new PercentageColumn(), new RemainingTimeColumn())
-                .StartAsync(async ctx =>
-                {
-                    var task = ctx.AddTask("Validating files", maxValue: files.Count);
-
-                    foreach (var file in files)
-                    {
-                        var result = await _validation.ValidateAsync(file, contracts, rootPath, cancellationToken);
-                        results.Add(result);
-                        task.Increment(1);
-                    }
-                });
-        }
-        else
-        {
-            foreach (var file in files)
-            {
-                var relativePath = MakeRelative(rootPath, file);
-                var result = await StatusSpinner.RunAsync(
-                    _console,
-                    $"Validating {relativePath}...",
-                    () => _validation.ValidateAsync(file, contracts, rootPath, cancellationToken));
-
-                results.Add(result);
-            }
-        }
-
-        return results;
+        return await ProgressHelper.RunAsync(
+            _console,
+            "Validating files",
+            files,
+            file => _validation.ValidateAsync(file, contracts, rootPath, cancellationToken),
+            file => $"Validating {MakeRelative(rootPath, file)}...");
     }
 
     private static string FormatSeverity(ViolationSeverity severity) => severity switch
