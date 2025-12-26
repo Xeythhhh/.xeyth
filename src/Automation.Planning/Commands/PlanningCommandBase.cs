@@ -31,5 +31,13 @@ internal abstract class PlanningCommandBase : IPlanningCommand
         }
     }
 
-    protected internal static string NormalizePath(string path) => path.Replace('\\', '/');
+    protected internal static string NormalizePath(string path)
+    {
+        if (path is null)
+        {
+            throw new ArgumentNullException(nameof(path));
+        }
+
+        return path.Replace('\\', '/');
+    }
 }

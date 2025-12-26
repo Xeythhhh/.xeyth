@@ -11,4 +11,10 @@ public sealed class PlanningCommandBaseTests
 
         Assert.Equal("root/nested/file.proposal", normalized);
     }
+
+    [Fact]
+    public void NormalizePath_ThrowsForNull()
+    {
+        Assert.Throws<ArgumentNullException>(() => PlanningCommandBase.NormalizePath(null!));
+    }
 }
