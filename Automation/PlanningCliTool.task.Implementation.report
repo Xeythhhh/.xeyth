@@ -1,0 +1,22 @@
+# PlanningCliTool.task — Implementation Progress Report
+
+## Status
+Complete — implementation finished, ready for review.
+
+## Summary
+- Normalized planning CLI path output across commands.
+- Added null-guarded path helper and coverage.
+- Updated task deliverables and reviewer handoff notes.
+
+## Verification
+- `dotnet build` (pass, 0 errors/warnings)
+- `dotnet test src/tests/Automation.Planning.Tests/Automation.Planning.Tests.csproj` (pass)
+
+## Documentation
+N/A (no additional README/docs changes required).
+
+## Blockers
+None.
+
+## Next Steps
+- Delegate to Reviewer per task handoff instructions.
