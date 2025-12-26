@@ -1,0 +1,355 @@
+# Proposal: Unified Logging Infrastructure with Serilog
+
+**Status**: Pending  
+**Submitted**: 2025-12-26  
+**Author**: Strategic Agent (Research Task)  
+**Related Task**: Research/Nuke/NukeCliDesign.research.report
+
+## Context
+
+The .xeyth framework CLI tools (xeyth-verify, xeyth-contracts) currently use ad-hoc logging approaches:
+- `Console.WriteLine()` for standard output
+- No structured logging
+- No log levels (verbose, debug, info, warning, error)
+- No file logging for diagnostics
+- Output not adaptable to environment (CI vs local)
+
+Nuke Build demonstrates that **professional CLI tools need professional logging** through:
+- Serilog for structured logging
+- Configurable verbosity levels
+- File logging with rotation
+- Environment-aware output (colors locally, plain in CI)
+- Consistent formatting across all tools
+
+## Proposal
+
+Implement a **unified logging infrastructure** for all .xeyth CLI tools using Serilog:
+
+1. Create `Automation.Cli.Common` project with shared logging configuration
+2. Adopt Serilog for structured, level-based logging
+3. Add environment detection (CI vs local) for adaptive output
+4. Implement file logging with rotation (`.xeyth/logs/`)
+5. Provide verbosity control via CLI flags (`--verbosity`)
+6. Integrate with Spectre.Console for rich terminal output
+
+**Example API:**
+
+```csharp
+// Configuration (Automation.Cli.Common)
+public static class LoggingConfig
+{
+    public static void Initialize(LogLevel minLevel = LogLevel.Information)
+    {
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Is(minLevel)
+            .WriteTo.Console(
+                outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}",
+                theme: IsCI ? ConsoleTheme.None : AnsiConsoleTheme.Code)
+            .WriteTo.File(
+                path: ".xeyth/logs/cli-.log",
+                rollingInterval: RollingInterval.Day,
+                retainedFileCountLimit: 5)
+            .CreateLogger();
+    }
+    
+    public static bool IsCI => Environment.GetEnvironmentVariable("CI") != null;
+}
+
+// Usage in CLI tools
+public class ValidateCommand
+{
+    public async Task<int> ExecuteAsync()
+    {
+        LoggingConfig.Initialize(options.Verbosity);
+        
+        Log.Information("Starting validation...");
+        Log.Verbose("Found {Count} contract files", files.Count);
+        Log.Warning("Deprecated syntax in {File}", file);
+        Log.Error("Validation failed for {File}", file);
+        
+        return exitCode;
+    }
+}
+```
+
+## Benefits
+
+- **Structured Logging**: Contextual information (file names, counts, etc.) in log messages
+- **Log Levels**: Control verbosity (quiet, normal, verbose, diagnostic)
+- **Environment Awareness**: Colors and formatting adapt to context (local vs CI)
+- **File Logging**: Persistent logs for debugging (last 5 days retained)
+- **Consistent Format**: All tools use same logging style
+- **Rich Sinks**: Can add custom sinks (Application Insights, Seq, etc.)
+- **Performance**: Serilog is fast, async, non-blocking
+- **Testability**: Can capture and assert on log messages in tests
+- **Professional UX**: Feels like mature developer tooling
+
+## Effort Estimate
+
+**Size**: Small
+
+**Impact**:
+- **What needs to change**:
+  - Create `Automation.Cli.Common` project
+  - Add Serilog packages (Serilog, Serilog.Sinks.Console, Serilog.Sinks.File)
+  - Implement `LoggingConfig` class
+  - Replace `Console.WriteLine()` with `Log.*()` in all CLI tools
+  - Add `--verbosity` parameter to all tools
+  - Create `.xeyth/logs/` directory (or auto-create)
+  - Update documentation
+
+- **Dependencies**:
+  - Serilog (3-4 NuGet packages)
+  - No breaking changes to existing functionality
+  - Can be adopted incrementally (one tool at a time)
+
+- **Risks**:
+  - **Very Low**: Serilog is mature, widely-used, battle-tested
+  - Migration is straightforward (search/replace Console → Log)
+  - Performance impact negligible
+
+## Implementation Notes
+
+### Phase 1: Infrastructure (Automation.Cli.Common)
+
+Create shared logging configuration:
+
+```csharp
+// Automation.Cli.Common/Logging/LoggingConfig.cs
+public static class LoggingConfig
+{
+    public static void Initialize(
+        LogLevel minLevel = LogLevel.Information,
+        string? logDirectory = null)
+    {
+        logDirectory ??= Path.Combine(
+            Environment.CurrentDirectory, 
+            ".xeyth", 
+            "logs");
+        
+        Directory.CreateDirectory(logDirectory);
+        
+        var loggerConfig = new LoggerConfiguration()
+            .MinimumLevel.Is(minLevel)
+            .Enrich.FromLogContext();
+        
+        // Console sink (environment-aware)
+        if (IsInteractive)
+        {
+            loggerConfig.WriteTo.Console(
+                outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}",
+                theme: AnsiConsoleTheme.Code);
+        }
+        else
+        {
+            loggerConfig.WriteTo.Console(
+                outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}",
+                theme: ConsoleTheme.None);
+        }
+        
+        // File sink (rolling daily, keep last 5)
+        loggerConfig.WriteTo.File(
+            path: Path.Combine(logDirectory, "cli-.log"),
+            rollingInterval: RollingInterval.Day,
+            retainedFileCountLimit: 5,
+            outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}");
+        
+        Log.Logger = loggerConfig.CreateLogger();
+    }
+    
+    public static bool IsCI => 
+        Environment.GetEnvironmentVariable("CI") != null;
+    
+    public static bool IsInteractive => 
+        !Console.IsOutputRedirected && 
+        !IsCI &&
+        Environment.GetEnvironmentVariable("NO_COLOR") == null;
+}
+
+public enum LogLevel
+{
+    Verbose = 0,
+    Debug = 1,
+    Information = 2,
+    Warning = 3,
+    Error = 4,
+    Fatal = 5
+}
+```
+
+### Phase 2: CLI Integration
+
+Add to all CLI tools:
+
+```csharp
+// xeyth-verify, xeyth-contracts, etc.
+public class Program
+{
+    public static async Task<int> Main(string[] args)
+    {
+        try
+        {
+            var app = new CommandApp();
+            app.Configure(config =>
+            {
+                config.AddCommand<ValidateCommand>("validate");
+                config.AddCommand<VerifyCommand>("verify");
+            });
+            
+            return await app.RunAsync(args);
+        }
+        catch (Exception ex)
+        {
+            Log.Fatal(ex, "Application terminated unexpectedly");
+            return 1;
+        }
+        finally
+        {
+            Log.CloseAndFlush();
+        }
+    }
+}
+
+public class ValidateSettings : CommandSettings
+{
+    [CommandOption("--verbosity")]
+    [Description("Log level (Quiet|Minimal|Normal|Verbose|Diagnostic)")]
+    public LogLevel Verbosity { get; set; } = LogLevel.Information;
+}
+
+public class ValidateCommand : AsyncCommand<ValidateSettings>
+{
+    public override async Task<int> ExecuteAsync(
+        CommandContext context, 
+        ValidateSettings settings)
+    {
+        LoggingConfig.Initialize(settings.Verbosity);
+        
+        Log.Information("Starting contract validation...");
+        
+        try
+        {
+            var files = DiscoverFiles(settings.Pattern);
+            Log.Verbose("Discovered {Count} files", files.Count);
+            
+            foreach (var file in files)
+            {
+                Log.Debug("Validating {File}", file);
+                var result = await ValidateFileAsync(file);
+                
+                if (result.HasWarnings)
+                    Log.Warning("{File}: {Count} warnings", file, result.Warnings.Count);
+                
+                if (result.HasErrors)
+                    Log.Error("{File}: {Count} errors", file, result.Errors.Count);
+            }
+            
+            Log.Information("Validation complete: {Passed}/{Total} files passed", 
+                passedCount, files.Count);
+            
+            return failedCount == 0 ? 0 : 1;
+        }
+        catch (Exception ex)
+        {
+            Log.Fatal(ex, "Validation failed with exception");
+            return 1;
+        }
+    }
+}
+```
+
+### Phase 3: Spectre.Console Integration
+
+Combine Serilog with Spectre.Console for rich output:
+
+```csharp
+// Use Serilog for structured logging
+Log.Information("Starting validation...");
+
+// Use Spectre.Console for rich UI elements
+AnsiConsole.Status()
+    .Spinner(Spinner.Known.Dots)
+    .Start("Validating contracts...", ctx =>
+    {
+        foreach (var file in files)
+        {
+            ctx.Status = $"Validating {file}...";
+            Log.Debug("Processing {File}", file); // Serilog for log file
+            ValidateFile(file);
+        }
+    });
+
+// Serilog for summary
+Log.Information("Validation complete: {Passed}/{Total}", passed, total);
+
+// Spectre.Console for visual summary
+var table = new Table();
+table.AddColumn("Status");
+table.AddColumn("Count");
+table.AddRow("Passed", passed.ToString());
+table.AddRow("Failed", failed.ToString());
+AnsiConsole.Write(table);
+```
+
+### Log Output Examples
+
+**Local (with colors)**:
+```
+[12:34:56 INF] Starting contract validation...
+[12:34:57 VRB] Discovered 42 files
+[12:34:58 DBG] Validating Ai/Framework/Flow.prompt.md
+[12:34:59 WRN] Ai/Framework/Flow.prompt.md: 2 warnings
+[12:35:00 INF] Validation complete: 41/42 files passed
+```
+
+**CI (plain text)**:
+```
+[12:34:56 INF] Starting contract validation...
+[12:34:57 VRB] Discovered 42 files
+[12:34:58 DBG] Validating Ai/Framework/Flow.prompt.md
+[12:34:59 WRN] Ai/Framework/Flow.prompt.md: 2 warnings
+[12:35:00 INF] Validation complete: 41/42 files passed
+```
+
+**Log File** (`.xeyth/logs/cli-2025-12-26.log`):
+```
+2025-12-26 12:34:56 [INF] Starting contract validation...
+2025-12-26 12:34:57 [VRB] Discovered 42 files
+2025-12-26 12:34:58 [DBG] Validating Ai/Framework/Flow.prompt.md
+2025-12-26 12:34:59 [WRN] Ai/Framework/Flow.prompt.md: 2 warnings
+2025-12-26 12:35:00 [INF] Validation complete: 41/42 files passed
+```
+
+### Verbosity Mapping
+
+| Flag | Serilog Level | What Gets Logged |
+|------|--------------|------------------|
+| `--verbosity Quiet` | Error | Errors only |
+| `--verbosity Minimal` | Warning | Warnings + Errors |
+| `--verbosity Normal` | Information | Info + Warnings + Errors (default) |
+| `--verbosity Verbose` | Debug | Debug + Info + Warnings + Errors |
+| `--verbosity Diagnostic` | Verbose | Everything |
+
+## Decision
+
+**Status**: Pending  
+**Decision Date**: TBD  
+**Rationale**: Awaiting review  
+**Task Created**: TBD
+
+## Additional Notes
+
+**Package Dependencies**:
+```xml
+<ItemGroup>
+  <PackageReference Include="Serilog" Version="4.1.0" />
+  <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+  <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+</ItemGroup>
+```
+
+**Future Enhancements**:
+- Add Serilog.Sinks.Seq for centralized logging
+- Add Serilog.Sinks.ApplicationInsights for cloud logging
+- Structured event templates for better querying
+- Log correlation IDs for tracking workflows
