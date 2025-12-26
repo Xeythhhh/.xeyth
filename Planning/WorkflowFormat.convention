@@ -281,7 +281,7 @@ Do more stuff
 
 ## See Also
 
-- [Workflow.workflow.template](Workflow.workflow.template) - Template file (planned)
+- [Workflow.workflow.template](Workflow.workflow.template) - Template file
 - [Convention.convention.template](../Conventions/Convention.convention.template) - Convention template
 - [Plan.plan.template](Plan.plan.template) - Plan template
 - [ContextFiles.md](ContextFiles.md) - All context file types

@@ -228,7 +228,7 @@ Examples:
 
 **Location**: `Planning/` directory or co-located with related work in appropriate slices
 
-**Schema**: See [Workflow.workflow.template](Workflow.workflow.template) (planned)
+**Schema**: See [Workflow.workflow.template](Workflow.workflow.template)
 
 **Key Sections**:
 
