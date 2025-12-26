@@ -1,0 +1,49 @@
+---
+type: BranchNaming
+scope: Repository-wide
+applies_to: All branches
+status: Active
+enforcement: Manual
+version: 1.0
+---
+
+# Branch Naming Convention
+
+## Convention Summary
+
+Standardizes branch prefixes to enforce PR-based workflow and align task work with reviewable changes.
+
+## Rules
+
+- ✅ **Task work**: `task/{task-name}`
+- ✅ **Features**: `feature/{feature-name}`
+- ✅ **Bug fixes**: `fix/{issue-description}`
+- ✅ **Chores/tooling**: `chore/{description}`
+- ✅ Use kebab-case for `{name}` segments; keep names short and descriptive
+- ✅ Create branches from `master` before committing: `git checkout -b task/{task-name}`
+- ✅ Reference the related task file in the PR description
+- ❌ Do not commit directly to `master`
+
+## Usage
+
+Typical workflow:
+
+```bash
+git checkout -b task/{task-name}
+git add .
+git commit -m "feat(scope): implement deliverable"
+git push origin task/{task-name}
+gh pr create --base master --head task/{task-name}
+```
+
+## Validation
+
+- [ ] Branch prefix matches one of the allowed categories
+- [ ] Name portion is kebab-case and descriptive
+- [ ] Branch created from `master`
+- [ ] PR references the originating task file
+
+## See Also
+
+- [Git/README.md](../Git/README.md) - PR workflow and task linking
+- [.github/pull_request_template.md](../.github/pull_request_template.md) - PR body requirements

@@ -19,6 +19,15 @@ Role: Implementer (plan review + execution).
 
 **CRITICAL**: All commits must go to feature branches. Pull Requests are required for merging to master.
 
+## PR Workflow
+
+1. Create feature branch: `git checkout -b task/{task-name}`
+2. Implement deliverables and commit to the feature branch
+3. Push branch: `git push origin task/{task-name}`
+4. Create PR: `gh pr create --base master --head task/{task-name}`
+5. Reference the task file in the PR description
+6. Delegate to Reviewer when ready
+
 ## Delegation Patterns
 
 **CRITICAL**: When delegating to Strategic Agent, use 4-backtick code block (see [Delegation.instructions.md](Delegation.instructions.md)).

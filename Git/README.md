@@ -27,6 +27,32 @@ Check settings:
 gh api repos/Xeythhhh/.xeyth/branches/master/protection
 ```
 
+## PR Workflow (Task Progress)
+
+All task work must be merged via Pull Requests; direct commits to `master` are blocked by branch protection.
+
+1. **Create feature branch**: `git checkout -b task/{task-name}` (use branch naming below)
+2. **Commit locally**: Conventional Commit messages (see format below)
+3. **Push branch**: `git push origin task/{task-name}`
+4. **Open PR**: Use `.github/pull_request_template.md` and reference the task file in **Related Task**
+5. **Reviews**: Resolve comments and obtain required approvals/status checks
+6. **After merge**: Update the task Progress Log with the PR link and marked deliverables
+
+### Branch Naming
+
+See [Conventions/BranchNamingConvention.convention](../Conventions/BranchNamingConvention.convention) for full rules.
+
+- `task/{task-name}` — task execution (default for .task files)
+- `feature/{feature-name}` — feature delivery
+- `fix/{issue-description}` — bug fixes
+- `chore/{description}` — maintenance and tooling
+
+### Task ↔ PR Linking
+
+- Every PR must include a **Task File** link in the template (`Git/{TaskName}.task`, etc.)
+- Use the **Deliverables** checklist in the PR body to track progress for that task
+- After merge, add the PR URL to the task Progress Log and mark deliverables complete
+
 ## Commit Message Format
 
 ```
