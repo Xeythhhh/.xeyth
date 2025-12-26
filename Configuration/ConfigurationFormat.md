@@ -21,9 +21,12 @@ The `.xeyth` file is a YAML-based configuration format that allows projects to c
 
 orchestrator:
   backlog:
-    minimum: 5          # Create new tasks when backlog drops below this
-    maximum: 20         # Pause task creation when backlog exceeds this
-    createThreshold: 7  # Target backlog size to maintain
+    minimum: 15         # Create new tasks when backlog drops below this
+    maximum: 25         # Pause task creation when backlog exceeds this
+    target: 20          # Target backlog size to maintain
+  pullRequests:
+    minimum: 5          # Maintain at least this many open PRs (or draft PRs)
+    createThreshold: 5  # Prioritize Implementation Agent delegation when PRs fall below this
 
 testing:
   verify:
@@ -47,29 +50,43 @@ Controls Orchestrator agent behavior (task selection, backlog management).
 
 **Properties**:
 - `backlog.minimum` (integer): Create new tasks when backlog drops below this threshold
-  - Default: 5
-  - Typical range: 3-10
+  - Default: 15
+  - Typical range: 10-20
   - Lower values: More proactive task creation
   - Higher values: Focus on execution before creating more work
 
 - `backlog.maximum` (integer): Pause task creation when backlog exceeds this threshold
-  - Default: 20
-  - Typical range: 10-50
+  - Default: 25
+  - Typical range: 20-50
   - Lower values: Stay focused, avoid overwhelming backlog
   - Higher values: Accommodate PR workflows with cloud agents
 
-- `backlog.createThreshold` (integer): Target backlog size to maintain
-  - Default: 7
-  - Typical range: 5-15
+- `backlog.target` (integer): Target backlog size to maintain
+  - Default: 20
+  - Typical range: 15-30
   - Orchestrator aims to keep backlog around this size
+
+- `pullRequests.minimum` (integer): Maintain at least this many open PRs (or draft PRs)
+  - Default: 5
+  - Typical range: 3-10
+  - Ensures continuous implementation workflow
+  - Each PR should handle a single `.task` file
+
+- `pullRequests.createThreshold` (integer): Prioritize Implementation Agent delegation threshold
+  - Default: 5
+  - When open PRs fall below this, prioritize new task delegation
+  - Keeps implementation pipeline flowing
 
 **Example**:
 ```yaml
 orchestrator:
   backlog:
-    minimum: 7
+    minimum: 15
     maximum: 25
-    createThreshold: 10
+    target: 20
+  pullRequests:
+    minimum: 5
+    createThreshold: 5
 ```
 
 ### testing
@@ -173,16 +190,19 @@ xeyth-config reset
 
 ## Usage Examples
 
-### High-Volume PR Workflow
+### High-Volume PR Workflow (Default)
 
-For projects with many PRs and cloud agents:
+For projects with continuous implementation flow:
 
 ```yaml
 orchestrator:
   backlog:
-    minimum: 10
-    maximum: 50
-    createThreshold: 20
+    minimum: 15
+    maximum: 25
+    target: 20
+  pullRequests:
+    minimum: 5
+    createThreshold: 5
 ```
 
 ### Focus Mode

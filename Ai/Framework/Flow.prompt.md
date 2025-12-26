@@ -170,10 +170,15 @@ Example recommendation:
 
 **Strategic Agent (Orchestrator)** - Continuous operation:
 
-- Maintain 5-10 ready tasks at all times
-- If backlog < 5 tasks: Create new enhancement/feature tasks
-- If backlog > 10 tasks: Focus on execution, defer new planning
-- Select highest-priority task and delegate to Planner
+- **Target Backlog**: Maintain 20 ready tasks at all times
+- If backlog < 15 tasks: Create new enhancement/feature tasks to reach 20
+- If backlog > 25 tasks: Focus on execution, defer new planning
+- **Target PRs**: Maintain at least 5 open PRs (or draft PRs) at all times
+- Each PR should handle a single `.task` file
+- If open PRs < 5: Prioritize delegation to Implementation Agent for new tasks
+- Select highest-priority task and delegate to Planner or Implementation Agent
+- **Task Refinement**: Regularly review "Not Started" tasks for clarity and completeness
+- **Task Delegation**: Continuously delegate refined tasks to Implementation Agent
 
 **Implementation Agent** - After completing implementation:
 

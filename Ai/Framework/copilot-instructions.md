@@ -62,10 +62,21 @@ Agents operate in **continuous flow mode**:
 4. **Strategic Agent**: After delegation, assume Orchestrator role and select next task
 5. Repeat until stop condition reached
 
+**Task Generation & Refinement**:
+- Orchestrator continuously creates new tasks to maintain backlog target
+- Tasks created in "Not Started" status with delegation prompts
+- Planner reviews and refines task details before delegation to Implementation
+- Implementation Agent receives refined, actionable tasks
+- All task work flows through PRs (never commit directly to master)
+
 **Backlog Management** (Orchestrator):
-- Maintain 5-10 ready tasks at all times
-- If backlog < 5: Create new enhancement/feature tasks
-- If backlog > 10: Focus on execution, defer new planning
+- **Target**: Maintain 20 ready tasks at all times
+- If backlog < 15: Create new enhancement/feature tasks to reach 20
+- If backlog > 25: Focus on execution, defer new planning
+- **PR Target**: Maintain at least 5 open PRs (or draft PRs) handling individual `.task` files
+- If open PRs < 5: Prioritize delegation to Implementation Agent for new tasks
+- Regularly refine unfinished tasks for clarity and completeness
+- Continuously delegate refined tasks to Implementation Agent
 
 **Stop Conditions**:
 - User explicitly requests halt
