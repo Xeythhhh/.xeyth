@@ -137,13 +137,14 @@ Capture ideas during implementation without context switching:
 
 - **xeyth-verify**: Verify snapshot test differences
 - **xeyth-contracts**: Validate YAML contracts
-- **xeyth-planning**: Manage proposals and backlog (planned)
+- **xeyth-planning**: Manage proposals and backlog
 
 Install as dotnet tools:
 
 ```bash
 dotnet tool install -g xeyth-verify
 dotnet tool install -g xeyth-contracts
+dotnet tool install -g xeyth-planning
 ```
 
 ## Configuration

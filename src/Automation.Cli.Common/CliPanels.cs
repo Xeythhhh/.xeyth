@@ -21,7 +21,7 @@ public static class CliPanels
     {
         var rows = new List<IRenderable>
         {
-            new Markup($"{icon} {Markup.Escape(message)}")
+            new Markup($"{Markup.Escape(icon)} {Markup.Escape(message)}")
         };
 
         if (!string.IsNullOrWhiteSpace(detail))
