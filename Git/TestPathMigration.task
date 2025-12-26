@@ -1,0 +1,29 @@
+# Test Path Migration to Slice/Tests Convention
+
+**Status**: Not Started  
+**Owner**: Strategic Agent (Planner)  
+**Priority**: Medium  
+**Effort**: Medium  
+
+## Objective
+
+Create and execute a migration plan to align all test projects and fixtures under the `{Slice}/Tests/` directory convention across the repository.
+
+## Scope
+
+- Inventory existing test projects and utilities outside `{Slice}/Tests/`
+- Define migration steps per slice (Automation, Contracts, etc.)
+- Update solution/project references and CI scripts as needed
+- Ensure tooling and documentation reflect the new layout
+
+## Deliverables
+
+- [ ] D1: Inventory report of current test locations
+- [ ] D2: Migration plan per slice with timelines
+- [ ] D3: Updated solution and project references
+- [ ] D4: CI/test scripts adjusted for new paths
+- [ ] D5: Documentation updated for test layout convention
+
+## Progress Log
+
+- 2025-12-26: Task created to track test path convention migration

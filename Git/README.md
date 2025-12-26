@@ -190,12 +190,28 @@ git commit --no-verify
 
 ## Git Hooks
 
-The repository includes PowerShell-based hooks for cross-platform compatibility:
+Hooks are implemented with the `xeyth-git` global tool for cross-platform compatibility:
 
-- `prepare-commit-msg` - Injects template into commit editor
+- `prepare-commit-msg` - Injects the commit template into the editor when empty
 - `commit-msg` - Validates commit message format
 
-Hooks are located in `.git/hooks/` and require PowerShell Core (`pwsh`).
+Wrapper scripts are available in `Git/hooks/`:
+
+```bash
+cp Git/hooks/prepare-commit-msg .git/hooks/prepare-commit-msg
+cp Git/hooks/commit-msg .git/hooks/commit-msg
+cp Git/hooks/prepare-commit-msg.ps1 .git/hooks/prepare-commit-msg.ps1
+cp Git/hooks/commit-msg.ps1 .git/hooks/commit-msg.ps1
+chmod +x .git/hooks/prepare-commit-msg .git/hooks/commit-msg
+```
+
+If `xeyth-git` is not installed, the wrappers emit a warning and allow the commit to continue.
+
+Install the tool globally from a local package source (after packing to `./nupkg`):
+
+```bash
+dotnet tool install --global --add-source ./nupkg xeyth-git
+```
 
 ## Configuration
 
