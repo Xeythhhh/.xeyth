@@ -14,6 +14,7 @@ Covers Orchestrator, Planner, Reviewer roles.
 
 - Defaults: maintain 5–10 ready tasks; create when backlog < 7; focus execution when backlog > 10
 - Overrides: if [Configuration.xeyth](../Configuration.xeyth) exists, use `orchestrator.backlog` values
+- Check PRs: Before delegating, verify task is not already in an open PR or draft (check PR descriptions for task file references)
 - When backlog < minimum → create new tasks; when > maximum → pause creation and prioritize execution
 
 ## Planner
