@@ -1,0 +1,322 @@
+# Proposal: Automated Semantic Versioning with GitVersion
+
+**Status**: Pending  
+**Submitted**: 2025-12-26  
+**Author**: Strategic Agent (Research Task)  
+**Related Task**: Research/Nuke/NukePackageManagement.research.report
+
+## Context
+
+The .xeyth framework currently lacks automated versioning. Package versions must be manually updated in project files before releases, which:
+- Requires remembering to bump versions
+- Creates inconsistency (different projects, different versions)
+- Makes release process manual and error-prone
+- Lacks semantic versioning automation
+- No connection between Git history and version numbers
+
+Nuke Build ecosystem demonstrates that **versioning can be fully automated** based on Git commits and branches using tools like GitVersion. This approach:
+- Eliminates manual version bumping
+- Ensures consistent versions across all packages
+- Follows semantic versioning automatically
+- Integrates branch strategy (main = release, develop = beta)
+- Creates predictable, repeatable releases
+
+## Proposal
+
+Implement **automated semantic versioning** using GitVersion:
+
+1. Add GitVersion NuGet package to build project
+2. Configure `gitversion.yml` with branching strategy
+3. Integrate with Build.cs for version injection
+4. Update all project files to use version from build
+5. Configure CI to use GitVersion for releases
+
+**Example Configuration:**
+
+`gitversion.yml`:
+```yaml
+mode: Mainline
+branches:
+  main:
+    tag: ''
+    increment: Patch
+    is-release-branch: true
+  develop:
+    tag: beta
+    increment: Minor
+  feature:
+    tag: alpha
+    increment: Patch
+  hotfix:
+    tag: hotfix
+    increment: Patch
+```
+
+`Build.cs`:
+```csharp
+[GitVersion] readonly GitVersion GitVersion;
+
+Target Pack => _ => _
+    .DependsOn(Compile)
+    .Executes(() =>
+    {
+        DotNetPack(s => s
+            .SetProject(Solution)
+            .SetConfiguration(Configuration)
+            .SetVersion(GitVersion.NuGetVersionV2)
+            .SetAssemblyVersion(GitVersion.AssemblySemVer)
+            .SetFileVersion(GitVersion.AssemblySemFileVer)
+            .SetInformationalVersion(GitVersion.InformationalVersion)
+            .SetOutputDirectory(ArtifactsDirectory));
+    });
+
+Target PrintVersion => _ => _
+    .Executes(() =>
+    {
+        Log.Information("Version: {Version}", GitVersion.NuGetVersionV2);
+        Log.Information("Assembly: {Version}", GitVersion.AssemblySemVer);
+        Log.Information("Informational: {Version}", GitVersion.InformationalVersion);
+    });
+```
+
+## Benefits
+
+- **No Manual Version Bumping**: Git commits/tags drive versions automatically
+- **Semantic Versioning**: Major.Minor.Patch follows semver rules
+- **Branch-Based Versioning**: 
+  - `main` → `1.0.0`, `1.0.1`, `1.1.0`
+  - `develop` → `1.1.0-beta.1`, `1.1.0-beta.2`
+  - `feature/*` → `1.0.1-alpha.1`, `1.0.1-alpha.2`
+- **Deterministic**: Same commit = same version (always)
+- **CI/CD Ready**: Works in GitHub Actions, Azure Pipelines, etc.
+- **Consistent Across Projects**: Single version source for all packages
+- **Release Automation**: Tag commit, version bumps automatically
+- **Pre-release Support**: Beta/alpha versions for testing
+- **Metadata Support**: Build number, commit SHA in version
+
+## Effort Estimate
+
+**Size**: Small
+
+**Impact**:
+- **What needs to change**:
+  - Add GitVersion NuGet package to Build.csproj
+  - Create `gitversion.yml` configuration
+  - Update Build.cs Pack target to use GitVersion
+  - Remove hardcoded versions from project files (or make them placeholders)
+  - Update CI workflows to use GitVersion
+  - Document versioning strategy
+
+- **Dependencies**:
+  - GitVersion.Tool (NuGet package)
+  - Git repository (already have)
+  - Tags for releases (create as needed)
+
+- **Risks**:
+  - **Low**: GitVersion is mature, widely used
+  - Initial version may need adjustment (can start at any version)
+  - Need to decide branching strategy upfront
+  - Can be rolled back if needed
+
+## Implementation Notes
+
+### Phase 1: Setup GitVersion
+
+**Install Tool**:
+```bash
+nuke :add-package GitVersion.Tool
+```
+
+**Create Configuration** (`gitversion.yml`):
+```yaml
+mode: Mainline
+branches:
+  main:
+    tag: ''
+    increment: Patch
+    is-release-branch: true
+    tracks-release-branches: true
+  develop:
+    tag: beta
+    increment: Minor
+    prevent-increment-of-merged-branch-version: false
+  feature:
+    tag: 'alpha'
+    increment: Patch
+    regex: ^features?[/-]
+  hotfix:
+    tag: 'hotfix'
+    increment: Patch
+    regex: ^hotfix(es)?[/-]
+  pull-request:
+    tag: 'pr'
+    increment: Inherit
+    regex: ^(pull|pull\-requests|pr)[/-]
+next-version: 1.0.0
+```
+
+### Phase 2: Integrate with Build
+
+**Build.cs**:
+```csharp
+using Nuke.Common.Tools.GitVersion;
+
+class Build : NukeBuild
+{
+    [GitVersion(Framework = "net10.0")] 
+    readonly GitVersion GitVersion;
+    
+    Target PrintVersion => _ => _
+        .Executes(() =>
+        {
+            Log.Information("NuGet Version: {0}", GitVersion.NuGetVersionV2);
+            Log.Information("Assembly Version: {0}", GitVersion.AssemblySemVer);
+            Log.Information("File Version: {0}", GitVersion.AssemblySemFileVer);
+            Log.Information("Info Version: {0}", GitVersion.InformationalVersion);
+            Log.Information("Full SemVer: {0}", GitVersion.FullSemVer);
+        });
+    
+    Target Pack => _ => _
+        .DependsOn(Compile)
+        .Executes(() =>
+        {
+            DotNetPack(s => s
+                .SetProject(Solution)
+                .SetConfiguration(Configuration)
+                .SetVersion(GitVersion.NuGetVersionV2)
+                .SetProperty("AssemblyVersion", GitVersion.AssemblySemVer)
+                .SetProperty("FileVersion", GitVersion.AssemblySemFileVer)
+                .SetProperty("InformationalVersion", GitVersion.InformationalVersion)
+                .SetOutputDirectory(ArtifactsDirectory)
+                .EnableNoBuild());
+        });
+}
+```
+
+### Phase 3: Project File Configuration
+
+**Remove Hardcoded Versions** (or use placeholders):
+
+```xml
+<PropertyGroup>
+  <!-- Version will be injected by build -->
+  <Version>0.0.0</Version>
+  <AssemblyVersion>0.0.0</AssemblyVersion>
+  <FileVersion>0.0.0</FileVersion>
+</PropertyGroup>
+```
+
+Alternatively, remove version properties entirely and let build supply them.
+
+### Phase 4: CI Integration
+
+**GitHub Actions**:
+```yaml
+- name: Print Version
+  run: ./build.sh PrintVersion
+
+- name: Pack Packages
+  run: ./build.sh Pack
+```
+
+GitVersion automatically detects CI environment and provides correct version.
+
+### Versioning Workflow
+
+**Development Workflow**:
+
+1. **Feature Development** (`feature/my-feature` branch):
+   - Version: `1.0.1-alpha.1`, `1.0.1-alpha.2`, etc.
+   - Each commit increments pre-release number
+
+2. **Merge to Develop**:
+   - Version: `1.1.0-beta.1`
+   - Develop always has `-beta` suffix
+
+3. **Release Preparation** (merge develop → main):
+   - Version: `1.1.0`
+   - Clean version, no suffix
+
+4. **Tagging Release**:
+   ```bash
+   git tag v1.1.0
+   git push --tags
+   ```
+   - Creates release `1.1.0`
+   - Triggers CI to publish
+
+5. **Hotfix** (`hotfix/critical-bug`):
+   - Version: `1.1.1-hotfix.1`
+   - Merge to main → `1.1.1`
+
+### Version Examples
+
+**Branches and Versions**:
+
+| Branch | Commits | Version |
+|--------|---------|---------|
+| `main` | 0 commits since tag v1.0.0 | `1.0.0` |
+| `main` | 3 commits since tag v1.0.0 | `1.0.1` |
+| `develop` | Based on main v1.0.0 | `1.1.0-beta.1` |
+| `develop` | 5 commits | `1.1.0-beta.5` |
+| `feature/login` | 2 commits | `1.0.1-login.2` |
+| `hotfix/security` | 1 commit | `1.0.1-hotfix.1` |
+
+### Configuration Options
+
+**Increment Strategies**:
+- `Patch`: Increments patch version (1.0.0 → 1.0.1)
+- `Minor`: Increments minor version (1.0.0 → 1.1.0)
+- `Major`: Increments major version (1.0.0 → 2.0.0)
+- `None`: No increment
+- `Inherit`: Inherit from parent branch
+
+**Tag Patterns**:
+- No tag (`''`): Clean version (1.0.0)
+- `beta`: Pre-release (1.1.0-beta.1)
+- `alpha`: Alpha release (1.0.1-alpha.1)
+- `rc`: Release candidate (1.2.0-rc.1)
+
+### Alternative: MinVer (Simpler)
+
+If GitVersion is too complex, consider **MinVer**:
+
+**Pros**:
+- Minimal configuration (convention-based)
+- Tag-based versioning only
+- Simpler to understand
+
+**Cons**:
+- Less control over branching strategies
+- No pre-release naming customization
+
+**Usage**:
+```csharp
+[MinVer] readonly MinVer MinVer;
+
+Target Pack => _ => _
+    .Executes(() =>
+    {
+        DotNetPack(s => s.SetVersion(MinVer.Version));
+    });
+```
+
+## Decision
+
+**Status**: Pending  
+**Decision Date**: TBD  
+**Rationale**: Awaiting review  
+**Task Created**: TBD
+
+## Additional Notes
+
+**Recommended Starting Version**: `1.0.0` (framework is mature enough)
+
+**Release Process**:
+1. Develop features in `develop` branch
+2. Test beta versions (`1.x.0-beta.N`)
+3. Merge to `main` when stable
+4. Tag release: `git tag v1.x.0`
+5. CI automatically publishes versioned packages
+
+**Documentation**: Add versioning strategy to README or Git/Conventions

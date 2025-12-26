@@ -1,0 +1,395 @@
+# Proposal: Architecture Validation Tests with NetArchTest
+
+**Status**: Pending  
+**Submitted**: 2025-12-26  
+**Author**: Strategic Agent (Research Task)  
+**Related Task**: Research/Nuke/NukeTestingPatterns.research.report
+
+## Context
+
+The .xeyth framework has established architectural conventions and patterns:
+- Framework code should not depend on application code
+- Prompt files must end with `.prompt.md`
+- Task files must follow `{Name}.task` naming
+- Reports must be stored alongside their tasks
+- Vertical slice organization (Ai/, Planning/, Git/, etc.)
+
+However, these conventions are currently enforced through:
+- Code reviews (manual, inconsistent)
+- Documentation (easy to miss)
+- Tribal knowledge (not discoverable)
+
+There's no **automated validation** that prevents architectural violations from being committed. Nuke Build demonstrates that **architectural rules can be tested** using NetArchTest, making conventions executable and CI-verified.
+
+## Proposal
+
+Implement **architecture validation tests** using NetArchTest to enforce .xeyth framework conventions:
+
+1. Add NetArchTest NuGet package
+2. Create `Automation.Framework.ArchitectureTests` project
+3. Write tests for key architectural rules
+4. Integrate with CI to fail builds on violations
+5. Document architectural decisions as executable tests
+
+**Example Tests:**
+
+```csharp
+public class FrameworkArchitectureTests
+{
+    [Fact]
+    public void Framework_ShouldNotDependOnApplicationCode()
+    {
+        var result = Types
+            .InAssembly(typeof(AiFramework).Assembly)
+            .That().ResideInNamespace("Automation.Framework")
+            .ShouldNot().HaveDependencyOn("Automation.Verify")
+            .And().ShouldNot().HaveDependencyOn("Contracts.Cli")
+            .GetResult();
+        
+        Assert.True(result.IsSuccessful, 
+            $"Framework should not depend on application code: {string.Join(", ", result.FailingTypeNames)}");
+    }
+    
+    [Fact]
+    public void Prompts_ShouldHaveMarkdownExtension()
+    {
+        var promptFiles = Directory.GetFiles(
+            GetRepositoryRoot(), 
+            "*.prompt.*", 
+            SearchOption.AllDirectories);
+        
+        Assert.All(promptFiles, file =>
+        {
+            Assert.True(file.EndsWith(".prompt.md"), 
+                $"Prompt file {file} should end with .prompt.md");
+        });
+    }
+    
+    [Fact]
+    public void Tasks_ShouldFollowNamingConvention()
+    {
+        var taskFiles = Directory.GetFiles(
+            GetRepositoryRoot(), 
+            "*.task", 
+            SearchOption.AllDirectories);
+        
+        Assert.All(taskFiles, file =>
+        {
+            var fileName = Path.GetFileName(file);
+            Assert.Matches(@"^[A-Z][a-zA-Z]+\.task$", fileName,
+                $"Task file {fileName} should follow PascalCase.task naming");
+        });
+    }
+    
+    [Fact]
+    public void Reports_ShouldBeColocatedWithTasks()
+    {
+        var reportFiles = Directory.GetFiles(
+            GetRepositoryRoot(), 
+            "*.report", 
+            SearchOption.AllDirectories);
+        
+        foreach (var reportFile in reportFiles)
+        {
+            var reportDir = Path.GetDirectoryName(reportFile);
+            var reportName = Path.GetFileName(reportFile);
+            
+            // Report should match pattern: {TaskName}.task.{ReportName}.report
+            if (reportName.Contains(".task."))
+            {
+                var taskName = reportName.Split(".task.")[0] + ".task";
+                var taskFile = Path.Combine(reportDir, taskName);
+                
+                Assert.True(File.Exists(taskFile), 
+                    $"Report {reportFile} should have corresponding task file {taskFile}");
+            }
+        }
+    }
+}
+
+public class DependencyArchitectureTests
+{
+    [Fact]
+    public void CliTools_ShouldNotReferenceMicrosoftAspNetCore()
+    {
+        var cliAssemblies = new[]
+        {
+            typeof(VerifyCommand).Assembly,
+            typeof(ContractsCommand).Assembly
+        };
+        
+        foreach (var assembly in cliAssemblies)
+        {
+            var result = Types
+                .InAssembly(assembly)
+                .ShouldNot().HaveDependencyOn("Microsoft.AspNetCore")
+                .GetResult();
+            
+            Assert.True(result.IsSuccessful, 
+                $"{assembly.GetName().Name} should not depend on ASP.NET Core");
+        }
+    }
+    
+    [Fact]
+    public void Tests_ShouldOnlyUseXunitOrVerify()
+    {
+        var testAssemblies = AppDomain.CurrentDomain.GetAssemblies()
+            .Where(a => a.GetName().Name.EndsWith(".Tests"));
+        
+        foreach (var assembly in testAssemblies)
+        {
+            var result = Types
+                .InAssembly(assembly)
+                .That().HaveNameEndingWith("Tests")
+                .Should().HaveDependencyOn("Xunit")
+                .Or().HaveDependencyOn("Verify.Xunit")
+                .GetResult();
+            
+            Assert.True(result.IsSuccessful);
+        }
+    }
+}
+
+public class NamingConventionTests
+{
+    [Fact]
+    public void PublicClasses_ShouldNotHavePublicFields()
+    {
+        var result = Types
+            .InCurrentDomain()
+            .That().ArePublic()
+            .And().AreClasses()
+            .ShouldNot().HavePublicFields()
+            .GetResult();
+        
+        Assert.True(result.IsSuccessful,
+            $"Public classes should not expose public fields: {string.Join(", ", result.FailingTypeNames)}");
+    }
+    
+    [Fact]
+    public void Interfaces_ShouldStartWithI()
+    {
+        var result = Types
+            .InCurrentDomain()
+            .That().AreInterfaces()
+            .Should().HaveNameStartingWith("I")
+            .GetResult();
+        
+        Assert.True(result.IsSuccessful,
+            $"Interfaces should start with 'I': {string.Join(", ", result.FailingTypeNames)}");
+    }
+}
+```
+
+## Benefits
+
+- **Automated Enforcement**: Conventions become executable rules, not documentation
+- **CI/CD Integration**: Build fails if architecture violated
+- **Self-Documenting**: Tests document architectural decisions
+- **Regression Prevention**: Can't accidentally violate conventions
+- **Onboarding**: New developers learn conventions from tests
+- **Refactoring Safety**: Tests catch unintended architectural changes
+- **Living Documentation**: Tests stay up-to-date with code
+- **Explicit Constraints**: No ambiguity about what's allowed
+
+## Effort Estimate
+
+**Size**: Medium
+
+**Impact**:
+- **What needs to change**:
+  - Create `Automation.Framework.ArchitectureTests` project
+  - Add NetArchTest NuGet package
+  - Write 10-15 architecture tests covering key conventions
+  - Integrate tests into Build.cs Test target
+  - Update CI to run architecture tests
+  - Document architectural decisions in tests
+
+- **Dependencies**:
+  - NetArchTest.Rules (NuGet package)
+  - xUnit (already have)
+  - No changes to existing code (unless violations found)
+
+- **Risks**:
+  - **Low-Medium**: May discover existing violations that need fixing
+  - Tests may be too strict initially (can relax)
+  - Need to maintain tests as architecture evolves
+  - Can be added incrementally (start with most important rules)
+
+## Implementation Notes
+
+### Phase 1: Setup Project
+
+**Create Test Project**:
+```bash
+dotnet new xunit -n Automation.Framework.ArchitectureTests
+cd Automation.Framework.ArchitectureTests
+dotnet add package NetArchTest.Rules
+dotnet add package FluentAssertions  # Optional, for better assertions
+```
+
+**Project Structure**:
+```
+Automation.Framework.ArchitectureTests/
+├── DependencyTests.cs
+├── NamingConventionTests.cs
+├── FileConventionTests.cs
+├── LayerTests.cs
+└── Automation.Framework.ArchitectureTests.csproj
+```
+
+### Phase 2: Write Core Tests
+
+**Start with High-Value Rules**:
+
+1. **Framework Isolation**: Framework doesn't depend on apps
+2. **File Naming**: Prompts, tasks, plans follow conventions
+3. **Dependency Constraints**: No unwanted dependencies (e.g., ASP.NET in CLI)
+4. **Naming Conventions**: Interfaces start with I, public classes use properties
+5. **Layer Boundaries**: Vertical slices don't cross-depend
+
+### Phase 3: Integrate with Build
+
+**Build.cs**:
+```csharp
+Target ArchitectureTests => _ => _
+    .DependsOn(Compile)
+    .Executes(() =>
+    {
+        DotNetTest(s => s
+            .SetProjectFile(Solution.GetProject("Automation.Framework.ArchitectureTests"))
+            .SetConfiguration(Configuration)
+            .EnableNoBuild());
+    });
+
+Target Test => _ => _
+    .DependsOn(UnitTests, IntegrationTests, ArchitectureTests)
+    .Executes(() =>
+    {
+        Log.Information("All tests passed!");
+    });
+```
+
+### Phase 4: Document Architecture Decisions
+
+**Example ADR as Test**:
+
+```csharp
+/// <summary>
+/// Architecture Decision Record (ADR):
+/// 
+/// Decision: Framework code must not depend on application code
+/// 
+/// Rationale:
+/// - Framework is reusable across projects
+/// - Applications depend on framework, not vice versa
+/// - Maintains clean dependency direction
+/// 
+/// Consequences:
+/// - Framework can be packaged and distributed separately
+/// - Applications can be swapped without changing framework
+/// - Circular dependencies are prevented
+/// </summary>
+[Fact]
+public void Framework_ShouldNotDependOnApplicationCode()
+{
+    var result = Types
+        .InAssembly(typeof(AiFramework).Assembly)
+        .That().ResideInNamespace("Automation.Framework")
+        .ShouldNot().HaveDependencyOn("Automation.Verify")
+        .And().ShouldNot().HaveDependencyOn("Contracts.Cli")
+        .GetResult();
+    
+    Assert.True(result.IsSuccessful, 
+        $"Framework violated dependency rules: {string.Join(", ", result.FailingTypeNames)}");
+}
+```
+
+### Example Architecture Test Catalog
+
+**Dependency Rules**:
+- Framework → Application (forbidden)
+- CLI → Web (forbidden)
+- Tests → Production code (allowed)
+- Production code → Tests (forbidden)
+
+**Naming Rules**:
+- Interfaces start with `I`
+- Exceptions end with `Exception`
+- Attributes end with `Attribute`
+- Tasks follow `{Name}.task` pattern
+- Prompts follow `{Name}.prompt.md` pattern
+
+**File Organization Rules**:
+- Reports colocated with tasks
+- Tests mirror source structure
+- Shared code in common projects
+- Vertical slices don't cross-depend
+
+**Convention Rules**:
+- Public classes use properties, not fields
+- Async methods end with `Async`
+- Test classes end with `Tests`
+- No hard-coded paths (use configuration)
+
+### NetArchTest Predicate Examples
+
+**Common Predicates**:
+```csharp
+// Assembly-level
+Types.InAssembly(assembly)
+Types.InCurrentDomain()
+Types.FromAssemblyDependingOn("PackageName")
+
+// Namespace
+.ResideInNamespace("MyNamespace")
+.ResideInNamespaceStartingWith("MyNamespace")
+
+// Type characteristics
+.ArePublic()
+.AreClasses()
+.AreInterfaces()
+.AreAbstract()
+.AreSealed()
+
+// Naming
+.HaveNameStartingWith("I")
+.HaveNameEndingWith("Tests")
+.HaveNameMatching("^I[A-Z]")
+
+// Dependencies
+.HaveDependencyOn("PackageName")
+.HaveDependencyOnAll("Package1", "Package2")
+.HaveDependencyOnAny("Package1", "Package2")
+
+// Assertions
+.Should()
+.ShouldNot()
+.GetResult()
+```
+
+## Decision
+
+**Status**: Pending  
+**Decision Date**: TBD  
+**Rationale**: Awaiting review  
+**Task Created**: TBD
+
+## Additional Notes
+
+**Progressive Adoption**:
+1. Start with most important rules (framework isolation)
+2. Add rules as violations are fixed
+3. Run in CI warning mode initially (don't fail build)
+4. Enable strict mode once clean
+
+**Maintenance**:
+- Review tests when architecture changes
+- Update tests as conventions evolve
+- Keep tests simple and readable
+- Document why rules exist (ADR format)
+
+**References**:
+- NetArchTest: https://github.com/BenMorris/NetArchTest
+- Architecture Tests in Nuke ecosystem
+- Clean Architecture principles
