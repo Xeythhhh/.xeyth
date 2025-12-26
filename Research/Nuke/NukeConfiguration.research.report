@@ -1,0 +1,553 @@
+# Nuke Configuration System - Research Report
+
+---
+
+**Date**: 2025-12-26  
+**Researcher**: AI Strategic Agent  
+**Status**: Complete
+
+## Executive Summary
+
+Nuke Build implements a **layered configuration system** that combines CLI arguments, JSON parameter files, environment variables, and encrypted secrets. The system uses **attribute-based parameter injection** (`[Parameter]`, `[Secret]`) to provide type-safe, validated configuration access. Configuration follows a **priority order** (CLI > parameter file > environment) and supports **profiles** for environment-specific settings.
+
+**Key Finding**: Nuke's configuration architecture demonstrates that **declarative parameter injection** can eliminate boilerplate while maintaining type safety and security.
+
+---
+
+## Configuration Layering
+
+### Priority Order (Highest to Lowest)
+
+1. **Command-line arguments**: `--my-parameter value`
+2. **Parameter files (profiles)**: `.nuke/parameters.{profile}.json`
+3. **Environment variables**: `NUKE_MY_PARAMETER=value` or `MY_PARAMETER=value`
+4. **Default values**: In code `[Parameter] readonly string Param = "default";`
+
+### Parameter Injection Pattern
+
+```csharp
+public class Build : NukeBuild
+{
+    [Parameter("Configuration to build")]
+    readonly Configuration Configuration = IsLocalBuild 
+        ? Configuration.Debug 
+        : Configuration.Release;
+    
+    [Parameter("API Key for deployment")]
+    [Secret]
+    readonly string ApiKey;
+    
+    [Parameter("Target framework")]
+    readonly string Framework = "net10.0";
+}
+```
+
+**Characteristics**:
+- Type-safe (compile-time validation)
+- Self-documenting (description in attribute)
+- Auto-help generation
+- Schema-based IDE completion
+
+---
+
+## Parameter Files
+
+### Structure
+
+**Location**: `.nuke/parameters.json` (default), `.nuke/parameters.{profile}.json`
+
+**Format**:
+```json
+{
+  "$schema": "./build.schema.json",
+  "Configuration": "Release",
+  "ApiKey": "v1:encrypted-secret-here",
+  "Framework": "net10.0",
+  "Verbosity": "Normal"
+}
+```
+
+### Profiles
+
+**Usage**: `nuke --profile prod`
+
+**Files**:
+- `.nuke/parameters.json` - Default/shared settings
+- `.nuke/parameters.dev.json` - Development overrides
+- `.nuke/parameters.prod.json` - Production overrides
+- `.nuke/parameters.ci.json` - CI-specific settings
+
+**Benefits**:
+- Environment-specific configuration
+- Shared base with overrides
+- Version-controlled (except secrets)
+- Schema validation
+
+### Schema Support
+
+**Generated File**: `build.schema.json`
+
+**Features**:
+- IntelliSense in parameter files (VS Code, Rider, VS)
+- Validation of parameter names/types
+- Documentation tooltips
+- Auto-completion
+
+**Example**:
+```json
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "properties": {
+    "Configuration": {
+      "type": "string",
+      "description": "Configuration to build",
+      "enum": ["Debug", "Release"]
+    }
+  }
+}
+```
+
+---
+
+## Secret Management
+
+### Encryption System
+
+**Algorithm**: AES with PBKDF2 key derivation (SHA256, static salt)
+
+**Format**: `v1:base64-encrypted-value`
+
+**CLI Commands**:
+```bash
+nuke :secrets set ApiKey          # Prompt for value, encrypt, store
+nuke :secrets list                # Show all secret names
+nuke :secrets remove ApiKey       # Remove secret
+nuke :secrets discard             # Discard all unsaved changes
+```
+
+**Storage**:
+- Encrypted secrets in `.nuke/parameters.json` (can be committed)
+- Encryption password in environment variable or prompted
+- macOS: Optional Keychain integration
+
+**Security Features**:
+1. Secrets never in plain text in parameter files
+2. Encryption password not stored (user provides)
+3. Easily identifiable by `v1:` prefix
+4. Can be selectively loaded (only decrypt when needed)
+
+### Usage Pattern
+
+```csharp
+public class Build : NukeBuild
+{
+    [Parameter]
+    [Secret]
+    readonly string ApiKey;  // Auto-decrypted from parameters.json
+    
+    Target Deploy => _ => _
+        .Requires(() => ApiKey)
+        .Executes(() =>
+        {
+            DeployService(apiKey: ApiKey);
+        });
+}
+```
+
+**Benefits**:
+- Type-safe secret access
+- Required validation (`.Requires()`)
+- Auto-decryption on access
+- No manual encryption/decryption code
+
+---
+
+## Environment Detection
+
+### Built-in Properties
+
+```csharp
+public class Build : NukeBuild
+{
+    // Environment type
+    bool IsLocalBuild => Host == HostType.Console;
+    bool IsServerBuild => Host != HostType.Console;
+    
+    // Specific CI platforms
+    HostType Host; // TeamCity, GitHubActions, AzurePipelines, etc.
+    
+    // Platform detection
+    bool IsWin => EnvironmentInfo.IsWin;
+    bool IsUnix => EnvironmentInfo.IsUnix;
+    bool IsOsx => EnvironmentInfo.IsOsx;
+}
+```
+
+### CI-Specific Configuration Classes
+
+```csharp
+[GitHubActions(
+    "continuous",
+    GitHubActionsImage.UbuntuLatest,
+    OnPushBranches = new[] { "main", "develop" },
+    InvokedTargets = new[] { nameof(Test), nameof(Pack) })]
+public class Build : NukeBuild
+{
+    [Parameter] readonly string NuGetApiKey;
+    
+    GitHubActions GitHubActions => GitHubActions.Instance;
+    
+    Target Publish => _ => _
+        .OnlyWhenStatic(() => GitHubActions != null)
+        .Executes(() =>
+        {
+            var runNumber = GitHubActions.RunNumber;
+            var sha = GitHubActions.Sha;
+            // Use CI-specific info
+        });
+}
+```
+
+**Supported Platforms**:
+- GitHub Actions
+- Azure Pipelines
+- TeamCity
+- GitLab CI
+- AppVeyor
+- Jenkins
+- Travis CI
+
+**Auto-Generated Config**: Attributes generate YAML/XML for CI platforms
+
+---
+
+## Convention-Over-Configuration Patterns
+
+### 1. Sensible Defaults
+
+```csharp
+[Parameter] readonly Configuration Configuration = 
+    IsLocalBuild ? Configuration.Debug : Configuration.Release;
+```
+
+**Convention**: Debug locally, Release on CI (no config needed)
+
+### 2. Auto-Discovery
+
+```csharp
+[Solution] readonly Solution Solution;  // Auto-finds *.sln
+
+[GitRepository] readonly GitRepository Repository;  // Auto-detects .git
+```
+
+**Convention**: Single solution in root, Git repository in parent dirs
+
+### 3. Path Conventions
+
+```csharp
+AbsolutePath SourceDirectory => RootDirectory / "src";
+AbsolutePath TestsDirectory => RootDirectory / "tests";
+AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
+AbsolutePath OutputDirectory => RootDirectory / "output";
+```
+
+**Convention**: Standard directory names (configurable if needed)
+
+### 4. Default Targets
+
+```csharp
+public static int Main() => Execute<Build>(x => x.Compile);
+```
+
+**Convention**: `Compile` as default target (overridable via CLI)
+
+---
+
+## Configuration Validation
+
+### Parameter Requirements
+
+```csharp
+[Parameter] [Secret]
+readonly string ApiKey;
+
+Target Deploy => _ => _
+    .Requires(() => ApiKey)  // Validates before execution
+    .Executes(() => { /* Deploy */ });
+```
+
+**Validation Types**:
+- `.Requires(() => field != null)` - Not null/empty
+- `.Requires(() => File.Exists(path))` - File exists
+- `.Requires(() => condition)` - Custom validation
+
+**Behavior**: Build fails fast with clear error if requirement not met
+
+### Type Validation
+
+```csharp
+[Parameter] readonly int MaxRetries = 3;
+[Parameter] readonly Configuration Configuration;  // Enum validation
+```
+
+**Automatic Validation**:
+- Type conversion (string → int, bool, enum)
+- Enum value validation
+- Collection parsing
+- Path normalization
+
+---
+
+## Environment Variable Mapping
+
+### Naming Conventions
+
+**Parameter**: `MyParameter`
+
+**Environment Variables** (all work, case-insensitive):
+- `NUKE_MY_PARAMETER`
+- `MY_PARAMETER`
+- `MyParameter`
+- `my_parameter`
+
+**Example**:
+```bash
+# All equivalent
+export NUKE_API_KEY=abc123
+export API_KEY=abc123
+export api_key=abc123
+```
+
+### CI/CD Integration
+
+**TeamCity Example**:
+```csharp
+[Parameter] readonly string BuildNumber;
+
+// Set in TeamCity: %build.number% → NUKE_BUILD_NUMBER
+```
+
+**GitHub Actions Example**:
+```yaml
+- name: Build
+  env:
+    NUKE_API_KEY: ${{ secrets.API_KEY }}
+  run: ./build.sh
+```
+
+---
+
+## Applicability to .xeyth Framework
+
+### High-Value Patterns
+
+1. **Attribute-Based Configuration**
+   - Declarative parameter definitions
+   - Auto-validation
+   - Self-documenting
+   - Type-safe access
+
+2. **Layered Configuration**
+   - CLI > File > Environment > Defaults
+   - Profile-based environments
+   - Sensible conventions
+
+3. **Secret Management**
+   - Encrypted parameter files
+   - Type-safe secret access
+   - Environment variable fallback
+
+4. **Environment Detection**
+   - CI vs local behavior
+   - Platform-specific logic
+   - Auto-configuration
+
+### Integration Opportunities
+
+#### High Priority
+
+1. **Adopt Parameter Injection Pattern**
+   - **Where**: All CLI tools (xeyth-verify, xeyth-contracts)
+   - **Why**: Type-safe, self-documenting, validated
+   - **Effort**: Medium (refactor existing config)
+   - **Impact**: High (better DX, fewer errors)
+
+2. **Implement Configuration Profiles**
+   - **Where**: Framework configuration (`.xeyth/config.{profile}.json`)
+   - **Why**: Environment-specific settings (dev/prod/ci)
+   - **Effort**: Small (create config loader)
+   - **Impact**: Medium (easier multi-environment setup)
+
+3. **Add Secret Management**
+   - **Where**: API keys, tokens (GitHub, OpenAI, etc.)
+   - **Why**: Secure credential storage
+   - **Effort**: Medium (encryption infrastructure)
+   - **Impact**: High (security improvement)
+
+#### Medium Priority
+
+4. **Environment Detection Helpers**
+   - **Where**: Framework utilities
+   - **Why**: Adapt behavior to context (CI/local)
+   - **Effort**: Small (helper methods)
+   - **Impact**: Medium (better UX)
+
+5. **Configuration Schema Generation**
+   - **Where**: Build-time code generation
+   - **Why**: IntelliSense for config files
+   - **Effort**: Medium (schema generator)
+   - **Impact**: Low (nice-to-have)
+
+---
+
+## Specific Integration Recommendations
+
+### Recommendation 1: Framework Configuration System
+
+**Proposal**: Create `.xeyth/config.json` with layered configuration
+
+**Structure**:
+```json
+{
+  "$schema": "./config.schema.json",
+  "framework": {
+    "defaultRole": "Implementer",
+    "defaultModel": "gpt-5.1-codex-max",
+    "verbosity": "Normal"
+  },
+  "tools": {
+    "verifyTool": "code-insiders",
+    "diffTool": "code-insiders"
+  },
+  "secrets": {
+    "githubToken": "v1:encrypted-token",
+    "openaiApiKey": "v1:encrypted-key"
+  }
+}
+```
+
+**API**:
+```csharp
+public class FrameworkConfig
+{
+    [Parameter("Default AI role")]
+    public string DefaultRole { get; set; } = "Implementer";
+    
+    [Parameter("Default AI model")]
+    public string DefaultModel { get; set; } = "gpt-5.1-codex-max";
+    
+    [Parameter("GitHub token for API access")]
+    [Secret]
+    public string GitHubToken { get; set; }
+}
+```
+
+### Recommendation 2: CLI Tool Configuration
+
+**Proposal**: Use parameter injection in all Xeyth tools
+
+**Example**:
+```csharp
+public class VerifyOptions
+{
+    [Parameter("Path to diff tool")]
+    public string DiffTool { get; set; } = "code-insiders";
+    
+    [Parameter("Auto-accept new snapshots")]
+    public bool AutoAccept { get; set; } = false;
+    
+    [Parameter("Verification file pattern")]
+    public string Pattern { get; set; } = "**/*.verified.*";
+}
+```
+
+**Benefits**:
+- Consistent CLI interface
+- Environment variable support
+- Configuration file integration
+- Type-safe validation
+
+### Recommendation 3: Environment-Aware Defaults
+
+**Proposal**: Adapt defaults based on environment
+
+**Implementation**:
+```csharp
+public static class FrameworkDefaults
+{
+    public static bool IsCI => Environment.GetEnvironmentVariable("CI") != null;
+    public static bool IsLocal => !IsCI;
+    
+    // CI: strict, local: lenient
+    public static ValidationMode DefaultValidationMode => 
+        IsCI ? ValidationMode.Strict : ValidationMode.Lenient;
+    
+    // CI: disable interactive, local: enable
+    public static bool AllowInteractive => IsLocal;
+    
+    // CI: verbose, local: normal
+    public static LogLevel DefaultLogLevel =>
+        IsCI ? LogLevel.Verbose : LogLevel.Normal;
+}
+```
+
+---
+
+## Anti-Patterns to Avoid
+
+### 1. Hardcoded Configuration
+
+**Problem**: Config values scattered in code
+
+**Nuke's Solution**: Centralized parameter definitions
+
+**Lesson**: Use parameters for all configurable values
+
+### 2. Mixing Concerns
+
+**Problem**: Business logic mixed with config loading
+
+**Nuke's Solution**: Attribute-based injection separates concerns
+
+**Lesson**: Keep config declaration separate from usage
+
+### 3. Insecure Secret Storage
+
+**Problem**: Secrets in plain text or weakly protected
+
+**Nuke's Solution**: Encrypted parameters with strong crypto
+
+**Lesson**: Never commit unencrypted secrets
+
+### 4. Environment Detection Duplication
+
+**Problem**: Checking `CI` environment variable everywhere
+
+**Nuke's Solution**: Centralized `IsLocalBuild`/`IsServerBuild` properties
+
+**Lesson**: Create reusable environment detection helpers
+
+---
+
+## Conclusion
+
+Nuke Build's configuration system demonstrates that **type-safe, layered configuration** can be achieved through attribute-based parameter injection. The combination of CLI arguments, parameter files, environment variables, and encrypted secrets provides flexibility while maintaining security and developer experience.
+
+**Primary Takeaway**: **Declarative configuration + type safety = maintainable, secure settings management**.
+
+**Recommended Next Steps**:
+1. Design `.xeyth/config.json` schema
+2. Implement parameter injection for CLI tools
+3. Add secret encryption infrastructure
+4. Create environment detection helpers
+
+**Risk Assessment**: Low - Configuration patterns are well-established, encryption libraries readily available.
+
+---
+
+## References
+
+- Parameters Documentation: https://nuke.build/docs/fundamentals/parameters/
+- Managing Secrets: https://nuke.build/docs/global-tool/secrets/
+- Build Anatomy: https://nuke.build/docs/fundamentals/builds/
+- CI/CD Integration: https://nuke.build/docs/cicd/

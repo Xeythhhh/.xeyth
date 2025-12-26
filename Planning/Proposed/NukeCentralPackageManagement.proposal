@@ -1,0 +1,150 @@
+# Proposal: Adopt Central Package Management for .xeyth Solution
+
+**Status**: Pending  
+**Submitted**: 2025-12-26  
+**Author**: Strategic Agent (Research Task)  
+**Related Task**: Research/Nuke/NukePackageManagement.research.report
+
+## Context
+
+The .xeyth solution currently manages NuGet package versions individually in each project file. This creates several problems:
+- Version drift across projects (same package, different versions)
+- Difficult to update dependencies (must find/replace in multiple files)
+- No single source of truth for package versions
+- Harder to audit dependencies
+
+Nuke Build uses .NET's Central Package Management (CPM) feature to define all package versions in a single `Directory.Packages.props` file at the solution root. This pattern is proven in the Nuke ecosystem and recommended by Microsoft for multi-project solutions.
+
+## Proposal
+
+Implement Central Package Management for the .xeyth solution by:
+
+1. Create `Directory.Packages.props` at solution root
+2. Move all `<PackageReference Version="...">` attributes to central file as `<PackageVersion>`
+3. Update all project files to remove version attributes
+4. Enable CPM via `<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>`
+
+**Example Structure:**
+
+`Directory.Packages.props`:
+```xml
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <!-- Framework Dependencies -->
+    <PackageVersion Include="Spectre.Console" Version="0.50.0" />
+    <PackageVersion Include="Serilog" Version="4.1.0" />
+    <PackageVersion Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageVersion Include="Serilog.Sinks.File" Version="6.0.0" />
+    
+    <!-- Testing -->
+    <PackageVersion Include="xunit" Version="2.9.0" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
+    <PackageVersion Include="Verify.Xunit" Version="28.4.0" />
+    <PackageVersion Include="FluentAssertions" Version="7.0.0" />
+    
+    <!-- Build Tools -->
+    <PackageVersion Include="Nuke.Common" Version="10.1.0" />
+  </ItemGroup>
+</Project>
+```
+
+Project files (simplified):
+```xml
+<ItemGroup>
+  <PackageReference Include="Spectre.Console" />
+  <PackageReference Include="Serilog" />
+</ItemGroup>
+```
+
+## Benefits
+
+- **Single Source of Truth**: All versions defined once, referenced everywhere
+- **Easy Updates**: Change version in one place, affects all projects
+- **Prevent Version Drift**: Impossible to have different versions across projects
+- **Better Auditing**: See all dependencies at a glance
+- **Simpler Project Files**: No version clutter, easier to read
+- **Consistent Builds**: Same package versions across all environments
+- **Microsoft Recommended**: Official .NET pattern for multi-project solutions
+
+## Effort Estimate
+
+**Size**: Small
+
+**Impact**:
+- **What needs to change**:
+  - Create `Directory.Packages.props` at solution root
+  - Extract versions from all `.csproj` files
+  - Remove `Version` attributes from `<PackageReference>` elements
+  - Test build to ensure everything works
+  - Update documentation with CPM pattern
+
+- **Dependencies**:
+  - Requires .NET SDK 6.0+ (already using .NET 10)
+  - No code changes required
+  - No breaking changes to build process
+
+- **Risks**:
+  - Low: Rollback is simple (restore old project files)
+  - Projects expecting different versions may break (but this is a bug to fix)
+  - Need to verify all projects build after migration
+
+## Implementation Notes
+
+**Migration Steps:**
+
+1. **Audit Current Packages**:
+   ```bash
+   # Find all unique packages and their versions
+   find src -name "*.csproj" -exec grep -h "PackageReference" {} \; | sort | uniq
+   ```
+
+2. **Create `Directory.Packages.props`**:
+   - Add `<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>`
+   - Add all packages as `<PackageVersion Include="..." Version="..." />`
+
+3. **Update Project Files**:
+   ```bash
+   # Remove Version attributes from all project files (automated or manual)
+   # Verify: grep -r 'PackageReference Include.*Version' src/
+   ```
+
+4. **Build and Test**:
+   ```bash
+   dotnet restore
+   dotnet build
+   dotnet test
+   ```
+
+5. **Commit Changes**:
+   ```bash
+   git add Directory.Packages.props
+   git add src/**/*.csproj
+   git commit -m "Adopt Central Package Management"
+   ```
+
+**Override Pattern** (if specific project needs different version):
+```xml
+<!-- Project-specific override -->
+<ItemGroup>
+  <PackageReference Include="Spectre.Console" VersionOverride="0.51.0" />
+</ItemGroup>
+```
+
+**Build Tools Separation** (recommendation):
+```xml
+<!-- Use PackageDownload for build-only tools -->
+<ItemGroup>
+  <PackageDownload Include="GitVersion.Tool" Version="[5.12.0]" />
+</ItemGroup>
+```
+
+## Decision
+
+**Status**: Pending  
+**Decision Date**: TBD  
+**Rationale**: Awaiting review  
+**Task Created**: TBD

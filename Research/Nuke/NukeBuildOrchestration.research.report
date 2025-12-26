@@ -1,0 +1,726 @@
+# Nuke Build Orchestration Patterns - Research Report
+
+---
+
+**Date**: 2025-12-26  
+**Researcher**: AI Strategic Agent  
+**Status**: Complete
+
+## Executive Summary
+
+Nuke Build implements **dependency-driven orchestration** through a type-safe C# target system. Targets declare dependencies using fluent APIs (`.DependsOn()`, `.DependentFor()`, `.Triggers()`), enabling automatic execution order resolution and **implicit parallel execution** for independent targets. The system supports **static and dynamic conditions**, **skip patterns**, and **failure handling**, making it highly adaptable to complex build workflows.
+
+**Key Finding**: Nuke's orchestration model treats build steps as **first-class C# methods with declarative dependencies**, enabling compiler-verified build graphs and IDE-assisted workflow development.
+
+---
+
+## Overview of Nuke's Build Orchestration
+
+### Core Concepts
+
+1. **Targets**: Build steps defined as properties returning lambda expressions
+2. **Dependencies**: Declarative relationships between targets (execution, ordering, trigger)
+3. **Execution Graph**: Automatically constructed from dependency declarations
+4. **Parallelism**: Independent targets can run concurrently (CI/CD-dependent)
+5. **Conditions**: Static (pre-execution) and dynamic (runtime) execution guards
+
+### Target Definition Pattern
+
+```csharp
+Target Clean => _ => _
+    .Before(Restore)
+    .Executes(() => { /* Clean logic */ });
+
+Target Restore => _ => _
+    .Executes(() => { /* Restore logic */ });
+
+Target Compile => _ => _
+    .DependsOn(Restore)
+    .Executes(() => { /* Compile logic */ });
+
+Target Test => _ => _
+    .DependsOn(Compile)
+    .Executes(() => { /* Test logic */ });
+```
+
+**Execution**: `nuke Test` → Clean → Restore → Compile → Test
+
+---
+
+## Key Patterns and Architectural Decisions
+
+### 1. Dependency Types
+
+Nuke provides **three types of target dependencies**:
+
+#### A. Execution Dependencies (`.DependsOn()`)
+
+**Behavior**: Ensures dependent target runs before current target (unless skipped)
+
+```csharp
+Target Compile => _ => _
+    .DependsOn(Restore)
+    .Executes(() => { /* ... */ });
+```
+
+**Characteristics**:
+- Guarantees execution order
+- Skipped dependencies don't prevent execution
+- Most common dependency type
+- Transitive (A→B→C means A runs before C)
+
+#### B. Ordering Dependencies (`.Before()` / `.After()`)
+
+**Behavior**: Enforces order only if both targets are scheduled
+
+```csharp
+Target Clean => _ => _
+    .Before(Restore)
+    .Executes(() => { /* ... */ });
+```
+
+**Characteristics**:
+- Lightweight ordering constraint
+- Doesn't force execution
+- Useful for optional targets
+- Prevents conflicts (e.g., Clean before Restore)
+
+#### C. Trigger Dependencies (`.Triggers()`)
+
+**Behavior**: Automatically schedules dependent target when current target completes
+
+```csharp
+Target Compile => _ => _
+    .Triggers(Test)
+    .Executes(() => { /* ... */ });
+```
+
+**Characteristics**:
+- Cascading execution
+- Useful for post-processing
+- Can be conditional
+- Creates implicit dependency chain
+
+**Example Combination**:
+```csharp
+Target Build => _ => _
+    .DependsOn(Restore, Compile)  // Execution deps
+    .Before(Test)                  // Ordering
+    .Triggers(Package)             // Trigger
+    .Executes(() => { /* ... */ });
+```
+
+### 2. Parallel Execution
+
+**Mechanism**: Dependency-graph-driven automatic parallelism
+
+**Rules**:
+- Targets without mutual dependencies can run in parallel
+- Downstream targets wait for all dependencies
+- Parallelism controlled by CI/CD platform (not explicitly configured)
+- No manual thread/worker management needed
+
+**Example**:
+```csharp
+Target Lint => _ => _
+    .Executes(() => { /* Lint code */ });
+
+Target Compile => _ => _
+    .DependsOn(Restore)
+    .Executes(() => { /* Compile */ });
+
+Target Package => _ => _
+    .DependsOn(Compile, Lint)
+    .Executes(() => { /* Package */ });
+```
+
+**Execution Flow**:
+```
+Restore
+   ↓
+Compile ⟺ Lint  (parallel)
+   ↓       ↓
+   └───────┘
+       ↓
+    Package
+```
+
+**Benefits**:
+- Automatic optimization based on dependencies
+- No explicit parallelism configuration
+- Safe by design (dependencies prevent race conditions)
+
+**Limitations**:
+- No fine-grained control over worker count
+- Cannot mark specific targets as non-parallelizable
+- Parallelism depends on CI platform capabilities
+
+### 3. Conditional Execution
+
+Nuke supports **two types of conditions**:
+
+#### A. Static Conditions
+
+**Timing**: Checked before dependencies execute
+**Effect**: Can skip entire target branch
+
+**Methods**:
+- `.OnlyWhenStatic(() => condition)`
+- `.OnlyWhenDynamic(() => condition)`
+- `.Requires(() => field != null)`
+
+**Example**:
+```csharp
+Target PublishDocs => _ => _
+    .DependsOn(BuildDocs)
+    .OnlyWhenStatic(() => IsServerBuild)
+    .Executes(() => { /* Publish */ });
+```
+
+**Use Case**: Environment-based execution (CI vs local)
+
+#### B. Dynamic Conditions
+
+**Timing**: Checked right before target execution
+**Effect**: Skips only the target, not dependencies
+
+**Example**:
+```csharp
+Target IncrementalCompile => _ => _
+    .DependsOn(Restore)
+    .OnlyWhenDynamic(() => HasSourceChanges())
+    .Executes(() => { /* Compile */ });
+```
+
+**Use Case**: Runtime state-based execution (file changes, cache validity)
+
+**Comparison**:
+
+| Aspect | Static Condition | Dynamic Condition |
+|--------|-----------------|-------------------|
+| **Timing** | Before dependencies | Before target execution |
+| **Scope** | Can skip dependency tree | Only skips target |
+| **Use Case** | Environment detection | Runtime state checks |
+| **Performance** | More efficient (early exit) | Runs dependencies anyway |
+
+### 4. Build State and Caching
+
+**Mechanisms**:
+
+#### A. Implicit State Through Properties
+
+```csharp
+public class Build : NukeBuild
+{
+    [Solution] readonly Solution Solution;
+    
+    // Cached property - computed once
+    AbsolutePath OutputDirectory => RootDirectory / "artifacts";
+    
+    // Lazy evaluation
+    IEnumerable<Project> TestProjects => Solution.GetProjects("*.Tests");
+}
+```
+
+**Benefits**:
+- Properties computed once, cached automatically
+- Lazy evaluation prevents unnecessary work
+- Type-safe state management
+
+#### B. File System-Based Caching
+
+**Pattern**: Check file timestamps/hashes before re-running work
+
+```csharp
+Target IncrementalBuild => _ => _
+    .Executes(() =>
+    {
+        var sourceFiles = GlobFiles(SourceDirectory, "**/*.cs");
+        var lastBuildTime = File.GetLastWriteTime(OutputDirectory / "build.txt");
+        
+        if (sourceFiles.All(f => f.LastWriteTime < lastBuildTime))
+        {
+            Log.Information("No changes, skipping build");
+            return;
+        }
+        
+        // Build logic...
+    });
+```
+
+**Benefits**:
+- Explicit cache invalidation logic
+- Full control over caching strategy
+- Can be persisted across builds
+
+#### C. `.nuke/temp/` Directory
+
+**Usage**: Temporary build artifacts, logs, and cache files
+
+```
+.nuke/
+├── build.log           # Current build log
+├── build.*.log         # Last 5 build logs (timestamped)
+├── temp/
+│   ├── artifacts/      # Temporary build outputs
+│   └── cache/          # User-defined cache files
+└── parameters.json     # Build parameters
+```
+
+**Benefits**:
+- Automatic cleanup
+- Separated from source control
+- Preserved across builds for debugging
+
+### 5. Cross-Platform Build Support
+
+**Mechanisms**:
+
+#### A. Environment Detection
+
+```csharp
+public class Build : NukeBuild
+{
+    bool IsWindows => EnvironmentInfo.IsWin;
+    bool IsUnix => EnvironmentInfo.IsUnix;
+    bool IsMacOS => EnvironmentInfo.IsOsx;
+    
+    bool IsLocalBuild => Host == HostType.Console;
+    bool IsServerBuild => Host != HostType.Console;
+    
+    HostType Host => EnvironmentInfo.Host; // TeamCity, GitHubActions, etc.
+}
+```
+
+#### B. Platform-Specific Targets
+
+```csharp
+Target CompileNative => _ => _
+    .Executes(() =>
+    {
+        if (IsWindows)
+            MSBuild(...);
+        else if (IsMacOS)
+            XCodeBuild(...);
+        else
+            Make(...);
+    });
+```
+
+#### C. Conditional Dependencies
+
+```csharp
+Target Package => _ => _
+    .DependsOn(Compile)
+    .DependsOn(IsWindows ? CompileWindows : CompileUnix)
+    .Executes(() => { /* ... */ });
+```
+
+**Benefits**:
+- Single build script for all platforms
+- Platform-specific logic encapsulated
+- CI/CD agnostic (same script everywhere)
+
+### 6. Incremental Build Patterns
+
+**Strategy 1: File Timestamp Comparison**
+
+```csharp
+Target IncrementalCompile => _ => _
+    .Executes(() =>
+    {
+        var sourceFiles = GlobFiles(SourceDirectory, "**/*.cs");
+        var outputFiles = GlobFiles(OutputDirectory, "**/*.dll");
+        
+        var needsRebuild = !outputFiles.Any() ||
+            sourceFiles.Max(f => f.LastWriteTime) > 
+            outputFiles.Min(f => f.LastWriteTime);
+        
+        if (!needsRebuild)
+        {
+            Log.Information("No changes detected, skipping");
+            return;
+        }
+        
+        DotNetBuild(...);
+    });
+```
+
+**Strategy 2: Hash-Based Caching**
+
+```csharp
+Target BuildWithCache => _ => _
+    .Executes(() =>
+    {
+        var cacheFile = TemporaryDirectory / "build.cache";
+        var currentHash = ComputeHash(SourceDirectory);
+        
+        if (File.Exists(cacheFile) && 
+            File.ReadAllText(cacheFile) == currentHash)
+        {
+            Log.Information("Cache hit, skipping build");
+            return;
+        }
+        
+        // Build logic...
+        
+        File.WriteAllText(cacheFile, currentHash);
+    });
+```
+
+**Strategy 3: Dependency Graph Analysis**
+
+```csharp
+Target SmartRebuild => _ => _
+    .Executes(() =>
+    {
+        var changedProjects = Solution.GetProjects("*")
+            .Where(p => HasChanges(p));
+        
+        var affectedProjects = changedProjects
+            .SelectMany(p => GetDependentProjects(p))
+            .Distinct();
+        
+        foreach (var project in affectedProjects)
+            DotNetBuild(s => s.SetProjectFile(project));
+    });
+```
+
+---
+
+## Strengths and Weaknesses
+
+### Strengths ✅
+
+1. **Declarative Dependencies**
+   - Clear, self-documenting target relationships
+   - Compiler-verified (typos caught at compile time)
+   - Easy to visualize and reason about
+   - Automatic execution order resolution
+
+2. **Type-Safe Orchestration**
+   - No string-based target names (refactor-safe)
+   - IntelliSense for available targets
+   - Compile-time validation of dependencies
+   - IDE navigation between targets
+
+3. **Implicit Parallelism**
+   - Automatic optimization based on graph
+   - No manual thread management
+   - Safe by design (prevents race conditions)
+   - Scales with CI platform capabilities
+
+4. **Flexibility**
+   - Multiple dependency types for different scenarios
+   - Static and dynamic conditions
+   - Platform-specific logic
+   - Extensible through C# language features
+
+5. **Maintainability**
+   - Readable target definitions
+   - Encapsulated logic in methods
+   - Reusable through inheritance/composition
+   - Version-controlled like regular code
+
+### Weaknesses ⚠️
+
+1. **Limited Parallelism Control**
+   - Cannot specify max worker threads
+   - Cannot mark targets as sequential-only
+   - Parallelism depends on CI platform
+   - No priority/affinity settings
+
+2. **Learning Curve**
+   - Requires understanding of dependency types
+   - Static vs dynamic conditions can be confusing
+   - More complex than linear scripts
+   - Need to think in graphs, not sequences
+
+3. **State Management Complexity**
+   - No built-in cache invalidation
+   - Must implement incremental logic manually
+   - Shared state can cause subtle bugs
+   - Difficult to debug state-related issues
+
+4. **Limited Build Graph Introspection**
+   - Cannot easily visualize full dependency graph
+   - Circular dependencies detected at runtime
+   - No built-in graph analysis tools
+   - Debugging complex graphs challenging
+
+---
+
+## Applicability to .xeyth Framework
+
+### High-Value Patterns
+
+1. **Declarative Task Dependencies**
+   - Apply target dependency patterns to AI task orchestration
+   - Type-safe task relationships
+   - Automatic execution order resolution
+   
+   **Example Application**:
+   ```csharp
+   Task ValidateContracts => _ => _
+       .DependsOn(DiscoverFiles)
+       .Triggers(GenerateReport)
+       .OnlyWhenStatic(() => HasContractFiles)
+       .Executes(() => { /* Validation */ });
+   ```
+
+2. **Conditional Execution Based on Context**
+   - Static conditions for environment (CI vs local, model availability)
+   - Dynamic conditions for runtime state (file changes, cache hits)
+   
+   **Example Application**:
+   ```csharp
+   Task GeneratePrompt => _ => _
+       .OnlyWhenStatic(() => Model == ModelType.GPT51CodexMax)
+       .OnlyWhenDynamic(() => RequiresCodeGeneration())
+       .Executes(() => { /* Generate */ });
+   ```
+
+3. **Parallel Task Execution**
+   - Independent AI tasks (validation, linting, doc generation) run in parallel
+   - Automatic optimization based on task graph
+   - Safe coordination through dependencies
+   
+   **Example Application**:
+   ```csharp
+   Task ValidateAll => _ => _
+       .DependsOn(ValidateContracts, ValidateTasks, ValidatePlans)
+       .Executes(() => { /* Aggregate results */ });
+   
+   // ValidateContracts, ValidateTasks, ValidatePlans run in parallel
+   ```
+
+4. **Incremental Processing**
+   - Hash-based caching for AI-generated content
+   - File timestamp comparison for re-validation
+   - Smart re-prompting (only changed context)
+   
+   **Example Application**:
+   ```csharp
+   Task IncrementalValidation => _ => _
+       .Executes(() =>
+       {
+           var changedFiles = GetChangedFiles(lastRun);
+           var affectedContracts = GetAffectedContracts(changedFiles);
+           
+           foreach (var contract in affectedContracts)
+               ValidateContract(contract);
+       });
+   ```
+
+### Integration Opportunities
+
+#### High Priority
+
+1. **Adopt Target-Style Task Definitions**
+   - **Where**: Framework task orchestration
+   - **Why**: Clear dependencies, automatic ordering, type-safe
+   - **Effort**: Medium (refactor existing task system)
+   - **Impact**: High (better orchestration, fewer bugs)
+
+2. **Implement Conditional Execution**
+   - **Where**: All framework tasks
+   - **Why**: Environment-aware, context-sensitive execution
+   - **Effort**: Small (add condition helpers)
+   - **Impact**: High (better UX, faster builds)
+
+3. **Enable Parallel Task Execution**
+   - **Where**: Validation, linting, doc generation
+   - **Why**: Faster feedback, better CI performance
+   - **Effort**: Medium (implement graph executor)
+   - **Impact**: Medium (performance improvement)
+
+#### Medium Priority
+
+4. **Incremental Validation System**
+   - **Where**: xeyth-verify, xeyth-contracts
+   - **Why**: Skip unchanged files, faster iteration
+   - **Effort**: Medium (implement caching)
+   - **Impact**: Medium (dev experience improvement)
+
+5. **Task Graph Visualization**
+   - **Where**: Developer tooling
+   - **Why**: Understand complex workflows
+   - **Effort**: Large (build graph renderer)
+   - **Impact**: Low (nice-to-have for debugging)
+
+#### Lower Priority
+
+6. **Dynamic Dependency Resolution**
+   - **Where**: Advanced scenarios
+   - **Why**: Runtime-determined task graphs
+   - **Effort**: Large (complex orchestration)
+   - **Impact**: Low (niche use cases)
+
+---
+
+## Specific Integration Recommendations
+
+### Recommendation 1: Task Orchestration System
+
+**Proposal**: Create framework task orchestration modeled after Nuke targets
+
+**API Design**:
+```csharp
+public abstract class AiTask
+{
+    protected abstract TaskDefinition Definition { get; }
+    
+    protected TaskDefinition DependsOn(params AiTask[] tasks);
+    protected TaskDefinition Before(params AiTask[] tasks);
+    protected TaskDefinition After(params AiTask[] tasks);
+    protected TaskDefinition Triggers(params AiTask[] tasks);
+    protected TaskDefinition OnlyWhen(Func<bool> condition);
+    protected TaskDefinition Requires(Func<bool> requirement);
+    
+    protected abstract Task ExecuteAsync();
+}
+```
+
+**Example Usage**:
+```csharp
+public class ContractValidationTask : AiTask
+{
+    protected override TaskDefinition Definition => _ => _
+        .DependsOn(ContractDiscoveryTask)
+        .Triggers(ReportGenerationTask)
+        .OnlyWhen(() => HasContractFiles())
+        .Executes(ExecuteAsync);
+    
+    protected override async Task ExecuteAsync()
+    {
+        // Validation logic
+    }
+}
+```
+
+**Benefits**:
+- Familiar pattern for Nuke users
+- Type-safe task dependencies
+- Automatic execution order
+- Reusable task components
+
+### Recommendation 2: Conditional Execution Helpers
+
+**Proposal**: Add environment and state-based execution guards
+
+**API Design**:
+```csharp
+public static class TaskConditions
+{
+    // Environment conditions
+    public static bool IsLocalBuild => !Environment.GetEnvironmentVariable("CI");
+    public static bool IsServerBuild => Environment.GetEnvironmentVariable("CI") != null;
+    public static bool IsCIBuild => IsServerBuild;
+    
+    // Model availability
+    public static bool HasGPT51Access => CheckModelAccess("gpt-5.1-codex-max");
+    public static bool HasClaude45Access => CheckModelAccess("claude-sonnet-4.5");
+    
+    // File state
+    public static bool HasUncommittedChanges() => GitHasChanges();
+    public static bool HasContractFiles() => Directory.Exists("Contracts");
+    
+    // Cache state
+    public static bool IsCacheValid(string cacheKey) => CheckCache(cacheKey);
+}
+```
+
+**Example Usage**:
+```csharp
+Task GeneratePrompt => _ => _
+    .OnlyWhen(() => TaskConditions.HasGPT51Access)
+    .OnlyWhen(() => !TaskConditions.IsCacheValid("prompt-cache"))
+    .Executes(() => { /* Generate */ });
+```
+
+### Recommendation 3: Parallel Validation Pipeline
+
+**Proposal**: Execute independent validations in parallel
+
+**Implementation**:
+```csharp
+Task ValidateContracts => _ => _
+    .Executes(() => ValidateContractsAsync());
+
+Task ValidateTasks => _ => _
+    .Executes(() => ValidateTasksAsync());
+
+Task ValidatePlans => _ => _
+    .Executes(() => ValidatePlansAsync());
+
+Task ValidateAll => _ => _
+    .DependsOn(ValidateContracts, ValidateTasks, ValidatePlans)
+    .Executes(() => AggregateResults());
+```
+
+**Benefits**:
+- Faster validation (3x speedup if all parallel)
+- Better CI performance
+- Consistent with Nuke patterns
+
+---
+
+## Anti-Patterns to Avoid
+
+### 1. Circular Dependencies
+
+**Problem**: Target A depends on B, B depends on A (detected at runtime)
+
+**Nuke's Error**: "Circular dependency detected: A → B → A"
+
+**Lesson**: Design acyclic graphs, use `.Before()`/`.After()` for ordering without execution dependency
+
+### 2. Shared Mutable State
+
+**Problem**: Multiple targets modifying shared state concurrently
+
+**Nuke's Pattern**: Immutable properties, isolated target execution
+
+**Lesson**: Prefer immutable state, use dependency order to sequence mutations
+
+### 3. Over-Complex Conditions
+
+**Problem**: Complex condition logic scattered across targets
+
+**Nuke's Pattern**: Extract condition logic to properties/methods
+
+**Lesson**: Centralize condition logic, make targets simple
+
+### 4. Ignoring Parallelism Implications
+
+**Problem**: Assuming sequential execution, relying on order
+
+**Nuke's Behavior**: Parallel execution when dependencies allow
+
+**Lesson**: Design targets as independent units, declare all dependencies explicitly
+
+---
+
+## Conclusion
+
+Nuke Build's orchestration patterns demonstrate that **complex build workflows can be expressed declaratively** through type-safe C# code. The dependency-driven execution model, combined with static/dynamic conditions and implicit parallelism, provides a robust foundation for AI task orchestration in the .xeyth framework.
+
+**Primary Takeaway**: **Declarative dependencies + type safety = maintainable orchestration** that scales from simple to complex workflows.
+
+**Recommended Next Steps**:
+1. Design task orchestration API inspired by Nuke targets
+2. Implement conditional execution helpers
+3. Prototype parallel validation pipeline
+4. Measure performance improvements
+
+**Risk Assessment**: Low - Dependency graph execution is well-understood, proven in production across many build systems.
+
+---
+
+## References
+
+- Target Definitions: https://nuke.build/docs/fundamentals/targets/
+- Parallel Execution Discussion: https://github.com/nuke-build/nuke/issues/162
+- Static/Dynamic Conditions: https://www.dennisdoomen.com/2025/02/nuke-conditions.html
+- Build Components: https://www.erikheemskerk.nl/nuke-build-components/
+- Nuke source code: https://github.com/nuke-build/nuke

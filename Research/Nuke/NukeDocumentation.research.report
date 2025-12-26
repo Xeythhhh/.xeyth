@@ -1,0 +1,705 @@
+# Nuke Documentation Patterns - Research Report
+
+---
+
+**Date**: 2025-12-26  
+**Researcher**: AI Strategic Agent  
+**Status**: Complete
+
+## Executive Summary
+
+Nuke Build supports **automated documentation generation** through integration with DocFX, XmlDocMarkdown, and other .NET documentation tools. Documentation is **generated as part of the build pipeline**, ensuring it stays synchronized with code. Nuke projects commonly use **Markdown for guides and tutorials**, **XML comments for API docs**, and **DocFX for unified documentation sites** combining both conceptual and API reference content.
+
+**Key Finding**: Nuke demonstrates that **documentation generation can be automated and integrated into build workflows**, ensuring docs stay up-to-date with minimal manual effort.
+
+---
+
+## Documentation Generation Tools
+
+### 1. DocFX (Primary Tool)
+
+**Purpose**: Generate documentation websites from Markdown and XML comments
+
+**Features**:
+- Conceptual documentation (Markdown)
+- API reference (XML comments)
+- Cross-references between concepts and API
+- Versioned documentation
+- Search functionality
+- Custom themes
+
+**Integration**:
+```csharp
+Target GenerateDocs => _ => _
+    .Executes(() =>
+    {
+        ProcessTasks.StartProcess("docfx", "docfx.json", RootDirectory);
+    });
+
+Target ServeDocs => _ => _
+    .DependsOn(GenerateDocs)
+    .Executes(() =>
+    {
+        ProcessTasks.StartProcess("docfx", "serve _site", RootDirectory);
+    });
+```
+
+**Configuration** (`docfx.json`):
+```json
+{
+  "metadata": [{
+    "src": [{ "files": ["src/**/*.csproj"] }],
+    "dest": "api",
+    "properties": { "TargetFramework": "net10.0" }
+  }],
+  "build": {
+    "content": [
+      { "files": ["api/**.yml"] },
+      { "files": ["docs/**.md"] }
+    ],
+    "resource": [{ "files": ["images/**"] }],
+    "dest": "_site",
+    "template": ["default", "modern"]
+  }
+}
+```
+
+**Directory Structure**:
+```
+/docs
+  /api               # Auto-generated API docs
+  /guides            # Hand-written guides
+  /tutorials         # Hand-written tutorials
+  /images            # Images for docs
+  index.md           # Documentation homepage
+/docfx.json          # DocFX configuration
+/_site               # Generated website (output)
+```
+
+### 2. XmlDocMarkdown
+
+**Purpose**: Convert XML documentation comments to Markdown files
+
+**Use Case**: When you want Markdown API docs instead of HTML (e.g., for GitHub wikis, Azure DevOps wikis)
+
+**Integration**:
+```csharp
+Target GenerateMarkdownDocs => _ => _
+    .Executes(() =>
+    {
+        var xmlFiles = GlobFiles(SourceDirectory, "**/bin/**/net10.0/*.xml");
+        
+        foreach (var xmlFile in xmlFiles)
+        {
+            ProcessTasks.StartProcess("xmldocmarkdown", 
+                $"{xmlFile} --output docs/api --clean");
+        }
+    });
+```
+
+**Output**: Markdown files in `docs/api/` directory
+
+**Example Output**:
+```markdown
+# MyClass
+
+Namespace: MyApp.Domain
+
+Represents a domain entity.
+
+## Constructors
+
+### MyClass()
+
+Initializes a new instance of MyClass.
+
+## Properties
+
+### Id
+
+Gets or sets the unique identifier.
+
+**Type:** `Guid`
+
+## Methods
+
+### Save()
+
+Saves the entity to the database.
+
+**Returns:** `Task`
+```
+
+### 3. Pandoc (Conversion Tool)
+
+**Purpose**: Convert between documentation formats (HTML → Markdown, etc.)
+
+**Use Case**: Convert DocFX HTML output to Markdown for wikis
+
+**Integration**:
+```csharp
+Target ConvertDocsToMarkdown => _ => _
+    .DependsOn(GenerateDocs)
+    .Executes(() =>
+    {
+        var htmlFiles = GlobFiles("_site", "**/*.html");
+        
+        foreach (var htmlFile in htmlFiles)
+        {
+            var markdownFile = htmlFile.Replace(".html", ".md");
+            ProcessTasks.StartProcess("pandoc", 
+                $"{htmlFile} -f html -t markdown -o {markdownFile}");
+        }
+    });
+```
+
+---
+
+## Markdown Processing Patterns
+
+### Conceptual Documentation Structure
+
+**Standard Layout**:
+```
+/docs
+  index.md                      # Getting Started
+  /getting-started
+    installation.md
+    quick-start.md
+    first-build.md
+  /guides
+    targets.md
+    parameters.md
+    configuration.md
+  /tutorials
+    creating-custom-tool.md
+    integrating-ci-cd.md
+  /api
+    index.md                    # API overview
+    /namespace1
+      Class1.md
+      Class2.md
+```
+
+**Navigation** (via `toc.yml`):
+```yaml
+- name: Getting Started
+  href: getting-started/
+  items:
+    - name: Installation
+      href: getting-started/installation.md
+    - name: Quick Start
+      href: getting-started/quick-start.md
+
+- name: Guides
+  href: guides/
+  items:
+    - name: Targets
+      href: guides/targets.md
+    - name: Parameters
+      href: guides/parameters.md
+
+- name: API Reference
+  href: api/
+```
+
+### Code Sample Extraction
+
+**Pattern**: Extract code samples from actual working code
+
+**Example**:
+```csharp
+// Build.cs
+#region Sample: BasicTarget
+Target Clean => _ => _
+    .Executes(() =>
+    {
+        DotNetClean(s => s.SetProject(Solution));
+    });
+#endregion
+
+// Documentation generation extracts region as code sample
+```
+
+**Markdown Output**:
+````markdown
+## Basic Target Example
+
+```csharp
+Target Clean => _ => _
+    .Executes(() =>
+    {
+        DotNetClean(s => s.SetProject(Solution));
+    });
+```
+````
+
+**Benefits**:
+- Code samples always compile
+- Samples stay in sync with code
+- Prevents outdated examples
+
+---
+
+## Version Synchronization
+
+### Versioned Documentation
+
+**DocFX Versioning**:
+```json
+{
+  "build": {
+    "xref": ["https://docs.microsoft.com/dotnet/api"],
+    "versions": {
+      "Version 1.0": {
+        "dest": "versions/1.0"
+      },
+      "Version 2.0": {
+        "dest": "versions/2.0"
+      }
+    }
+  }
+}
+```
+
+**URL Structure**:
+- `https://docs.myproject.com/latest/` - Latest version
+- `https://docs.myproject.com/1.0/` - Version 1.0
+- `https://docs.myproject.com/2.0/` - Version 2.0
+
+### Automatic Version Injection
+
+**Pattern**: Inject version into docs during build
+
+```csharp
+[GitVersion] readonly GitVersion GitVersion;
+
+Target GenerateDocs => _ => _
+    .Executes(() =>
+    {
+        var indexMd = RootDirectory / "docs" / "index.md";
+        var content = File.ReadAllText(indexMd);
+        
+        content = content.Replace("{{VERSION}}", GitVersion.NuGetVersionV2);
+        content = content.Replace("{{RELEASE_DATE}}", DateTime.Now.ToString("yyyy-MM-dd"));
+        
+        File.WriteAllText(indexMd, content);
+        
+        ProcessTasks.StartProcess("docfx", "docfx.json");
+    });
+```
+
+**Markdown Template**:
+```markdown
+# MyProject Documentation
+
+**Version:** {{VERSION}}  
+**Release Date:** {{RELEASE_DATE}}
+
+Welcome to MyProject version {{VERSION}}.
+```
+
+**Generated Output**:
+```markdown
+# MyProject Documentation
+
+**Version:** 1.2.3  
+**Release Date:** 2025-12-26
+
+Welcome to MyProject version 1.2.3.
+```
+
+---
+
+## Documentation Testing
+
+### Link Validation
+
+**Pattern**: Validate all links in documentation
+
+```csharp
+Target ValidateDocsLinks => _ => _
+    .Executes(() =>
+    {
+        var markdownFiles = GlobFiles(RootDirectory / "docs", "**/*.md");
+        var brokenLinks = new List<string>();
+        
+        foreach (var mdFile in markdownFiles)
+        {
+            var content = File.ReadAllText(mdFile);
+            var links = ExtractLinks(content);
+            
+            foreach (var link in links)
+            {
+                if (!LinkExists(link, mdFile))
+                    brokenLinks.Add($"{mdFile}: {link}");
+            }
+        }
+        
+        if (brokenLinks.Any())
+        {
+            Log.Error("Broken links found:");
+            brokenLinks.ForEach(l => Log.Error($"  {l}"));
+            throw new Exception($"{brokenLinks.Count} broken links found!");
+        }
+    });
+```
+
+### Code Sample Compilation
+
+**Pattern**: Extract and compile code samples
+
+```csharp
+Target ValidateCodeSamples => _ => _
+    .Executes(() =>
+    {
+        var samples = ExtractCodeSamples(RootDirectory / "docs");
+        var failures = new List<string>();
+        
+        foreach (var (file, sample) in samples)
+        {
+            var tempProject = CreateTempProject(sample);
+            
+            try
+            {
+                DotNetBuild(s => s.SetProjectFile(tempProject));
+            }
+            catch
+            {
+                failures.Add($"{file}: Sample does not compile");
+            }
+        }
+        
+        if (failures.Any())
+            throw new Exception($"{failures.Count} samples failed to compile!");
+    });
+```
+
+### Markdown Linting
+
+**Pattern**: Validate Markdown formatting
+
+```csharp
+Target LintDocs => _ => _
+    .Executes(() =>
+    {
+        ProcessTasks.StartProcess("markdownlint", 
+            "--config .markdownlint.json docs/**/*.md");
+    });
+```
+
+**Configuration** (`.markdownlint.json`):
+```json
+{
+  "default": true,
+  "MD013": { "line_length": 120 },
+  "MD033": false,
+  "MD041": false
+}
+```
+
+---
+
+## CI/CD Integration
+
+### Automated Documentation Deployment
+
+**GitHub Pages Example**:
+```csharp
+[GitHubActions(
+    "docs",
+    GitHubActionsImage.UbuntuLatest,
+    OnPushBranches = new[] { "main" },
+    InvokedTargets = new[] { nameof(PublishDocs) })]
+public class Build : NukeBuild
+{
+    Target GenerateDocs => _ => _
+        .Executes(() =>
+        {
+            ProcessTasks.StartProcess("docfx", "docfx.json");
+        });
+    
+    Target PublishDocs => _ => _
+        .DependsOn(GenerateDocs)
+        .Requires(() => GitHubToken)
+        .Executes(() =>
+        {
+            // Deploy to GitHub Pages
+            GitTasks.Git($"checkout gh-pages");
+            GitTasks.Git($"rm -rf .");
+            GitTasks.Git($"cp -r _site/* .");
+            GitTasks.Git($"add .");
+            GitTasks.Git($"commit -m 'Update documentation'");
+            GitTasks.Git($"push origin gh-pages");
+        });
+}
+```
+
+**Generated Workflow** (`.github/workflows/docs.yml`):
+```yaml
+name: docs
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Build
+        run: ./build.sh PublishDocs
+```
+
+---
+
+## Applicability to .xeyth Framework
+
+### High-Value Patterns
+
+1. **Automated Doc Generation**
+   - Keep docs in sync with code
+   - Build-time generation
+   - Version injection
+
+2. **Markdown-First Approach**
+   - Easy to write and maintain
+   - Version control friendly
+   - Readable without rendering
+
+3. **Code Sample Extraction**
+   - Samples always compile
+   - No outdated examples
+   - Single source of truth
+
+4. **Documentation Testing**
+   - Link validation
+   - Code sample compilation
+   - Markdown linting
+
+### Integration Opportunities
+
+#### High Priority
+
+1. **Add Documentation Build Target**
+   - **Where**: Build.cs
+   - **Why**: Automated doc generation, CI integration
+   - **Effort**: Medium (set up DocFX/tool)
+   - **Impact**: High (better docs, always up-to-date)
+
+2. **Markdown Linting Integration**
+   - **Where**: Build.cs, CI
+   - **Why**: Consistent formatting, catch errors
+   - **Effort**: Small (add markdownlint, config)
+   - **Impact**: Medium (documentation quality)
+
+3. **Link Validation**
+   - **Where**: Build.cs ValidateDocs target
+   - **Why**: Prevent broken links
+   - **Effort**: Medium (implement link checker)
+   - **Impact**: Medium (better user experience)
+
+#### Medium Priority
+
+4. **Code Sample Extraction**
+   - **Where**: Build.cs, documentation
+   - **Why**: Verified working examples
+   - **Effort**: Large (implement extraction, validation)
+   - **Impact**: Medium (better examples)
+
+5. **Versioned Documentation**
+   - **Where**: Documentation site
+   - **Why**: Support multiple versions
+   - **Effort**: Large (versioning infrastructure)
+   - **Impact**: Low (only needed for mature framework)
+
+---
+
+## Specific Integration Recommendations
+
+### Recommendation 1: Documentation Build Pipeline
+
+**Proposal**: Add automated documentation generation to build
+
+**Implementation**:
+```csharp
+Target GenerateDocs => _ => _
+    .Executes(() =>
+    {
+        // Lint Markdown files
+        ProcessTasks.StartProcess("markdownlint", 
+            "--config .markdownlint.json Ai/**/*.md Planning/**/*.md");
+        
+        // Validate internal links
+        ValidateInternalLinks();
+        
+        // Generate API docs (if needed)
+        if (HasApiProjects())
+        {
+            DotNetTool("xmldocmarkdown", 
+                $"{SourceDirectory}/**/bin/**/net10.0/*.xml --output docs/api");
+        }
+        
+        Log.Information("Documentation generated successfully!");
+    });
+
+Target ValidateDocs => _ => _
+    .DependsOn(GenerateDocs)
+    .Executes(() =>
+    {
+        // Additional validation
+    });
+```
+
+### Recommendation 2: Markdown Linting Configuration
+
+**Proposal**: Add markdownlint for consistent documentation formatting
+
+**Configuration** (`.markdownlint.json`):
+```json
+{
+  "default": true,
+  "MD013": { "line_length": 120 },
+  "MD024": false,
+  "MD033": false,
+  "MD041": false,
+  "MD046": { "style": "fenced" }
+}
+```
+
+**Build Integration**:
+```csharp
+Target LintMarkdown => _ => _
+    .Executes(() =>
+    {
+        var mdFiles = new[]
+        {
+            "Ai/**/*.md",
+            "Planning/**/*.md",
+            "Research/**/*.md",
+            "Git/**/*.md",
+            "*.md"
+        };
+        
+        foreach (var pattern in mdFiles)
+        {
+            ProcessTasks.StartProcess("markdownlint", 
+                $"--config .markdownlint.json {pattern}");
+        }
+    });
+```
+
+### Recommendation 3: Link Validation Tool
+
+**Proposal**: Validate all internal links in documentation
+
+**Implementation**:
+```csharp
+Target ValidateLinks => _ => _
+    .Executes(() =>
+    {
+        var markdownFiles = GlobFiles(RootDirectory, "**/*.md");
+        var brokenLinks = new List<string>();
+        
+        foreach (var mdFile in markdownFiles)
+        {
+            var content = File.ReadAllText(mdFile);
+            var relativeLinks = ExtractRelativeLinks(content);
+            
+            foreach (var link in relativeLinks)
+            {
+                var targetPath = ResolveLinkPath(mdFile, link);
+                
+                if (!File.Exists(targetPath) && !Directory.Exists(targetPath))
+                {
+                    brokenLinks.Add($"{mdFile.GetRelativePathTo(RootDirectory)}: {link}");
+                    Log.Warning($"Broken link: {mdFile} -> {link}");
+                }
+            }
+        }
+        
+        if (brokenLinks.Any())
+        {
+            Log.Error($"Found {brokenLinks.Count} broken links:");
+            brokenLinks.ForEach(l => Log.Error($"  {l}"));
+            
+            if (IsServerBuild)
+                throw new Exception($"{brokenLinks.Count} broken links found!");
+        }
+    });
+
+IEnumerable<string> ExtractRelativeLinks(string markdown)
+{
+    // Extract [text](link) and [text]: link patterns
+    var linkPattern = @"\[([^\]]+)\]\(([^)]+)\)";
+    var matches = Regex.Matches(markdown, linkPattern);
+    
+    return matches
+        .Select(m => m.Groups[2].Value)
+        .Where(link => !link.StartsWith("http"))
+        .Where(link => !link.StartsWith("#"));
+}
+```
+
+---
+
+## Anti-Patterns to Avoid
+
+### 1. Manual Documentation Updates
+
+**Problem**: Docs drift from code, become outdated
+
+**Nuke's Approach**: Automated generation from code
+
+**Lesson**: Generate docs as part of build
+
+### 2. Untested Code Samples
+
+**Problem**: Examples in docs don't compile
+
+**Nuke's Pattern**: Extract samples from real code, validate compilation
+
+**Lesson**: Code samples should be tested code
+
+### 3. Ignoring Broken Links
+
+**Problem**: Users follow links to non-existent pages
+
+**Nuke's Approach**: Link validation as build step
+
+**Lesson**: Validate links automatically
+
+### 4. No Version Synchronization
+
+**Problem**: Docs reference wrong version
+
+**Nuke's Pattern**: Inject version during build
+
+**Lesson**: Automate version updates in docs
+
+---
+
+## Conclusion
+
+Nuke Build demonstrates that **documentation can be treated as a first-class build artifact**, generated automatically and validated like code. The combination of Markdown-first authoring, automated generation, and build-time validation ensures documentation stays accurate and useful.
+
+**Primary Takeaway**: **Docs-as-code + build automation = always up-to-date documentation**.
+
+**Recommended Next Steps**:
+1. Add Markdown linting to build pipeline
+2. Implement link validation
+3. Create documentation build target
+4. Consider DocFX for API docs (if needed)
+
+**Risk Assessment**: Low - Documentation tools are mature, Markdown is stable, validation is straightforward.
+
+---
+
+## References
+
+- DocFX: https://dotnet.github.io/docfx/
+- XmlDocMarkdown: https://ejball.com/XmlDocMarkdown/
+- Markdown Lint: https://github.com/DavidAnson/markdownlint
+- Using DocFX and Tools: https://microsoft.github.io/code-with-engineering-playbook/documentation/recipes/using-docfx-and-tools/
+- Nuke Docs Example: https://kean.blog/post/nuke-docs
