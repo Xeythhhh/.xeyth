@@ -52,7 +52,7 @@ Tasks are work items tracking agent progress. All task progress must be merged t
 - [ ] **D1**: PR template created (.github/pull_request_template.md)
 - [ ] **D2**: PR workflow documented (Git/README.md)
 - [ ] **D3**: Agent instructions updated (Flow.prompt.md, Implementation.prompt.md)
-- [ ] **D4**: Branch naming convention documented (Conventions/BranchNamingConvention.convention)
+- [ ] **D4**: Branch naming convention documented (Git/Branches.Naming.convention)
 - [ ] **D5**: First PR created demonstrating workflow
 - [ ] **D6**: Verification: Direct push to master fails
 
@@ -178,7 +178,7 @@ Tasks are work items tracking agent progress. All task progress must be merged t
 
 ---
 
-Status: Not Started  
+Status: In Progress  
 Owner: Implementation Agent  
 Priority: Critical  
 Effort: Medium  
@@ -208,7 +208,7 @@ Enforce PR-based workflow for all task progress; prevent direct commits to maste
 - D1: PR template (.github/pull_request_template.md)
 - D2: Workflow documented (Git/README.md)
 - D3: Agent instructions updated (Flow.prompt.md, Implementation.prompt.md)
-- D4: Branch naming convention
+- D4: Branch naming convention (Git/Branches.Naming.convention)
 - D5: Example PR demonstrating workflow
 - D6: Verification (direct push fails)
 
@@ -234,4 +234,4 @@ Enforce PR-based workflow for all task progress; prevent direct commits to maste
 
 - 2025-12-25: Task created; user requested PR enforcement for task progress
 - 2025-12-25: Branch protection verified (PR reviews required, direct commits blocked)
-
+- 2025-12-26: Added PR template, documented PR workflow and branch naming, updated implementation instructions; pending example PR and direct-push verification
