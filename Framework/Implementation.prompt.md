@@ -15,7 +15,10 @@ Role: Implementer (plan review + execution).
 9. **Push Feature Branch**: `git push origin task/{task-name}`
 10. **Create PR**: `gh pr create --base master --head task/{task-name}` with task reference
 11. Update the task Progress Log with decisions and verification evidence
-12. Delegate to Reviewer when done; use Flow prompt + ProgressReport.template for status
+12. **When all deliverables, checklists, and TODOs are complete and PR is ready for merge**:
+    - Post a comment on the PR with @copilot tag
+    - Include delegation prompt for Strategic Agent (Reviewer role) in the comment
+    - Use the delegation format shown in "PR Ready for Review Comment Template" below
 
 **CRITICAL**: All commits must go to feature branches. Pull Requests are required for merging to master.
 
@@ -42,6 +45,58 @@ Questions: ...
 
 Implementation complete; verification attached in task file.
 ````
+
+## PR Ready for Review Comment Template
+
+**When to use**: After all deliverables, checklists, and TODOs are complete and the PR is ready for merge.
+
+**Where to post**: As a comment on the PR (not in chat).
+
+**Format**:
+
+```markdown
+@copilot PR is ready for review and merge.
+
+**Verification complete**:
+- ✅ All deliverables (D1, D2, etc.) marked complete in task file
+- ✅ Progress Log updated with completion entry
+- ✅ Build passes (0 errors, 0 warnings)
+- ✅ All tests pass
+- ✅ Lint clean (or N/A)
+- ✅ Documentation updated (or N/A)
+
+**Delegation**:
+````markdown
+**Task**: [{Slice}/{TaskName}.task]({Slice}/{TaskName}.task)  
+**Role**: Reviewer (see [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md))  
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Implementation complete. All deliverables verified and PR ready for merge.
+````
+```
+
+**Example**:
+
+```markdown
+@copilot PR is ready for review and merge.
+
+**Verification complete**:
+- ✅ All deliverables (D1-D3) marked complete in task file
+- ✅ Progress Log updated with completion entry
+- ✅ Build passes (0 errors, 0 warnings)
+- ✅ All tests pass
+- ✅ Lint clean
+- ✅ Documentation updated
+
+**Delegation**:
+````markdown
+**Task**: [Automation/PlanningCliTool.task](Automation/PlanningCliTool.task)  
+**Role**: Reviewer (see [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md))  
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Implementation complete. All deliverables verified and PR ready for merge.
+````
+```
 
 ## Response Footer
 
