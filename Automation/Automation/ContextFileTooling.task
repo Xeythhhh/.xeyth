@@ -1,6 +1,6 @@
 # Context File Tooling - Dotnet CLI Utilities
 
-**Status**: Not Started  
+**Status**: Ready for Implementation  
 **Created**: 2024-12-24  
 **Owner**: Strategic Agent (Planner)  
 **Priority**: Medium  
@@ -376,3 +376,15 @@ Architecture decisions finalized to extend existing `xeyth-planning` CLI tool wi
 - Support table output (default) + JSON output (--json flag for automation)
 
 **Implementation Readiness**: ✅ All phases detailed with specific classes, file locations, and patterns to follow.
+
+---
+
+## DELEGATION TO IMPLEMENTATION AGENT
+
+````markdown
+**Task**: [Automation/Automation/ContextFileTooling.task](Automation/Automation/ContextFileTooling.task)  
+**Role**: Implementer (see [Ai/Framework/Implementation.prompt.md](../../Ai/Framework/Implementation.prompt.md))  
+**Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
+
+Implement context file management commands in existing `xeyth-planning` CLI tool. Extend `Automation.Planning` with Models, Services, and Commands for .task, .plan, .report, and .convention files following established patterns.
+````
