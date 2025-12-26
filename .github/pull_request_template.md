@@ -6,13 +6,14 @@
 
 **Task File**: <!-- Link to .task file, e.g., [Git/PrWorkflowEnforcement.task](../Git/PrWorkflowEnforcement.task) -->
 
-**Deliverables** (copy from the task file and mark complete):
-- [ ] D1: <!-- e.g., PR template created -->
-- [ ] D2:
-- [ ] D3:
-- [ ] D4:
-- [ ] D5:
-- [ ] D6:
+**Deliverables** (paste or adapt the checklist from the linked `.task` file and mark complete):
+
+<!-- Paste deliverables checklist from the task file here.
+     Example format (replace with the actual items from your task file):
+     - [ ] D1: PR template created
+     - [ ] D2: Tests updated
+     - [ ] D3: Documentation updated
+-->
 
 ## Verification
 
