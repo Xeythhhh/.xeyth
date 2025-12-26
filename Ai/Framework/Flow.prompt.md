@@ -107,10 +107,11 @@
 **Strategic Agent (Orchestrator role)**:
 
 1. Review backlog using priority scores (see [TaskPrioritySystem.md](../Planning/TaskPrioritySystem.md))
-2. Search for tasks with `Status: Not Started` or `Status: Planning Complete`
-3. Select highest Priority Score task
-4. Delegate to Planner (if needs design) or Implementation Agent (if ready) using code block
-5. Continue flow - do NOT wait for user
+2. Check open PRs and PR drafts to identify tasks already in progress
+3. Search for tasks with `Status: Not Started` or `Status: Planning Complete` that are NOT already delegated in open PRs
+4. Select highest Priority Score task
+5. Delegate to Planner (if needs design) or Implementation Agent (if ready) using code block
+6. Continue flow - do NOT wait for user
 
 **Implementation Agent**:
 

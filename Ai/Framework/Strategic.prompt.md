@@ -17,6 +17,7 @@ Covers Orchestrator, Planner, Reviewer roles.
 - **Target**: Maintain 20 ready tasks; create when backlog < 15; focus execution when backlog > 25
 - **PR Target**: Maintain at least 5 open PRs (or draft PRs) at all times, each handling a single `.task`
 - Overrides: if [Configuration.xeyth](../Configuration.xeyth) exists, use `orchestrator.backlog` values
+- Check PRs: Before delegating, verify task is not already in an open PR or draft (check PR descriptions for task file references)
 - When backlog < minimum → create new tasks; when > maximum → pause creation and prioritize execution
 - Regularly refine unfinished tasks and delegate refined tasks to Implementation Agent
 - If open PRs < 5 → prioritize delegation to Implementation Agent for new task implementation
