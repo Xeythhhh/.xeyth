@@ -1,0 +1,665 @@
+# Nuke CLI Design and User Experience - Research Report
+
+---
+
+**Date**: 2025-12-26  
+**Researcher**: AI Strategic Agent  
+**Status**: Complete
+
+## Executive Summary
+
+Nuke Build's CLI is designed for **developer-centric UX** with auto-generated help, adaptive output formatting, Serilog-based logging, and shell completion support. The CLI automatically detects environment (local vs CI) and adjusts output accordingly—using ANSI colors and formatting locally, structured output in CI. **Verbosity control**, **collapsible sections** (CI), and **navigable error traces** (IDE plugins) create a polished experience.
+
+**Key Finding**: Nuke demonstrates that **build tool CLIs can be as polished as modern developer tools** through thoughtful output formatting and context-aware behavior.
+
+---
+
+## CLI Command Structure
+
+### Invocation Patterns
+
+**Standard Invocation**:
+```bash
+nuke [target] [--parameter value] [--flag]
+```
+
+**Examples**:
+```bash
+nuke                              # Run default target
+nuke Test                         # Run specific target
+nuke Clean Compile Test           # Run multiple targets
+nuke Test --configuration Release # Target with parameter
+nuke --help                       # Show help
+nuke --plan                       # Show execution plan (dry-run)
+```
+
+### Global Tool vs Local Execution
+
+**Global Tool**:
+```bash
+nuke --setup              # Setup Nuke in repository
+nuke :add-package <pkg>   # Add NuGet package to build
+nuke :secrets set <name>  # Manage encrypted secrets
+nuke :complete install    # Install shell completion
+```
+
+**Local Execution** (via build scripts):
+```bash
+./build.sh Test                    # Unix-like
+.\build.ps1 Test                   # PowerShell
+.\build.cmd Test                   # Windows CMD
+```
+
+**Benefits**:
+- Global tool for repository management
+- Local scripts for reproducible builds
+- No global tool required for CI
+- Bootstrapping scripts handle .NET SDK version
+
+---
+
+## Help Generation
+
+### Auto-Generated Help
+
+**Command**: `nuke --help` or `nuke` (no arguments)
+
+**Output**:
+```
+NUKE Execution Engine version 10.1.0
+
+Targets (with their direct dependencies):
+
+  Clean
+  Restore
+  Compile (default)    → Restore
+  Test                 → Compile
+  Pack                 → Test
+  Publish              → Pack
+
+Parameters:
+
+  --configuration        Configuration to build (Debug|Release)
+  --skip                 Skip specified targets
+  --plan                 Show execution plan without running
+  --help                 Show this help
+
+Build project: Build.cs
+Build environment: Local (Console)
+```
+
+**Features**:
+- Lists all targets with descriptions
+- Shows target dependencies
+- Parameter documentation (from `[Parameter]` attributes)
+- Current build environment
+- Version information
+
+### Context-Sensitive Help
+
+**Target-Specific Help**:
+```bash
+nuke Test --help
+```
+
+**Output**:
+```
+Target: Test
+  Description: Run unit tests
+  Dependencies: Compile → Restore → Clean (optional)
+  
+Parameters:
+  --configuration     Build configuration (default: Debug)
+  --framework         Target framework filter
+  --no-build          Skip build step
+```
+
+**Benefits**:
+- Self-documenting targets
+- Auto-generated from code
+- Always up-to-date
+- No separate docs to maintain
+
+### Shell Completion
+
+**Installation**:
+```bash
+nuke :complete install           # Auto-detect shell
+nuke :complete install --shell bash
+nuke :complete install --shell zsh
+nuke :complete install --shell powershell
+```
+
+**Features**:
+- Tab completion for targets
+- Parameter name completion
+- Parameter value suggestions (enums)
+- Works in Bash, Zsh, PowerShell, Fish
+
+**Example**:
+```bash
+nuke Te<TAB>    # Completes to "Test"
+nuke --conf<TAB> # Completes to "--configuration"
+```
+
+---
+
+## Parameter Binding
+
+### Type-Safe Binding
+
+```csharp
+[Parameter] readonly Configuration Configuration;  // Enum
+[Parameter] readonly string ApiKey;                // String
+[Parameter] readonly int MaxRetries = 3;           // Int with default
+[Parameter] readonly bool Verbose;                 // Boolean flag
+```
+
+**CLI Usage**:
+```bash
+nuke --configuration Release    # Enum value (validated)
+nuke --api-key abc123          # String value
+nuke --max-retries 5           # Integer parsing
+nuke --verbose                 # Boolean flag (true)
+nuke --verbose false           # Explicit boolean
+```
+
+**Validation**:
+- Enum values validated at parse time
+- Type conversion automatic (string → int, bool)
+- Invalid values cause build failure with clear error
+- Case-insensitive enum matching
+
+### Name Transformation
+
+**Parameter Name**: `MyParameter`
+
+**CLI Accepted Forms** (all equivalent):
+```bash
+--my-parameter value
+--MyParameter value
+--myparameter value
+--MY_PARAMETER value
+```
+
+**Benefits**:
+- Flexible naming (kebab-case, camelCase, snake_case)
+- Case-insensitive for usability
+- Automatic transformation from C# property names
+
+### Collection Parameters
+
+**Definition**:
+```csharp
+[Parameter] readonly string[] Frameworks;
+```
+
+**CLI Usage**:
+```bash
+nuke --frameworks net6.0 net7.0 net8.0
+nuke --frameworks net6.0 --frameworks net7.0  # Multiple flags
+```
+
+**Parsing**: Automatically splits into array/collection
+
+---
+
+## Output Formatting
+
+### Environment-Adaptive Formatting
+
+**Local Build**:
+- ANSI colors and formatting
+- Unicode box-drawing characters
+- Emoji/icons (when supported)
+- Progress indicators
+
+**CI Build**:
+- Platform-specific formatting (TeamCity messages, GitHub annotations)
+- Collapsible sections
+- Error/warning highlighting
+- Plain text fallback
+
+### Output Components
+
+**1. Build Header**:
+```
+╔═══════════════════════════════════════
+║ NUKE Execution Engine 10.1.0
+║ Build project: Build.cs
+║ Configuration: Release
+╚═══════════════════════════════════════
+```
+
+**2. Target Execution**:
+```
+══════════════════════════════════════════
+Target: Restore
+══════════════════════════════════════════
+  Restoring packages...
+  ✓ Restored 42 packages in 3.2s
+```
+
+**3. Build Summary**:
+```
+══════════════════════════════════════════
+Build Summary
+══════════════════════════════════════════
+
+Target    Status   Duration
+────────────────────────────
+Clean     Skipped  -
+Restore   Success  3.2s
+Compile   Success  12.5s
+Test      Success  8.3s
+────────────────────────────
+Total               24.0s
+```
+
+**4. Error Summary**:
+```
+══════════════════════════════════════════
+Build Errors
+══════════════════════════════════════════
+
+✗ Test failed with 3 failures
+  - TestClass.TestMethod1: Expected true but was false
+  - TestClass.TestMethod2: NullReferenceException
+  - TestClass.TestMethod3: Timeout after 30s
+```
+
+### Color Scheme
+
+**Semantic Colors**:
+- Green: Success, completed targets
+- Red: Errors, failed targets
+- Yellow: Warnings, skipped targets
+- Cyan/Blue: Information, metadata
+- Gray/Dim: Secondary information, timestamps
+
+**Example**:
+```
+✓ Compile    Success  12.5s   # Green checkmark, green "Success"
+⚠ Test       Skipped  -       # Yellow warning, yellow "Skipped"
+✗ Deploy     Failed   5.2s    # Red X, red "Failed"
+```
+
+### CI-Specific Formatting
+
+**GitHub Actions**:
+```bash
+::group::Restore
+Restoring packages...
+::endgroup::
+
+::error file=src/App.cs,line=42::Null reference exception
+::warning file=tests/Test.cs,line=10::Deprecated API usage
+```
+
+**Azure Pipelines**:
+```bash
+##[group]Restore
+Restoring packages...
+##[endgroup]
+
+##vso[task.logissue type=error;sourcepath=src/App.cs;linenumber=42]Null reference
+```
+
+**TeamCity**:
+```bash
+##teamcity[blockOpened name='Restore']
+Restoring packages...
+##teamcity[blockClosed name='Restore']
+
+##teamcity[message text='Error' status='ERROR']
+```
+
+**Benefits**:
+- Native CI platform integration
+- Collapsible sections
+- Clickable errors/warnings
+- Test result aggregation
+
+---
+
+## Logging and Diagnostics
+
+### Serilog Integration
+
+**Log Levels**:
+```csharp
+Log.Verbose("Detailed diagnostic information");
+Log.Debug("Debugging information");
+Log.Information("General information");
+Log.Warning("Warning condition");
+Log.Error("Error condition");
+Log.Fatal("Critical failure");
+```
+
+**Output**:
+```
+[12:34:56 INF] Starting build...
+[12:34:57 DBG] Found 42 projects in solution
+[12:35:02 WRN] Deprecated API usage detected
+[12:35:10 ERR] Build failed with 3 errors
+```
+
+### Verbosity Control
+
+**CLI Flag**:
+```bash
+nuke --verbosity Quiet      # Errors only
+nuke --verbosity Minimal    # Errors + warnings
+nuke --verbosity Normal     # Standard output (default)
+nuke --verbosity Verbose    # Detailed information
+nuke --verbosity Diagnostic # Debug-level detail
+```
+
+**Programmatic Control**:
+```csharp
+Logging.Level = LogLevel.Trace;  // Override in code
+```
+
+**Benefits**:
+- Adjustable detail level
+- CI can use verbose for debugging
+- Local builds default to normal
+- Quiet for scripting/automation
+
+### Log Files
+
+**Location**: `.nuke/temp/build.log` (current), `.nuke/temp/build.*.log` (last 5 builds)
+
+**Format**:
+```
+2025-12-26 12:34:56 [INF] NUKE Execution Engine 10.1.0
+2025-12-26 12:34:57 [INF] Build project: Build.cs
+2025-12-26 12:34:58 [INF] Target: Restore
+2025-12-26 12:35:02 [INF] ✓ Restored 42 packages
+```
+
+**Features**:
+- Timestamped entries
+- Retained history (5 builds)
+- Viewable in IDE with plugins (Ideolog for Rider)
+- Log level highlighting
+- Exception stack trace navigation
+
+### Error and Warning Aggregation
+
+**Summary at End**:
+```
+══════════════════════════════════════════
+Warnings (3)
+══════════════════════════════════════════
+1. Deprecated API usage in src/App.cs:42
+2. Missing XML documentation for public method
+3. Unused using directive
+
+══════════════════════════════════════════
+Errors (2)
+══════════════════════════════════════════
+1. src/Service.cs:15: Null reference exception
+2. tests/IntegrationTests.cs:67: Connection timeout
+```
+
+**Benefits**:
+- Don't miss errors buried in output
+- Quick scan for issues
+- Navigable in IDE
+- Copy-paste friendly format
+
+### Custom Logging in CLI Tool Invocations
+
+**Pattern**: Capture and filter tool output
+
+```csharp
+DotNetBuild(s => s
+    .SetProcessLogger((type, output) =>
+    {
+        if (output.Contains("warning"))
+            Log.Warning(output);
+        else if (output.Contains("error"))
+            Log.Error(output);
+        else
+            Log.Information(output);
+    }));
+```
+
+**Benefits**:
+- Control tool output formatting
+- Filter noise
+- Reclassify severity
+- Integrate with Serilog
+
+---
+
+## Applicability to .xeyth Framework
+
+### High-Value Patterns
+
+1. **Auto-Generated Help**
+   - Self-documenting CLI tools
+   - Always up-to-date
+   - Context-sensitive
+
+2. **Environment-Adaptive Output**
+   - Rich formatting locally
+   - CI-optimized output
+   - Automatic detection
+
+3. **Structured Logging**
+   - Serilog for consistency
+   - Verbosity control
+   - Log file retention
+
+4. **Parameter Validation**
+   - Type-safe binding
+   - Clear error messages
+   - Enum validation
+
+### Integration Opportunities
+
+#### High Priority
+
+1. **Adopt Serilog for All CLI Tools**
+   - **Where**: xeyth-verify, xeyth-contracts, future tools
+   - **Why**: Consistent logging, structured output, verbosity control
+   - **Effort**: Small (add Serilog package, configure)
+   - **Impact**: High (better UX, debugging)
+
+2. **Environment-Adaptive Formatting**
+   - **Where**: All CLI output
+   - **Why**: Rich local experience, CI-friendly output
+   - **Effort**: Medium (detect CI, adjust formatting)
+   - **Impact**: High (professional feel)
+
+3. **Auto-Generated Help**
+   - **Where**: All CLI tools
+   - **Why**: Self-documenting, maintainable
+   - **Effort**: Small (use attribute metadata)
+   - **Impact**: Medium (better discoverability)
+
+#### Medium Priority
+
+4. **Shell Completion**
+   - **Where**: xeyth global tool
+   - **Why**: Improved DX
+   - **Effort**: Medium (implement completion logic)
+   - **Impact**: Low (nice-to-have)
+
+5. **Structured Error Summaries**
+   - **Where**: Validation, linting output
+   - **Why**: Don't miss errors in verbose output
+   - **Effort**: Small (aggregate errors, print summary)
+   - **Impact**: Medium (better error visibility)
+
+---
+
+## Specific Integration Recommendations
+
+### Recommendation 1: Unified Logging Infrastructure
+
+**Proposal**: Add Serilog to Automation.Cli.Common
+
+**Configuration**:
+```csharp
+public static class LoggingConfig
+{
+    public static void Initialize(LogLevel minLevel = LogLevel.Information)
+    {
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Is(minLevel)
+            .WriteTo.Console(
+                outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}",
+                theme: IsCI ? ConsoleTheme.None : AnsiConsoleTheme.Code)
+            .WriteTo.File(
+                path: ".xeyth/logs/cli-.log",
+                rollingInterval: RollingInterval.Day,
+                retainedFileCountLimit: 5)
+            .CreateLogger();
+    }
+    
+    public static bool IsCI => Environment.GetEnvironmentVariable("CI") != null;
+}
+```
+
+**Usage**:
+```csharp
+public class ValidateCommand
+{
+    public async Task<int> ExecuteAsync()
+    {
+        LoggingConfig.Initialize(options.Verbosity);
+        
+        Log.Information("Starting validation...");
+        Log.Verbose("Found {Count} contract files", files.Count);
+        Log.Warning("Deprecated syntax in {File}", file);
+        Log.Error("Validation failed for {File}", file);
+        
+        return exitCode;
+    }
+}
+```
+
+### Recommendation 2: Environment-Adaptive Output
+
+**Proposal**: Detect CI and adjust Spectre.Console output
+
+**Implementation**:
+```csharp
+public static class ConsoleHelper
+{
+    public static IAnsiConsole CreateConsole()
+    {
+        var settings = new AnsiConsoleSettings
+        {
+            Ansi = IsCI ? AnsiSupport.No : AnsiSupport.Detect,
+            ColorSystem = IsCI ? ColorSystemSupport.NoColors : ColorSystemSupport.Detect,
+            Interactive = IsCI ? InteractionSupport.No : InteractionSupport.Yes
+        };
+        
+        return AnsiConsole.Create(settings);
+    }
+    
+    public static bool IsCI => Environment.GetEnvironmentVariable("CI") != null;
+}
+```
+
+**Benefits**:
+- Rich output locally (colors, spinners, progress)
+- Plain output in CI (parseable, no ANSI codes)
+- Automatic adaptation
+
+### Recommendation 3: Help Generation Pattern
+
+**Proposal**: Generate help from command metadata
+
+**Implementation**:
+```csharp
+[Command("validate", "Validate contract files")]
+public class ValidateCommand
+{
+    [Parameter("Contract files pattern", Default = "**/*.prompt.md")]
+    public string Pattern { get; set; }
+    
+    [Parameter("Strict mode (fail on warnings)", Default = false)]
+    public bool Strict { get; set; }
+}
+
+// Auto-generate help:
+// xeyth-contracts validate --help
+//
+// DESCRIPTION
+//   Validate contract files
+//
+// USAGE
+//   xeyth-contracts validate [OPTIONS]
+//
+// OPTIONS
+//   --pattern <pattern>   Contract files pattern (default: **/*.prompt.md)
+//   --strict              Strict mode (fail on warnings)
+//   --help                Show this help
+```
+
+---
+
+## Anti-Patterns to Avoid
+
+### 1. Console.WriteLine for Everything
+
+**Problem**: Unstructured output, no verbosity control
+
+**Nuke's Solution**: Serilog with levels
+
+**Lesson**: Use structured logging from the start
+
+### 2. Ignoring Environment
+
+**Problem**: ANSI codes in CI logs, plain text locally
+
+**Nuke's Solution**: Environment detection
+
+**Lesson**: Adapt output to context
+
+### 3. No Error Aggregation
+
+**Problem**: Errors buried in verbose output
+
+**Nuke's Solution**: Summary section at end
+
+**Lesson**: Repeat important messages
+
+### 4. Manual Help Maintenance
+
+**Problem**: Help text out of sync with code
+
+**Nuke's Solution**: Auto-generated from attributes
+
+**Lesson**: Generate help from metadata
+
+---
+
+## Conclusion
+
+Nuke Build's CLI design demonstrates that **developer tools should adapt to their environment** and provide clear, structured output. The combination of auto-generated help, Serilog integration, and environment-aware formatting creates a professional CLI experience.
+
+**Primary Takeaway**: **Context-aware CLI + structured logging = professional developer experience**.
+
+**Recommended Next Steps**:
+1. Add Serilog to all CLI tools
+2. Implement environment detection and adaptive formatting
+3. Generate help from command metadata
+4. Create error aggregation pattern
+
+**Risk Assessment**: Low - Serilog and Spectre.Console are mature, well-documented libraries.
+
+---
+
+## References
+
+- Build Execution: https://nuke.build/docs/getting-started/execution/
+- Logging Documentation: https://nuke.build/docs/fundamentals/logging/
+- CLI Tools: https://nuke.build/docs/common/cli-tools/
+- Azure Pipelines Integration: https://nuke.build/docs/cicd/azure-pipelines/
+- Serilog: https://serilog.net/

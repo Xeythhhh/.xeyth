@@ -1,0 +1,286 @@
+# Proposal: Implement Fluent Builder Pattern for AI Task Orchestration
+
+**Status**: Pending  
+**Submitted**: 2025-12-26  
+**Author**: Strategic Agent (Research Task)  
+**Related Task**: Research/Nuke/NukeToolingArchitecture.research.report, Research/Nuke/NukeBuildOrchestration.research.report
+
+## Context
+
+The .xeyth framework currently lacks a unified, type-safe approach to AI task orchestration. Tasks are managed through file-based workflows (`.task`, `.plan` files) and CLI tools, but there's no programmatic API for:
+- Defining task dependencies
+- Configuring task execution
+- Composing complex workflows
+- Testing task orchestration
+
+Nuke Build demonstrates that **build orchestration can be type-safe, fluent, and highly maintainable** through declarative C# APIs. The same patterns that make build automation better (compile-time validation, IntelliSense, immutability) can make AI workflow orchestration better.
+
+## Proposal
+
+Create a **Fluent Builder Pattern API** for AI task orchestration inspired by Nuke's target system. This would enable developers to define AI workflows in code with:
+
+1. **Type-safe task definitions** using fluent APIs
+2. **Declarative dependencies** (`.DependsOn()`, `.Before()`, `.After()`, `.Triggers()`)
+3. **Conditional execution** (`.OnlyWhen()`, `.Requires()`)
+4. **Immutable configuration** (builder pattern prevents state bugs)
+5. **Compile-time validation** (typos and errors caught early)
+
+**Example API Design:**
+
+```csharp
+// Task definition
+public class ContractValidationWorkflow : AiWorkflow
+{
+    public override void Configure()
+    {
+        Task("DiscoverContracts", t => t
+            .Description("Discover all contract files in framework")
+            .Executes(() => DiscoverContractFilesAsync()));
+        
+        Task("ValidateContracts", t => t
+            .Description("Validate contract files against schema")
+            .DependsOn("DiscoverContracts")
+            .Triggers("GenerateReport")
+            .OnlyWhen(() => HasContractFiles())
+            .Executes(() => ValidateContractsAsync()));
+        
+        Task("GenerateReport", t => t
+            .Description("Generate validation report")
+            .Requires(() => ValidationResults != null)
+            .Executes(() => GenerateReportAsync()));
+    }
+}
+
+// Usage
+var workflow = new ContractValidationWorkflow();
+await workflow.RunAsync("ValidateContracts");
+
+// Fluent prompt construction
+var prompt = PromptBuilder.Create()
+    .ForRole(Role.Implementer)
+    .WithTask("Implement feature X")
+    .AddContext(contextFile)
+    .SetModel(Model.GPT51CodexMax)
+    .EnableVerboseOutput()
+    .Build();
+```
+
+## Benefits
+
+- **Type Safety**: Compile-time validation prevents runtime errors
+- **IntelliSense Support**: Discoverable API, auto-completion for all options
+- **Refactoring Safety**: Rename task, all references update automatically
+- **Testability**: Mock workflow execution, unit test task logic
+- **Composability**: Reuse workflows, extend via inheritance
+- **Clear Dependencies**: Visualize task graph, understand execution order
+- **Immutability**: Builder pattern prevents accidental state mutations
+- **Self-Documenting**: Code is documentation (descriptions in fluent calls)
+- **Parallelization**: Independent tasks run concurrently automatically
+- **Extensible**: Easy to add new task types, conditions, or behaviors
+
+## Effort Estimate
+
+**Size**: Large
+
+**Impact**:
+- **What needs to change**:
+  - Create `Automation.Framework.Orchestration` project
+  - Design core abstractions: `AiWorkflow`, `AiTask`, `TaskDefinition`
+  - Implement fluent builders: `TaskBuilder`, `PromptBuilder`
+  - Add dependency resolution and execution engine
+  - Create condition system (`.OnlyWhen()`, `.Requires()`)
+  - Integrate with existing CLI tools (xeyth-verify, xeyth-contracts)
+  - Add unit tests and integration tests
+  - Document patterns and examples
+
+- **Dependencies**:
+  - No external dependencies (pure .NET)
+  - Can be implemented incrementally
+  - Integrates with existing framework (doesn't replace it)
+  - Optional: Consider Nuke.Common for proven patterns
+
+- **Risks**:
+  - **Medium Complexity**: Requires careful API design
+  - **Learning Curve**: Team needs to learn fluent API patterns
+  - **Parallel Adoption**: Existing file-based workflows still work
+  - **Scope Creep**: Keep focused on orchestration, not execution logic
+
+## Implementation Notes
+
+### Phase 1: Core Abstractions (Small)
+
+Create foundational types:
+
+```csharp
+public abstract class AiWorkflow
+{
+    private readonly Dictionary<string, AiTask> _tasks = new();
+    
+    public abstract void Configure();
+    
+    protected TaskBuilder Task(string name) =>
+        new TaskBuilder(name, task => _tasks[name] = task);
+    
+    public async Task<int> RunAsync(string taskName)
+    {
+        Configure(); // Build task graph
+        var executor = new WorkflowExecutor(_tasks);
+        return await executor.ExecuteAsync(taskName);
+    }
+}
+
+public class TaskBuilder
+{
+    private readonly AiTask _task;
+    
+    public TaskBuilder Description(string description) { /* ... */ return this; }
+    public TaskBuilder DependsOn(params string[] dependencies) { /* ... */ return this; }
+    public TaskBuilder Triggers(params string[] triggers) { /* ... */ return this; }
+    public TaskBuilder OnlyWhen(Func<bool> condition) { /* ... */ return this; }
+    public TaskBuilder Requires(Func<bool> requirement) { /* ... */ return this; }
+    public TaskBuilder Executes(Func<Task> action) { /* ... */ return this; }
+}
+```
+
+### Phase 2: Dependency Resolution (Medium)
+
+Implement graph-based execution:
+
+```csharp
+public class WorkflowExecutor
+{
+    public async Task<int> ExecuteAsync(string targetTask)
+    {
+        var graph = BuildDependencyGraph(targetTask);
+        var executionOrder = TopologicalSort(graph);
+        
+        foreach (var taskName in executionOrder)
+        {
+            if (!ShouldExecute(taskName))
+            {
+                Log.Information($"Skipping {taskName} (condition not met)");
+                continue;
+            }
+            
+            await ExecuteTaskAsync(taskName);
+        }
+        
+        return 0; // Success
+    }
+}
+```
+
+### Phase 3: Prompt Builder (Small)
+
+Type-safe prompt construction:
+
+```csharp
+public class PromptBuilder
+{
+    private Role? _role;
+    private string? _task;
+    private List<string> _context = new();
+    private Model _model = Model.GPT51CodexMax;
+    
+    public static PromptBuilder Create() => new();
+    
+    public PromptBuilder ForRole(Role role) { _role = role; return this; }
+    public PromptBuilder WithTask(string task) { _task = task; return this; }
+    public PromptBuilder AddContext(string file) { _context.Add(file); return this; }
+    public PromptBuilder SetModel(Model model) { _model = model; return this; }
+    
+    public Prompt Build()
+    {
+        Validate();
+        return new Prompt(_role!.Value, _task!, _context, _model);
+    }
+}
+```
+
+### Phase 4: Integration with Existing Tools (Medium)
+
+Wrap existing CLI tools:
+
+```csharp
+public class FrameworkWorkflows : AiWorkflow
+{
+    public override void Configure()
+    {
+        Task("ValidateContracts", t => t
+            .Executes(() => XeythContractsTasks.Validate(s => s
+                .SetPattern("**/*.prompt.md")
+                .EnableStrictMode())));
+        
+        Task("VerifySnapshots", t => t
+            .Executes(() => XeythVerifyTasks.Verify(s => s
+                .SetDiffTool("code-insiders")
+                .SetPattern("**/*.verified.*"))));
+    }
+}
+```
+
+### Example Usage Scenarios
+
+**Scenario 1: CI Validation Pipeline**
+```csharp
+public class CiValidationWorkflow : AiWorkflow
+{
+    public override void Configure()
+    {
+        Task("ValidateAll", t => t
+            .DependsOn("ValidateContracts", "ValidateTasks", "ValidatePlans", "LintMarkdown")
+            .Description("Run all validation checks"));
+        
+        // These run in parallel (no dependencies)
+        Task("ValidateContracts", t => t.Executes(() => ValidateContractsAsync()));
+        Task("ValidateTasks", t => t.Executes(() => ValidateTasksAsync()));
+        Task("ValidatePlans", t => t.Executes(() => ValidatePlansAsync()));
+        Task("LintMarkdown", t => t.Executes(() => LintMarkdownAsync()));
+    }
+}
+
+// Run in CI
+await new CiValidationWorkflow().RunAsync("ValidateAll");
+```
+
+**Scenario 2: Incremental Validation**
+```csharp
+Task("IncrementalValidation", t => t
+    .OnlyWhen(() => HasUncommittedChanges())
+    .Executes(() =>
+    {
+        var changedFiles = GetChangedFiles();
+        var affectedContracts = GetAffectedContracts(changedFiles);
+        
+        foreach (var contract in affectedContracts)
+            ValidateContract(contract);
+    }));
+```
+
+**Scenario 3: Environment-Specific Behavior**
+```csharp
+Task("PublishDocs", t => t
+    .DependsOn("GenerateDocs")
+    .OnlyWhen(() => IsCI && Branch == "main")
+    .Requires(() => GitHubToken != null)
+    .Executes(() => PublishDocsAsync()));
+```
+
+## Decision
+
+**Status**: Pending  
+**Decision Date**: TBD  
+**Rationale**: Awaiting review  
+**Task Created**: TBD
+
+## Additional Notes
+
+This proposal complements (doesn't replace) the existing file-based task system. Both can coexist:
+- `.task` files for human-authored task definitions
+- Fluent API for programmatic orchestration and automation
+
+Future enhancements could include:
+- Visual task graph generation
+- Interactive workflow execution (prompts, confirmations)
+- Workflow composition (nest workflows)
+- Event-driven triggers (file changes, webhooks)

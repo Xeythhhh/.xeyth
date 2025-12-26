@@ -1,0 +1,474 @@
+# Nuke Build Tooling Architecture - Research Report
+
+---
+
+**Date**: 2025-12-26  
+**Researcher**: AI Strategic Agent  
+**Status**: Complete
+
+## Executive Summary
+
+Nuke Build employs a **code-first, type-safe tooling architecture** that wraps command-line tools with fluent C# APIs. The system uses **auto-generated CLI wrappers**, **attribute-based configuration**, and **immutable builder patterns** to provide strongly-typed, IDE-friendly tool integrations. This approach eliminates YAML configuration brittleness while enabling rich tooling experiences through IntelliSense, refactoring, and debugging.
+
+**Key Finding**: Nuke's tooling architecture prioritizes **developer experience** and **type safety** over configuration files, making it highly adaptable to AI-driven automation workflows.
+
+---
+
+## Overview of Nuke's Tooling Approach
+
+### Architecture Philosophy
+
+1. **Code Over Configuration**: Tools are invoked through C# code rather than YAML/JSON
+2. **Type Safety**: Fluent APIs ensure compile-time validation of tool parameters
+3. **Immutability**: Builder pattern prevents accidental state mutations
+4. **Auto-Generation**: Common tools have pre-generated wrappers (DotNetTasks, MSBuildTasks, NUnitTasks)
+5. **Extensibility**: Custom tools can be integrated through ToolTasks base class
+
+### Core Components
+
+```
+Nuke.Common/
+├── Tooling/
+│   ├── ToolTasks.cs          # Base class for tool wrappers
+│   ├── ProcessTasks.cs       # Low-level process execution
+│   └── [Tool]Tasks.cs        # Auto-generated tool wrappers
+├── Attributes/
+│   ├── [PathTool]            # Declares tool executables
+│   ├── [Command]             # Maps to command-line arguments
+│   └── [Parameter]           # Injects build parameters
+└── Extensions/
+    └── ToolSettingsExtensions # Fluent API extensions
+```
+
+---
+
+## Key Patterns and Architectural Decisions
+
+### 1. Auto-Generated CLI Wrappers
+
+**Pattern**: Static code generation creates strongly-typed wrappers for popular CLI tools
+
+**Example**:
+```csharp
+DotNetBuild(s => s
+    .SetProjectFile(Solution)
+    .SetConfiguration(Configuration)
+    .EnableNoRestore()
+    .SetVerbosity(DotNetVerbosity.Minimal));
+```
+
+**Benefits**:
+- IntelliSense support for all tool options
+- Compile-time validation of arguments
+- Refactoring support across entire codebase
+- Self-documenting through method names
+
+**Implementation Details**:
+- Wrappers generated from tool schema/specifications
+- Immutable settings objects modified via fluent methods
+- Each method returns new instance (functional approach)
+
+### 2. Fluent Builder Pattern
+
+**Pattern**: Immutable builder-style APIs for configurable tool settings
+
+**Key Methods**:
+- `.Set[Property](value)` - Set individual properties
+- `.Enable[Feature]()` - Enable boolean flags
+- `.Disable[Feature]()` - Disable boolean flags
+- `.Add[Collection](item)` - Add to collections
+- `.When(condition, config)` - Conditional configuration
+- `.CombineWith(variants)` - Combinatorial invocations
+
+**Example**:
+```csharp
+DotNetTest(s => s
+    .SetProjectFile(Solution)
+    .SetConfiguration(Configuration)
+    .When(IsServerBuild, _ => _.EnableNoBuild())
+    .CombineWith(
+        new[] { "net6.0", "net7.0" },
+        (settings, framework) => settings.SetFramework(framework)));
+```
+
+**Benefits**:
+- Method chaining for readability
+- Conditional logic inline with configuration
+- Combinatorial execution (test multiple frameworks/platforms)
+- Type-safe throughout entire chain
+
+### 3. Attribute-Based Extension Points
+
+**Pattern**: Declarative attributes for tool discovery and configuration
+
+**Key Attributes**:
+
+```csharp
+public class Build : NukeBuild
+{
+    [PathTool] readonly Tool Git;  // Auto-discovered from PATH
+    
+    [Parameter("API Key for deployment")]
+    readonly string ApiKey;
+    
+    [Solution] readonly Solution Solution;
+    
+    [GitRepository] readonly GitRepository Repository;
+}
+```
+
+**Benefits**:
+- Declarative tool dependencies
+- Automatic parameter injection from CLI/env vars/config files
+- IDE support for discovering available tools
+- Dependency injection-like pattern for build context
+
+### 4. Custom Tool Integration
+
+**Pattern**: Extend ToolTasks base class for custom tools
+
+**Implementation Steps**:
+1. Define settings class with tool-specific options
+2. Inherit from `ToolTasks` and override configuration
+3. Implement argument construction logic
+4. Add fluent extension methods for settings
+
+**Example**:
+```csharp
+public class MyCustomToolTasks : ToolTasks
+{
+    protected override string GetToolPath() => ToolPathResolver.GetToolPath();
+    
+    protected override ArgumentStringBuilder ConfigureArguments(
+        MyCustomToolSettings settings)
+    {
+        return new ArgumentStringBuilder()
+            .Add("--input {value}", settings.InputFile)
+            .Add("--output {value}", settings.OutputFile)
+            .Add("--verbose", settings.Verbose);
+    }
+}
+```
+
+**Benefits**:
+- Consistent pattern for all tools
+- Reusable across projects
+- Testable in isolation
+- Can be packaged as NuGet for sharing
+
+### 5. Tool Versioning and Compatibility
+
+**Pattern**: Global.json SDK enforcement + package versioning
+
+**Mechanisms**:
+- `global.json` enforces .NET SDK version
+- Tool packages versioned independently
+- `Directory.Build.props` for unified tool versions across solution
+- Optional package download vs. package reference distinction
+
+**Example global.json**:
+```json
+{
+  "sdk": {
+    "version": "10.0.0",
+    "rollForward": "latestMinor"
+  },
+  "msbuild-sdks": {
+    "Nuke.Common": "10.1.0"
+  }
+}
+```
+
+---
+
+## Strengths and Weaknesses
+
+### Strengths ✅
+
+1. **Developer Experience**
+   - Rich IDE support (IntelliSense, refactoring, debugging)
+   - Compile-time safety prevents runtime errors
+   - Self-documenting through type system
+   - Familiar C# syntax for .NET developers
+
+2. **Maintainability**
+   - Refactoring tools work on build scripts
+   - Type safety catches breaking changes early
+   - Code reuse through inheritance/composition
+   - Version control friendly (readable diffs)
+
+3. **Extensibility**
+   - Easy to add custom tools
+   - Consistent patterns across all tools
+   - Shareable via NuGet packages
+   - No lock-in to specific tool versions
+
+4. **Cross-Platform**
+   - Runs on Windows, Linux, macOS
+   - Tool discovery adapts to platform
+   - Environment detection built-in
+   - CI/CD agnostic
+
+### Weaknesses ⚠️
+
+1. **Learning Curve**
+   - Requires C# knowledge
+   - More ceremony than simple bash scripts
+   - Initial setup more complex than YAML
+
+2. **Tool Generation Complexity**
+   - Auto-generation requires tool schemas
+   - Complex tools may need manual wrapper creation
+   - Version upgrades can cause breaking changes (e.g., MSBuildTasks in v10)
+
+3. **Compilation Overhead**
+   - Build script must be compiled before execution
+   - Slower cold start compared to interpreted scripts
+   - Additional project in solution to maintain
+
+4. **Ecosystem Size**
+   - Smaller ecosystem than Make/Gradle/Maven
+   - Some tools lack pre-generated wrappers
+   - Community extensions less mature
+
+---
+
+## Applicability to .xeyth Framework
+
+### High-Value Patterns
+
+1. **Fluent Builder Pattern for AI Prompts**
+   - Apply immutable builder pattern to prompt construction
+   - Type-safe prompt parameter configuration
+   - Combinatorial prompt generation (test multiple variations)
+   
+   **Example Application**:
+   ```csharp
+   GeneratePrompt(p => p
+       .SetRole("Implementer")
+       .SetTask("Feature X")
+       .EnableVerboseLogging()
+       .When(needsContext, _ => _.AddContext(contextFile))
+       .CombineWith(models, (p, m) => p.SetModel(m)));
+   ```
+
+2. **Attribute-Based Configuration**
+   - Use attributes for framework component discovery
+   - Declarative task/plan/report file types
+   - Auto-injection of context from files
+   
+   **Example Application**:
+   ```csharp
+   public class AiOrchestrator
+   {
+       [TaskFile] readonly TaskDefinition CurrentTask;
+       [PlanFile] readonly PlanDefinition CurrentPlan;
+       [ContextFiles] readonly IEnumerable<string> ContextFiles;
+   }
+   ```
+
+3. **Tool Wrapper Pattern for CLI Tools**
+   - Wrap xeyth-verify, xeyth-contracts with type-safe APIs
+   - Fluent configuration for validation rules
+   - Consistent invocation patterns
+   
+   **Example Application**:
+   ```csharp
+   XeythVerify(v => v
+       .SetToolPath(vsCodeInsiders)
+       .AddVerificationFile("snapshot.verified.txt")
+       .EnableAutoAccept(IsLocalBuild));
+   ```
+
+4. **Conditional Execution**
+   - `.When()` pattern for environment-specific behavior
+   - Static conditions for CI vs local builds
+   - Dynamic conditions based on file state
+   
+   **Example Application**:
+   ```csharp
+   ValidateContracts(c => c
+       .SetContractPath("Ai/Framework/")
+       .When(IsServerBuild, _ => _.EnableStrictMode())
+       .When(HasUncommittedChanges, _ => _.SkipVersionChecks()));
+   ```
+
+### Integration Opportunities
+
+#### High Priority
+
+1. **Adopt Fluent Builder Pattern**
+   - **Where**: Automation.Framework CLI tools
+   - **Why**: Type safety, IntelliSense, self-documentation
+   - **Effort**: Medium (refactor existing CLI invocations)
+   - **Impact**: High (improved DX, fewer runtime errors)
+
+2. **Create Tool Wrappers for Xeyth CLIs**
+   - **Where**: New Automation.Nuke project
+   - **Why**: Consistent invocation pattern, testable, reusable
+   - **Effort**: Small (wrapper per tool)
+   - **Impact**: Medium (consolidates tool usage)
+
+3. **Attribute-Based Context Discovery**
+   - **Where**: Framework initialization
+   - **Why**: Declarative, less boilerplate, auto-wiring
+   - **Effort**: Medium (implement attribute processors)
+   - **Impact**: High (simplifies framework usage)
+
+#### Medium Priority
+
+4. **Combinatorial Prompt Testing**
+   - **Where**: AI testing infrastructure
+   - **Why**: Test prompt variations systematically
+   - **Effort**: Medium (new testing patterns)
+   - **Impact**: Medium (better prompt quality)
+
+5. **Environment Detection Patterns**
+   - **Where**: All CLI tools
+   - **Why**: Adapt behavior to CI vs local
+   - **Effort**: Small (helper methods)
+   - **Impact**: Medium (better UX in different contexts)
+
+#### Lower Priority
+
+6. **Custom Tool Generation**
+   - **Where**: Future extensibility point
+   - **Why**: Allow users to add custom tools
+   - **Effort**: Large (code generation infrastructure)
+   - **Impact**: Low (nice-to-have for advanced users)
+
+---
+
+## Specific Integration Recommendations
+
+### Recommendation 1: Create Automation.Nuke Project
+
+**Proposal**: Add new project with Nuke-style wrappers for Xeyth tools
+
+**Structure**:
+```
+src/Automation.Nuke/
+├── Tools/
+│   ├── XeythVerifyTasks.cs
+│   ├── XeythContractsTasks.cs
+│   └── XeythGitTasks.cs
+├── Settings/
+│   ├── XeythVerifySettings.cs
+│   ├── XeythContractsSettings.cs
+│   └── XeythGitSettings.cs
+└── Extensions/
+    └── ToolSettingsExtensions.cs
+```
+
+**Benefits**:
+- Unified invocation pattern across all tools
+- Type-safe configuration
+- Testable without running actual tools
+- Reusable across different build contexts
+
+### Recommendation 2: Fluent Prompt Builder
+
+**Proposal**: Create type-safe prompt construction API
+
+**Example API**:
+```csharp
+var prompt = PromptBuilder.Create()
+    .ForRole(Role.Implementer)
+    .WithTask("Implement feature X")
+    .AddContext(contextFile)
+    .SetModel(Model.GPT51CodexMax)
+    .EnableVerboseOutput()
+    .Build();
+```
+
+**Benefits**:
+- IntelliSense-driven prompt creation
+- Validation at compile time
+- Easier to test and maintain
+- Self-documenting
+
+### Recommendation 3: Attribute-Based File Discovery
+
+**Proposal**: Use attributes to auto-discover and inject context files
+
+**Example**:
+```csharp
+public class TaskExecutor
+{
+    [TaskFile("*.task")]
+    readonly TaskDefinition[] Tasks;
+    
+    [PlanFile]
+    readonly PlanDefinition CurrentPlan;
+    
+    [ReportFiles("*.report")]
+    readonly IEnumerable<string> Reports;
+}
+```
+
+**Benefits**:
+- Declarative file dependencies
+- Auto-loading of context
+- Less boilerplate code
+- Clear documentation of dependencies
+
+---
+
+## Anti-Patterns to Avoid
+
+### 1. Over-Abstraction
+
+**Problem**: Creating wrappers for everything, even simple shell commands
+
+**Nuke's Approach**: Use `ProcessTasks` directly for one-off commands, wrappers for repeated use
+
+**Lesson**: Balance abstraction with pragmatism
+
+### 2. Mutable State in Settings
+
+**Problem**: Settings objects that can be modified after creation
+
+**Nuke's Approach**: Immutable settings, new instance returned by each method
+
+**Lesson**: Immutability prevents subtle bugs in configuration
+
+### 3. Tight Coupling to Specific Versions
+
+**Problem**: Hard-coding tool versions in wrappers
+
+**Nuke's Approach**: Version-independent argument construction, version specified in package
+
+**Lesson**: Decouple wrapper logic from tool version
+
+### 4. Ignoring Cross-Platform Differences
+
+**Problem**: Assuming Windows-only environment
+
+**Nuke's Approach**: Platform detection, path normalization, environment variables
+
+**Lesson**: Design for cross-platform from start
+
+---
+
+## Conclusion
+
+Nuke Build's tooling architecture demonstrates that **build automation can be developer-friendly, type-safe, and maintainable** through code-first design. The fluent builder pattern, attribute-based configuration, and custom tool extensibility provide a robust foundation that could significantly enhance the .xeyth AI Framework.
+
+**Primary Takeaway**: The same patterns that make build automation better (type safety, IntelliSense, immutability) can make AI workflow orchestration better.
+
+**Recommended Next Steps**:
+1. Create proposal for Automation.Nuke project
+2. Design fluent API for prompt construction
+3. Prototype attribute-based file discovery
+4. Evaluate effort vs. impact for each integration opportunity
+
+**Risk Assessment**: Low - Patterns are well-proven in Nuke ecosystem, adaptable to .xeyth's needs without wholesale adoption.
+
+---
+
+## References
+
+- Nuke.Common source code: https://github.com/nuke-build/nuke
+- Executing CLI Tools: https://nuke.build/docs/common/cli-tools/
+- Tooling architecture discussions: https://github.com/nuke-build/nuke/issues
+- NuGet: Nuke.Common 10.1.0
