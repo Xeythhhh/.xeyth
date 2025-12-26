@@ -58,11 +58,13 @@ internal static partial class CommitMessageValidator
         var type = match.Groups["type"].Value;
         var scope = match.Groups["scope"].Value;
         var subject = match.Groups["subject"].Value.Trim();
+        var hasBreakingIndicator = match.Groups["breaking"].Success;
 
         ValidateType(type, result);
         ValidateScope(scope, result);
         ValidateSubject(subject, result);
         ValidateBody(lines, headerLine, result);
+        ValidateBreakingFooter(hasBreakingIndicator, lines, result);
         ValidateContextFiles(contextFiles, lines, result);
 
         return result;
@@ -152,6 +154,39 @@ internal static partial class CommitMessageValidator
         }
     }
 
+    private static void ValidateBreakingFooter(bool hasBreakingIndicator, IReadOnlyCollection<string> lines, ValidationResult result)
+    {
+        if (!hasBreakingIndicator)
+        {
+            return;
+        }
+
+        var hasBreakingFooter = lines.Any(line =>
+        {
+            var trimmed = line.TrimStart();
+            const string breakingChange = "BREAKING CHANGE:";
+            const string breakingChangeHyphen = "BREAKING-CHANGE:";
+
+            return HasTrailerValue(trimmed, breakingChange) || HasTrailerValue(trimmed, breakingChangeHyphen);
+        });
+
+        if (!hasBreakingFooter)
+        {
+            result.Errors.Add("Add a 'BREAKING CHANGE:' footer when using '!'.");
+        }
+
+        static bool HasTrailerValue(string line, string prefix)
+        {
+            if (!line.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            var value = line[prefix.Length..].Trim();
+            return value.Length > 0;
+        }
+    }
+
     private static List<string> GetContentLines(string message)
     {
         return message
@@ -161,7 +196,7 @@ internal static partial class CommitMessageValidator
             .ToList();
     }
 
-    [GeneratedRegex("^(?<type>[a-z]+)(\\((?<scope>[^)]+)\\))?!?: (?<subject>.+)$")]
+    [GeneratedRegex("^(?<type>[a-z]+)(\\((?<scope>[^)]+)\\))?(?<breaking>!)?: (?<subject>.+)$")]
     private static partial Regex HeaderRegex();
 
     private static bool IsBypassCandidate(string header)

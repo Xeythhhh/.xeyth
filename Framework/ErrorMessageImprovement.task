@@ -1,0 +1,76 @@
+# Error Message Improvement
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Framework/ErrorMessageImprovement.task](Framework/ErrorMessageImprovement.task)
+**Role**: Planner (see [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md))
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Plan error message improvement strategy - actionable, context-rich, user-friendly error messages for all CLI tools.
+````
+
+---
+
+## Role: Planner
+
+**Task File**: Framework/ErrorMessageImprovement.task
+**Objective**: Improve error message quality across all CLI tools
+
+**Role Reference**: See [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md) for workflow guidance.
+
+### Context
+
+CLI tools need better error messages that:
+- Explain what went wrong (context)
+- Suggest how to fix it (actionable guidance)
+- Provide relevant examples (show correct usage)
+- Link to documentation (deep links)
+
+### Your Responsibilities
+
+1. Research error message best practices (Rust, Go, TypeScript patterns)
+2. Design error message template structure
+3. Plan error code taxonomy (validation, I/O, parsing, etc.)
+4. Define integration with logging framework
+
+### Deliverables
+
+- [ ] **D1**: Research report on error message patterns
+- [ ] **D2**: Error message template design
+- [ ] **D3**: Error code taxonomy
+- [ ] **D4**: Guidelines for writing actionable errors
+- [ ] **D5**: Examples and anti-patterns
+- [ ] **D6**: Implementation plan for migration
+
+### Verification Steps
+
+- [ ] Plan complete and approved by Planner
+- [ ] Ready for Implementation Agent delegation
+
+---
+
+## Task Details
+
+---
+
+Status: Not Started
+Owner: Strategic Agent (Planner)
+Priority: Medium
+Effort: Small
+Priority Score: 7 (Impact:6 + Urgency:2 + Dependency:0 - Complexity:0 - Improves UX)
+
+## Objective
+
+Improve error message quality to reduce user frustration and support burden.
+
+## Task Context
+
+- Current state: Generic exception messages, minimal context
+- Desired state: Rich, actionable error messages with fix suggestions
+
+## Progress Log
+
+- 2025-12-26: Task created by Orchestrator for backlog maintenance

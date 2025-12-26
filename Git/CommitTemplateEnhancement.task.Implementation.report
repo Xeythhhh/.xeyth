@@ -1,0 +1,31 @@
+# IMPLEMENTATION REPORT - Git Commit Template Enhancement
+
+---
+
+**Date**: 2025-12-26  
+**Agent**: Implementation Agent (GPT-5.1-Codex-Max)  
+**Status**: Completed (D1-D4); D5 deferred (optional)
+
+## Summary
+
+- Added Git trailer guidance to `.gitmessage` (BREAKING CHANGE, Refs/Closes, Co-authored-by, Reviewed-by, etc.).
+- Enforced BREAKING CHANGE footer with content when header uses `!`; refined header parsing and trailer checks.
+- Updated README validation notes and expanded validator tests.
+
+## Deliverables
+
+- [x] D1: Research common commit metadata practices
+- [x] D2: Proposed enhanced .gitmessage template
+- [x] D3: Updated commit-msg.ps1 validation rules
+- [x] D4: Documentation of new fields and when to use them
+- [ ] D5: Migration plan for existing repos (Optional; deferred)
+
+## Verification
+
+- `dotnet test Xeyth.sln`  
+- `dotnet test Git/Tests/GitTool.Tests/GitTool.Tests.csproj`
+
+## Next Steps
+
+- Reviewer to confirm implementation (per delegation block in task file).
+- Optional: develop migration plan (D5) for downstream repos.

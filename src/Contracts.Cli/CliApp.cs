@@ -2,11 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Xeyth.Common.IO.Paths;
 using Contracts.Core.Services;
 using Spectre.Console;
+using Spectre.Console.Rendering;
 
 namespace Contracts.Cli;
 
@@ -14,7 +16,9 @@ public static class CliApp
 {
     public static Task<int> RunAsync(string[] args, IAnsiConsole? console = null, CancellationToken cancellationToken = default)
     {
-        console ??= AnsiConsole.Console;
+        console ??= ConsoleEnvironment.CreateConsole();
+
+        RenderHeader(console);
 
         var parseResult = Parse(args);
 
@@ -117,16 +121,18 @@ public static class CliApp
             console.WriteLine();
         }
 
-        console.WriteLine("Usage: xeyth-contracts validate [options]");
-        console.WriteLine();
-        console.WriteLine("Options:");
-        console.WriteLine("  --path, -p       File or directory to validate (defaults to current)");
-        console.WriteLine("  --contract, -c   Filter by contract file name (without .metadata)");
-        console.WriteLine("  --strict         Treat warnings as errors");
-        console.WriteLine("  --help, -h       Show help");
-        console.WriteLine();
-        console.WriteLine("Exit Codes:");
-        console.WriteLine("  0 = success/warnings, 1 = errors or strict warnings, 2 = usage errors");
+        var bold = new Style(decoration: Decoration.Bold);
+        var grid = new Grid();
+        grid.AddColumn();
+        grid.AddColumn();
+
+        grid.AddRow(new Text("Usage", bold), new Text("xeyth-contracts validate [options]"));
+        grid.AddEmptyRow();
+        grid.AddRow(new Text("Options", bold), new Text("--path, -p       File or directory to validate (defaults to current)\n--contract, -c  Filter by contract file name (without .metadata)\n--strict        Treat warnings as errors\n--help, -h      Show help"));
+        grid.AddEmptyRow();
+        grid.AddRow(new Text("Exit Codes", bold), new Text("0 = success/warnings, 1 = errors or strict warnings, 2 = usage errors"));
+
+        console.Write(grid);
         console.WriteLine();
     }
 
@@ -138,6 +144,29 @@ public static class CliApp
         {
             throw new ArgumentException($"Missing value for {token}");
         }
+    }
+
+    private static void RenderHeader(IAnsiConsole console)
+    {
+        var header = new CliHeader("xeyth-contracts", GetVersion(), "Contract validation", "📋");
+        header.Render(console);
+    }
+
+    private static string GetVersion()
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+
+        var informational = assembly
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+            .InformationalVersion;
+
+        if (!string.IsNullOrWhiteSpace(informational))
+        {
+            var buildMetadataIndex = informational.IndexOf('+');
+            return buildMetadataIndex >= 0 ? informational[..buildMetadataIndex] : informational;
+        }
+
+        return assembly.GetName().Version?.ToString(3) ?? "1.0.0";
     }
 }
 

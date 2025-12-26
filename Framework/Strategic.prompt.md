@@ -20,24 +20,61 @@ Covers Orchestrator, Planner, Reviewer roles.
 
 **Before selecting new tasks for delegation**:
 1. Check status of ALL open PRs and drafts
-2. For each PR, verify:
+2. **Automate PR preparation** (when `gh` CLI available):
+   - Check if workflows need approval: `gh pr checks {number}`
+   - Update branch if behind: `gh pr view {number} --json mergeStateStatus`
+   - Wait for CI checks to complete: `gh pr checks {number} --watch` (or poll)
+   - **Resolve review threads**: Query unresolved threads and auto-resolve (see below)
+   - Auto-mark ready when all checks pass: `gh pr ready {number}`
+3. For each PR, verify:
    - ✅ All deliverables checked in task file
    - ✅ Progress Log updated with completion entry
    - ✅ Reviewer delegation block present in task file
    - ✅ Progress report created and linked
    - ✅ PR checklist complete (build, tests, docs)
-   - ✅ CI/CD checks passing
+   - ✅ CI/CD checks passing (verified via `gh pr checks`)
+   - ✅ Branch up-to-date (verified via `gh pr view`)
    - ✅ No merge conflicts
 
 **If PR is NOT ready**:
-1. Post comment to PR with @copilot tag listing required refinements
+1. Post comment to PR with @copilot tag listing required refinements:
+   - **If `gh` CLI available**: Use `gh pr comment {number} --body "{comment}"` to post automatically
+   - **If `gh` CLI NOT available**: Draft comment for manual posting
 2. Include delegation prompt in comment for Implementation Agent
 3. Move to next PR
 
+**Review Thread Handling** (if any unresolved):
+1. Query threads and extract suggestions:
+   ```bash
+   gh api graphql -f query='query($owner:String!, $repo:String!, $pr:Int!) { repository(owner:$owner, name:$repo) { pullRequest(number:$pr) { reviewThreads(first:20) { nodes { id isResolved comments(first:5) { nodes { id body author { login } } } } } } } }' -f owner=Xeythhhh -f repo=.xeyth -F pr={number}
+   ```
+
+2. **Post @copilot comment** delegating fixes to Implementation Agent:
+   ```bash
+   gh pr comment {number} --body "@copilot Please address the following review comments:
+   
+   [List each suggestion with thread ID]
+   
+   ````markdown
+   **Task**: [PR #{number} - Review Comments]
+   **Role**: Implementer (see Framework/Implementation.prompt.md)
+   **Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
+   
+   Address Copilot reviewer suggestions on this PR.
+   ````
+   
+   Comment when complete so threads can be resolved."
+   ```
+
+3. **DO NOT resolve threads** until Implementation Agent confirms fixes
+4. **DO NOT merge** until all threads addressed and resolved
+
 **If PR IS ready**:
-1. Squash merge PR to master
-2. Archive task file to `{Slice}/archive/{TaskName}.YYYY-MM-DD.task`
-3. Update task inventories
+1. Verify all review threads resolved (Implementation Agent addressed suggestions)
+2. Auto-mark as ready: `gh pr ready {number}` (if still draft)
+3. Squash merge PR: `gh pr merge {number} --squash --delete-branch`
+4. Archive task file to `{Slice}/archive/{TaskName}.YYYY-MM-DD.task`
+5. Update task inventories
 
 **Critical**: PR review and merge takes priority over new task delegation to maintain healthy pipeline flow.
 
@@ -61,20 +98,105 @@ When reviewing a PR for merge, verify ALL items:
 **GitHub Status**:
 - [ ] CI/CD checks: All green
 - [ ] Merge conflicts: None
+- [ ] Review threads: All resolved (Implementation Agent addressed suggestions)
 - [ ] Reviews: At least 1 approval (human or Copilot)
 - [ ] Draft status: Not draft
 
-**If ANY item fails**: Post comment with @copilot tag and delegation prompt to fix issues.
+**If ANY item fails**: Post comment with @copilot tag and delegation prompt to fix issues (use `gh pr comment` if available, otherwise draft for manual posting).
+
+### PR Comment Formatting
+
+When drafting PR comments with delegation prompts for Implementation Agent:
+
+**Critical**: Avoid nested code blocks - they break GitHub markdown rendering.
+
+**Correct Format** (use bullet points for delegation content):
+```markdown
+@copilot
+
+**Task**: <a>Slice/TaskName.task</a>  
+**Role**: Implementer (see <a>Framework/Implementation.prompt.md</a>)  
+**Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
+
+**Refinements needed**:
+
+1. **Task file** - Mark deliverables complete
+2. **Progress Log** - Add completion entry
+3. **Progress Report** - Create report file using template
+4. **Reviewer Delegation** - Add delegation block to task file (use 4 backticks):
+   - Task: <a>Slice/TaskName.task</a>
+   - Role: Reviewer (see <a>Framework/Strategic.prompt.md</a>)
+   - Target Audience: Strategic Agent (Claude Sonnet 4.5)
+   - Context: {Brief summary of work completed}
+5. **Draft Status** - Mark PR ready for review when complete
+
+**Current PR Status**: Build ✅ | Tests ✅ | Draft 🚧
+```
+
+**Incorrect Format** ❌ (nested code blocks — do NOT do this):
+- Outer ` ```markdown ` fenced block (3 backticks)
+  - Inside it, another ` ```markdown ` fenced block (3 backticks)
+    - Inside that, a ` ````markdown ` fenced block (4 backticks) containing the delegation text
+- This kind of nesting breaks markdown rendering and must be avoided in PR comments
+
+**Markdown Backtick Rules**:
+- PR comments use **3 backticks** for outer code block
+- Delegation instructions use **bullet points** (no code block)
+- Implementation Agent will use **4 backticks** when adding to task file (4 backticks allows nesting of 3-backtick code examples within the delegation block)
+- Always validate: outer backticks > inner backticks
 
 ### Backlog Management
 
 - **Target**: Maintain 20 ready tasks; create when backlog < 15; focus execution when backlog > 25
-- **PR Target**: Maintain at least 5 open PRs (or draft PRs) at all times, each handling a single `.task`
+- **PR Target**: Maintain 5-10 open PRs (or draft PRs), each handling a single `.task` (maximum 10)
 - Overrides: if [Configuration.xeyth](../Configuration.xeyth) exists, use `orchestrator.backlog` values
 - Check PRs: Before delegating, verify task is not already in an open PR or draft (check PR descriptions for task file references)
 - When backlog < minimum → create new tasks; when > maximum → pause creation and prioritize execution
 - Regularly refine unfinished tasks and delegate refined tasks to Implementation Agent
 - If open PRs < 5 → prioritize delegation to Implementation Agent for new task implementation
+- If open PRs ≥ 10 → pause new delegations, focus on PR review/merge
+
+### Automatic Agent Delegation (when tools available)
+
+**If agent invocation tools are available** (e.g., `runSubagent` which spawns cloud agents with model selection):
+
+1. **Commit and push orchestrator work** before delegation:
+   ```bash
+   git add -A
+   git commit -m "feat(orchestrator): {summary of task creation/updates}"
+   git push origin master
+   ```
+   This ensures cloud agents have latest task files, instructions, and context.
+
+2. **Update PR branches** if delegating to existing agent work:
+   ```bash
+   gh pr view {number} --json headRefName,mergeable,mergeStateStatus
+   # If BEHIND master, update branch first:
+   gh api repos/{owner}/{repo}/pulls/{number}/update-branch -X PUT
+   ```
+
+3. **Automatically invoke Implementation Agents** (cloud agents running GPT-5.1-Codex-Max) instead of outputting code blocks:
+   ```
+   runSubagent(
+     model: "GPT-5.1-Codex-Max",
+     prompt: "{Full delegation prompt from task file}",
+     description: "{TaskName} - Implementation"
+   )
+   ```
+   This spawns a new cloud agent session that works independently on the task.
+
+4. **Monitor active agents** on each Flow invocation:
+   - Check PR status for agent-delegated tasks
+   - Review PR content: description, comments, file comments, reviews
+   - Post refinement comments if PRs need updates
+   - Approve/merge when ready
+
+5. **Support agents** with:
+   - Planner approval when agents request design decisions
+   - Reviewer feedback when PRs are submitted
+   - Blocker resolution when agents report issues
+
+**If tools NOT available**: Fall back to code block delegation (current behavior)
 
 ## Planner
 
@@ -99,8 +221,8 @@ When reviewing a PR for merge, verify ALL items:
 ### To Implementation Agent (cross-model - **USE CODE BLOCK**):
 
 ````markdown
-**Task**: [Planning/Task.task.template](../Planning/Task.task.template)  
-**Role**: Implementer (see [Implementation.prompt.md](Implementation.prompt.md))  
+**Task**: [Planning/Task.task.template](../Planning/Task.task.template)
+**Role**: Implementer (see [Implementation.prompt.md](Implementation.prompt.md))
 **Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
 
 Summary: ...

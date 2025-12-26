@@ -1,0 +1,130 @@
+# Copilot Cloud Agent Configuration Research
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Framework/CopilotCloudAgentConfiguration.task](Framework/CopilotCloudAgentConfiguration.task)
+**Role**: Planner (see [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md))
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Research GitHub Copilot Cloud agent configuration requirements - MCP setup, global tool installation, environment customization for gh CLI access.
+````
+
+---
+
+## Role: Planner
+
+**Task File**: Framework/CopilotCloudAgentConfiguration.task
+**Objective**: Research and document Copilot Cloud agent configuration for optimal framework integration
+
+**Role Reference**: See [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md) for workflow guidance.
+
+### Context
+
+GitHub Copilot Cloud agents (both Claude Sonnet 4.5 and GPT-5.1-Codex-Max) may require configuration to:
+- Access MCP (Model Context Protocol) servers for enhanced context
+- Install global tools (gh CLI, dotnet tools, etc.) in prebuilt environments
+- Configure workspace settings and environment variables
+- Enable automatic agent invocation and delegation
+- Set up persistent state across agent sessions
+
+### Your Responsibilities
+
+1. Research GitHub Copilot Cloud agent architecture and configuration options
+2. Investigate MCP server requirements and setup
+3. Document global tool installation capabilities (gh CLI, xeyth-* tools)
+4. Explore environment customization and persistence
+5. Identify automatic agent invocation capabilities
+
+### Deliverables
+
+- [ ] **D1**: Research report on Copilot Cloud agent architecture
+- [ ] **D2**: MCP server configuration requirements (if applicable)
+- [ ] **D3**: Global tool installation options (prebuilt vs. runtime)
+- [ ] **D4**: Environment customization capabilities
+- [ ] **D5**: Agent invocation and delegation mechanisms
+- [ ] **D6**: Configuration guide with examples
+
+### Implementation Guidance
+
+**Research Areas**:
+- GitHub Copilot documentation for cloud agents
+- MCP protocol specification and server setup
+- Devcontainer configurations for Copilot agents
+- GitHub Actions runner customization
+- Agent-to-agent communication patterns
+
+**Key Questions**:
+1. Does Copilot Cloud agent support MCP servers?
+2. Can we preinstall gh CLI in agent environments?
+3. Is there a `.github/copilot-agent-config` or similar?
+4. Can agents invoke other agents programmatically?
+5. How do agents persist state across invocations?
+6. What environment variables are available?
+
+### Verification Steps
+
+- [ ] Plan complete and approved by Planner
+- [ ] Ready for Implementation Agent delegation
+
+---
+
+## Task Details
+
+---
+
+Status: Not Started
+Owner: Strategic Agent (Planner)
+Priority: High
+Effort: Small
+Priority Score: 9 (Impact:7 + Urgency:3 + Dependency:5 - Complexity:0 - Unblocks automation)
+
+## Objective
+
+Research GitHub Copilot Cloud agent configuration to enable full framework automation.
+
+## Task Context
+
+- Current state: Unknown configuration requirements for Copilot Cloud agents
+- Desired state: Documented configuration enabling automatic agent invocation, gh CLI access, MCP integration
+
+## Research Questions
+
+### MCP (Model Context Protocol)
+- Does GitHub Copilot Cloud support MCP servers?
+- How to configure MCP servers for cloud agents?
+- Can MCP provide repository context, documentation, APIs?
+
+### Global Tools
+- Can we preinstall gh CLI in Copilot Cloud environments?
+- How to install dotnet global tools (xeyth-planning, xeyth-contracts, etc.)?
+- Are tools persistent across agent sessions?
+
+### Environment Customization
+- Is there a configuration file for agent environments?
+- Can we set environment variables (GITHUB_TOKEN, etc.)?
+- How to customize PATH and other shell settings?
+
+### Agent Invocation
+- Can Strategic Agent invoke Implementation Agent programmatically?
+- What tools/APIs enable agent-to-agent communication?
+- How to pass context between agents?
+
+### Workspace Persistence
+- How do agents access workspace files?
+- Is git state preserved across invocations?
+- Can agents commit/push to branches?
+
+## Success Criteria
+
+- [ ] MCP configuration documented (or N/A if unsupported)
+- [ ] Global tool installation guide complete
+- [ ] Environment customization options documented
+- [ ] Agent invocation mechanisms identified
+- [ ] Configuration examples provided
+
+## Progress Log
+
+- 2025-12-26: Task created by Orchestrator for cloud agent optimization research

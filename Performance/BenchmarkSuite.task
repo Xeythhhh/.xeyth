@@ -1,0 +1,76 @@
+# Performance Benchmark Suite
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Performance/BenchmarkSuite.task](Performance/BenchmarkSuite.task)
+**Role**: Planner (see [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md))
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Plan benchmark suite for CLI tools using BenchmarkDotNet - measure parsing, validation, rendering performance.
+````
+
+---
+
+## Role: Planner
+
+**Task File**: Performance/BenchmarkSuite.task
+**Objective**: Create performance benchmark suite for critical paths
+
+**Role Reference**: See [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md) for workflow guidance.
+
+### Context
+
+CLI tools need performance benchmarking for:
+- Contract validation (large YAML files, complex schemas)
+- Proposal discovery (recursive file system scans)
+- Task parsing (markdown parsing, metadata extraction)
+- Rendering (console output, progress reporting)
+
+### Your Responsibilities
+
+1. Research BenchmarkDotNet patterns and best practices
+2. Identify performance-critical operations to benchmark
+3. Design benchmark organization and categories
+4. Plan baseline establishment and regression detection
+
+### Deliverables
+
+- [ ] **D1**: Research report on BenchmarkDotNet usage
+- [ ] **D2**: Performance-critical operation inventory
+- [ ] **D3**: Benchmark project structure
+- [ ] **D4**: Baseline establishment strategy
+- [ ] **D5**: CI integration plan (performance regression detection)
+- [ ] **D6**: Implementation plan for initial benchmarks
+
+### Verification Steps
+
+- [ ] Plan complete and approved by Planner
+- [ ] Ready for Implementation Agent delegation
+
+---
+
+## Task Details
+
+---
+
+Status: Not Started
+Owner: Strategic Agent (Planner)
+Priority: Low
+Effort: Medium
+Priority Score: 5 (Impact:4 + Urgency:1 + Dependency:2 - Complexity:1 - Quality improvement)
+
+## Objective
+
+Establish performance benchmarking to detect regressions and optimize hot paths.
+
+## Task Context
+
+- Current state: No performance benchmarks, optimization is ad-hoc
+- Desired state: Automated benchmarks, baseline tracking, regression alerts
+
+## Progress Log
+
+- 2025-12-26: Task created by Orchestrator for backlog maintenance
