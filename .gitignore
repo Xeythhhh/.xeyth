@@ -86,3 +86,6 @@ nCrunchTemp_*
 # Git hooks (generated)
 .git/hooks/*
 !.git/hooks/README.md
+
+# Legacy directory
+.legacy/

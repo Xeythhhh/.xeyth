@@ -1,0 +1,75 @@
+# Proposal Workflow Enhancement
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Framework/ProposalWorkflowEnhancement.task](Framework/ProposalWorkflowEnhancement.task)
+**Role**: Planner (see [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md))
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Enhance proposal workflow with automatic proposal creation from PR comments, @copilot tags, and Implementation Agent recommendations.
+````
+
+---
+
+## Role: Planner
+
+**Task File**: Framework/ProposalWorkflowEnhancement.task
+**Objective**: Streamline proposal creation from Implementation Agent ideas during PR work
+
+**Role Reference**: See [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md) for workflow guidance.
+
+### Context
+
+Implementation Agents often discover optimization opportunities during work but must manually create proposal files. Need automation to:
+- Parse PR comments for @copilot proposal tags
+- Auto-generate proposal files from structured comments
+- Link proposals to originating PR/task for traceability
+- Notify Orchestrator of new proposals in backlog
+
+### Your Responsibilities
+
+1. Research proposal capture patterns (GitHub PR comments, code comments, chat)
+2. Design proposal template with metadata (origin PR, author, submitted date)
+3. Plan automation for proposal file creation
+4. Define integration with xeyth-planning tool
+
+### Deliverables
+
+- [ ] **D1**: Research report on automated proposal capture
+- [ ] **D2**: Enhanced proposal template with origin tracking
+- [ ] **D3**: CLI command design (create-proposal, link-pr)
+- [ ] **D4**: GitHub integration plan (PR comment parsing)
+- [ ] **D5**: Implementation plan ready for delegation
+
+### Verification Steps
+
+- [ ] Plan complete and approved by Planner
+- [ ] Ready for Implementation Agent delegation
+
+---
+
+## Task Details
+
+---
+
+Status: Not Started
+Owner: Strategic Agent (Planner)
+Priority: Medium
+Effort: Medium
+Priority Score: 7 (Impact:7 + Urgency:1 + Dependency:3 - Complexity:2 - Improves workflow efficiency)
+
+## Objective
+
+Automate proposal creation from Implementation Agent discoveries to reduce friction.
+
+## Task Context
+
+- Current state: Manual .proposal file creation, easy to forget/lose ideas
+- Desired state: Automated proposal capture from PR comments/tags, linked to context
+
+## Progress Log
+
+- 2025-12-26: Task created by Orchestrator for backlog maintenance

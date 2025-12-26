@@ -20,24 +20,43 @@ Covers Orchestrator, Planner, Reviewer roles.
 
 **Before selecting new tasks for delegation**:
 1. Check status of ALL open PRs and drafts
-2. For each PR, verify:
+2. **Automate PR preparation** (when `gh` CLI available):
+   - Check if workflows need approval: `gh pr checks {number}`
+   - Update branch if behind: `gh pr view {number} --json mergeStateStatus`
+   - Wait for CI checks to complete: `gh pr checks {number} --watch` (or poll)
+   - **Resolve review threads**: Query unresolved threads and auto-resolve (see below)
+   - Auto-mark ready when all checks pass: `gh pr ready {number}`
+3. For each PR, verify:
    - ✅ All deliverables checked in task file
    - ✅ Progress Log updated with completion entry
    - ✅ Reviewer delegation block present in task file
    - ✅ Progress report created and linked
    - ✅ PR checklist complete (build, tests, docs)
-   - ✅ CI/CD checks passing
+   - ✅ CI/CD checks passing (verified via `gh pr checks`)
+   - ✅ Branch up-to-date (verified via `gh pr view`)
    - ✅ No merge conflicts
 
 **If PR is NOT ready**:
-1. Post comment to PR with @copilot tag listing required refinements
+1. Post comment to PR with @copilot tag listing required refinements:
+   - **If `gh` CLI available**: Use `gh pr comment {number} --body "{comment}"` to post automatically
+   - **If `gh` CLI NOT available**: Draft comment for manual posting
 2. Include delegation prompt in comment for Implementation Agent
 3. Move to next PR
 
+**Resolve Review Threads** (if any unresolved):
+```bash
+# Query unresolved threads
+gh api graphql -f query='query($owner:String!, $repo:String!, $pr:Int!) { repository(owner:$owner, name:$repo) { pullRequest(number:$pr) { reviewThreads(first:20) { nodes { id isResolved } } } } }' -f owner=Xeythhhh -f repo=.xeyth -F pr={number}
+
+# Resolve each thread (auto-resolve Copilot reviewer suggestions)
+gh api graphql -f query='mutation { resolveReviewThread(input: {threadId: "{threadId}"}) { thread { id isResolved } } }'
+```
+
 **If PR IS ready**:
-1. Squash merge PR to master
-2. Archive task file to `{Slice}/archive/{TaskName}.YYYY-MM-DD.task`
-3. Update task inventories
+1. Auto-mark as ready: `gh pr ready {number}` (if still draft)
+2. Squash merge PR: `gh pr merge {number} --squash --delete-branch`
+3. Archive task file to `{Slice}/archive/{TaskName}.YYYY-MM-DD.task`
+4. Update task inventories
 
 **Critical**: PR review and merge takes priority over new task delegation to maintain healthy pipeline flow.
 
@@ -64,17 +83,60 @@ When reviewing a PR for merge, verify ALL items:
 - [ ] Reviews: At least 1 approval (human or Copilot)
 - [ ] Draft status: Not draft
 
-**If ANY item fails**: Post comment with @copilot tag and delegation prompt to fix issues.
+**If ANY item fails**: Post comment with @copilot tag and delegation prompt to fix issues (use `gh pr comment` if available, otherwise draft for manual posting).
 
 ### Backlog Management
 
 - **Target**: Maintain 20 ready tasks; create when backlog < 15; focus execution when backlog > 25
-- **PR Target**: Maintain at least 5 open PRs (or draft PRs) at all times, each handling a single `.task`
+- **PR Target**: Maintain 5-10 open PRs (or draft PRs), each handling a single `.task` (maximum 10)
 - Overrides: if [Configuration.xeyth](../Configuration.xeyth) exists, use `orchestrator.backlog` values
 - Check PRs: Before delegating, verify task is not already in an open PR or draft (check PR descriptions for task file references)
 - When backlog < minimum → create new tasks; when > maximum → pause creation and prioritize execution
 - Regularly refine unfinished tasks and delegate refined tasks to Implementation Agent
 - If open PRs < 5 → prioritize delegation to Implementation Agent for new task implementation
+- If open PRs ≥ 10 → pause new delegations, focus on PR review/merge
+
+### Automatic Agent Delegation (when tools available)
+
+**If agent invocation tools are available** (e.g., `runSubagent` which spawns cloud agents with model selection):
+
+1. **Commit and push orchestrator work** before delegation:
+   ```bash
+   git add -A
+   git commit -m "feat(orchestrator): {summary of task creation/updates}"
+   git push origin master
+   ```
+   This ensures cloud agents have latest task files, instructions, and context.
+
+2. **Update PR branches** if delegating to existing agent work:
+   ```bash
+   gh pr view {number} --json headRefName,mergeable,mergeStateStatus
+   # If BEHIND master, update branch first:
+   gh api repos/{owner}/{repo}/pulls/{number}/update-branch -X PUT
+   ```
+
+3. **Automatically invoke Implementation Agents** (cloud agents running GPT-5.1-Codex-Max) instead of outputting code blocks:
+   ```
+   runSubagent(
+     model: "GPT-5.1-Codex-Max",
+     prompt: "{Full delegation prompt from task file}",
+     description: "{TaskName} - Implementation"
+   )
+   ```
+   This spawns a new cloud agent session that works independently on the task.
+
+4. **Monitor active agents** on each Flow invocation:
+   - Check PR status for agent-delegated tasks
+   - Review PR content: description, comments, file comments, reviews
+   - Post refinement comments if PRs need updates
+   - Approve/merge when ready
+
+5. **Support agents** with:
+   - Planner approval when agents request design decisions
+   - Reviewer feedback when PRs are submitted
+   - Blocker resolution when agents report issues
+
+**If tools NOT available**: Fall back to code block delegation (current behavior)
 
 ## Planner
 
@@ -99,8 +161,8 @@ When reviewing a PR for merge, verify ALL items:
 ### To Implementation Agent (cross-model - **USE CODE BLOCK**):
 
 ````markdown
-**Task**: [Planning/Task.task.template](../Planning/Task.task.template)  
-**Role**: Implementer (see [Implementation.prompt.md](Implementation.prompt.md))  
+**Task**: [Planning/Task.task.template](../Planning/Task.task.template)
+**Role**: Implementer (see [Implementation.prompt.md](Implementation.prompt.md))
 **Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
 
 Summary: ...

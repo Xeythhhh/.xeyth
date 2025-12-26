@@ -1,0 +1,77 @@
+# Build Performance Optimization
+
+---
+
+## DELEGATION PROMPT
+
+````markdown
+**Task**: [Build/PerformanceOptimization.task](Build/PerformanceOptimization.task)
+**Role**: Planner (see [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md))
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Plan build performance optimizations - incremental builds, parallel compilation, caching strategies.
+````
+
+---
+
+## Role: Planner
+
+**Task File**: Build/PerformanceOptimization.task
+**Objective**: Optimize build performance for faster development cycles
+
+**Role Reference**: See [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md) for workflow guidance.
+
+### Context
+
+Build performance can be improved via:
+- Incremental builds (only rebuild changed projects)
+- Parallel compilation (multi-core utilization)
+- NuGet package caching
+- Test assembly caching
+- Nuke build caching
+
+### Your Responsibilities
+
+1. Research .NET build optimization techniques
+2. Measure current build performance (baseline)
+3. Design optimization strategy (incremental, parallel, caching)
+4. Plan Nuke build pipeline enhancements
+
+### Deliverables
+
+- [ ] **D1**: Research report on .NET build optimization
+- [ ] **D2**: Build performance baseline measurement
+- [ ] **D3**: Optimization strategy design
+- [ ] **D4**: Nuke pipeline enhancement plan
+- [ ] **D5**: Caching strategy (local + CI)
+- [ ] **D6**: Implementation plan
+
+### Verification Steps
+
+- [ ] Plan complete and approved by Planner
+- [ ] Ready for Implementation Agent delegation
+
+---
+
+## Task Details
+
+---
+
+Status: Not Started
+Owner: Strategic Agent (Planner)
+Priority: Low
+Effort: Medium
+Priority Score: 4 (Impact:3 + Urgency:1 + Dependency:2 - Complexity:1 - Developer experience)
+
+## Objective
+
+Optimize build performance to reduce development cycle time.
+
+## Task Context
+
+- Current state: No specific optimizations, full rebuilds common
+- Desired state: Incremental builds, parallel compilation, caching enabled
+
+## Progress Log
+
+- 2025-12-26: Task created by Orchestrator for backlog maintenance

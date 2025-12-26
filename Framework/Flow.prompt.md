@@ -10,15 +10,21 @@
 
 **IF you are Strategic Agent (Orchestrator)**:
 1. **Check ALL open PRs first** - Review for merge readiness or refinement needs
-2. **Draft PR comments** for incomplete PRs (with @copilot tags and delegation prompts)
-3. **Merge ready PRs** (if all acceptance criteria met)
-4. **Review backlog** using priority scores (see [TaskPrioritySystem.md](../Planning/TaskPrioritySystem.md))
-5. **Select tasks for delegation** to reach 5-PR minimum target
-6. **Output ALL pending work** in single response:
-   - PR review comments (for manual posting until tool supports it)
-   - New task delegations (code blocks for Implementation Agent)
+   - Read full PR content: description, comments, file comments, reviews
+   - Use `gh pr view {number} --json title,body,comments,reviews,files`
+2. **Commit and push orchestrator work** - Before delegating to cloud agents:
+   - Commit any task creation/updates: `git add -A && git commit && git push`
+   - Update PR branches if behind: `gh api repos/{owner}/{repo}/pulls/{number}/update-branch -X PUT`
+3. **Auto-delegate to Implementation Agents** - If tools available (runSubagent spawns cloud agents), invoke GPT-5.1-Codex-Max agents directly
+4. **Draft PR comments** for incomplete PRs (with @copilot tags and delegation prompts)
+5. **Merge ready PRs** (if all acceptance criteria met)
+6. **Review backlog** using priority scores (see [TaskPrioritySystem.md](../Planning/TaskPrioritySystem.md))
+7. **Select tasks for delegation** to reach 5-10 PR target (maximum 10)
+8. **Output ALL pending work** in single response:
+   - PR review comments (auto-posted or drafted)
+   - New task delegations (auto-invoked cloud agents or code blocks)
    - Backlog status summary
-7. **Do NOT wait for user** between delegations - batch everything together
+9. **Do NOT wait for user** between delegations - batch everything together
 
 **IF you are Strategic Agent (Planner)**:
 1. Continue planning active task
@@ -64,8 +70,8 @@
 ### Model Mismatch Response Template
 
 ````markdown
-**Task**: [{TaskPath}]({TaskPath})  
-**Role**: {Role} (see [Framework/{Prompt}.prompt.md](../Framework/{Prompt}.prompt.md))  
+**Task**: [{TaskPath}]({TaskPath})
+**Role**: {Role} (see [Framework/{Prompt}.prompt.md](../Framework/{Prompt}.prompt.md))
 **Target Audience**: {Agent} ({Model})
 
 {Delegation context}
@@ -130,7 +136,7 @@ Example recommendation:
 
 ````markdown
 **Task**: [Proposed task location]
-**Role**: Planner (see [Strategic.prompt.md](Strategic.prompt.md))  
+**Role**: Planner (see [Strategic.prompt.md](Strategic.prompt.md))
 **Target Audience**: Strategic Agent (Claude Sonnet 4.5)
 
 **Recommendation**: {Brief description of proposed work}
@@ -149,17 +155,22 @@ When invoked in Copilot Cloud (via `file:Flow.prompt.md`), Strategic Agent (Orch
 ## 📊 OPEN PR REVIEW
 
 ### PR #{number} - {Title}
-**Status**: {Draft/Open/Ready}  
-**Task**: {TaskFile}  
+**Status**: {Draft/Open/Ready}
+**Task**: {TaskFile}
+
+**Automated Preparation** (via `gh` CLI):
+- {✅|⏳|❌} Workflows approved/running
+- {✅|⏳|❌} Branch updated (up-to-date with master)
+- {✅|⏳|❌} CI checks passing (build, tests)
+- {✅|⏳|N/A} Auto-marked ready
+
 **Analysis**: {Readiness check results}
 
-**Action**: 
+**Action**:
 - ✅ READY TO MERGE → Proceed with merge
-- ⚠️ NEEDS REFINEMENT → Comment drafted below
-- 🚧 IN PROGRESS → Monitor, no action needed
-```
-
-**2. PR Comment Drafts** (for PRs needing refinement):
+- ⏳ CHECKS RUNNING → Wait for completion, then auto-mark ready
+- ⚠️ NEEDS REFINEMENT → Comment posted below
+**If `gh` CLI is NOT available**: Draft comments for manual posting:
 ```markdown
 ## 📝 PR COMMENTS TO POST (Manual Action Required)
 
@@ -168,7 +179,7 @@ When invoked in Copilot Cloud (via `file:Flow.prompt.md`), Strategic Agent (Orch
 {Full comment text with @copilot tag and delegation prompt}
 
 ---
-*Note: Post this comment manually until githubwrite supports PR comments*
+*Note: Post this comment manually - gh CLI not available*
 ```
 
 **3. New Task Delegations**:
@@ -178,8 +189,8 @@ When invoked in Copilot Cloud (via `file:Flow.prompt.md`), Strategic Agent (Orch
 ### Delegation 1: {TaskName}
 
 ````markdown
-**Task**: [{TaskPath}]({TaskPath})  
-**Role**: {Role} (see [../Framework/{Prompt}.prompt.md](../Framework/{Prompt}.prompt.md))  
+**Task**: [{TaskPath}]({TaskPath})
+**Role**: {Role} (see [../Framework/{Prompt}.prompt.md](../Framework/{Prompt}.prompt.md))
 **Target Audience**: {Agent} ({Model})
 
 {Context}
@@ -207,8 +218,9 @@ When invoked in Copilot Cloud (via `file:Flow.prompt.md`), Strategic Agent (Orch
 
 **Backlog Health**:
 - Total tasks: {count}
-- Open PRs: {count} / 5 minimum
+- Open PRs: {count} / 5-10 target (max 10)
 - Next priority: {highest unassigned task}
+- Auto-delegation: {enabled/disabled} (tool availability)
 ```
 
 ### Critical Rules
@@ -216,12 +228,83 @@ When invoked in Copilot Cloud (via `file:Flow.prompt.md`), Strategic Agent (Orch
 1. **Never output just one delegation** - always check for more work
 2. **Always review PRs first** before delegating new tasks
 3. **Batch all delegation prompts** in one response
-4. **Include manual workarounds** for tool limitations (PR comments)
-5. **Provide clear action items** for user (what to post, what Copilot will handle)
+4. **Auto-post PR comments** when `gh` CLI available; draft for manual posting otherwise
+5. **Provide clear action items** for user (what was posted, what needs manual action)
 
 ## PR Review Checklist (Orchestrator)
 
-For each open PR, verify:
+For each open PR, **automate preparation** then verify readiness:
+
+### Comprehensive PR Content Review (use `gh` CLI):
+
+1. **Read full PR details**:
+   ```bash
+   gh pr view {number} --json title,body,comments,reviews,files
+   ```
+
+2. **Check PR description/body**:
+   - Task file referenced
+   - Deliverables listed and marked complete
+   - Verification steps documented
+   - Build/test status reported
+
+3. **Review all PR comments**:
+   ```bash
+   gh pr view {number} --comments
+   ```
+   - Check for @copilot delegation prompts
+   - Look for blocker reports or questions
+   - Verify Implementation Agent responses
+
+4. **Check file-level comments**:
+   ```bash
+   gh pr view {number} --json reviewThreads
+   ```
+   - Review code comments and discussions
+   - Check for unresolved threads
+   - Verify feedback has been addressed
+
+5. **Review PR reviews**:
+   ```bash
+   gh pr view {number} --json reviews
+   ```
+   - Check approval status
+   - Review change requests
+   - Verify reviewer feedback addressed
+
+### Automated PR Preparation (use `gh` CLI when available):
+
+1. **Approve workflows** if awaiting approval:
+   ```bash
+   gh pr checks {number} --json name,conclusion
+   # If workflows awaiting approval, approve them (requires maintainer permissions)
+   ```
+
+2. **Update branch** if behind master:
+   ```bash
+   gh pr view {number} --json mergeable,mergeStateStatus
+   # If BEHIND, update: gh pr comment {number} --body "@copilot-action update-branch"
+   # Or use: gh api repos/{owner}/{repo}/pulls/{number}/update-branch -X PUT
+   ```
+
+3. **Wait for CI checks** to complete:
+   ```bash
+   gh pr checks {number} --watch
+   # Or poll: gh pr view {number} --json statusCheckRollup
+   ```
+
+4. **Resolve review threads** (auto-resolve Copilot reviewer suggestions):
+   ```bash
+   # Query unresolved threads
+   gh api graphql -f query='query($owner:String!, $repo:String!, $pr:Int!) { repository(owner:$owner, name:$repo) { pullRequest(number:$pr) { reviewThreads(first:20) { nodes { id isResolved } } } } }' -f owner={owner} -f repo={repo} -F pr={number}
+   
+   # Resolve each thread
+   gh api graphql -f query='mutation { resolveReviewThread(input: {threadId: "{threadId}"}) { thread { id isResolved } } }'
+   ```
+
+5. **Verify all checks pass** before marking ready
+
+### Manual Verification:
 
 **Task File Alignment**:
 - [ ] All deliverables checked `- [x]` in task file
@@ -230,19 +313,22 @@ For each open PR, verify:
 - [ ] Progress report created and linked
 
 **PR Description**:
-- [ ] Build: ✅ Passes (or run and verify)
-- [ ] Tests: ✅ All pass
+- [ ] Build: ✅ Passes (verified via `gh pr checks`)
+- [ ] Tests: ✅ All pass (verified via `gh pr checks`)
 - [ ] Checklist: All items complete
 
-**GitHub Status**:
-- [ ] CI/CD: All checks green
+**GitHub Status** (automated checks):
+- [ ] CI/CD: All checks green (`gh pr checks {number}`)
+- [ ] Branch: Up-to-date with master (`gh pr view --json mergeStateStatus`)
+- [ ] Workflows: Approved and running
 - [ ] Conflicts: None
 - [ ] Reviews: At least 1 approval
 
 **Decision**:
-- If ALL ✅ → Merge PR (use githubwrite tool)
-- If ANY ❌ → Draft comment with @copilot tag listing issues + delegation prompt
+- If ALL ✅ → **Auto-mark ready** (`gh pr ready {number}`), then merge (`gh pr merge {number} --squash --delete-branch`)
+- If ANY ❌ → Post comment with @copilot tag listing issues + delegation prompt (use `gh pr comment`)
 - If 🚧 WIP → Monitor, no action
+- If ⏳ Checks running → Wait for completion, then re-assess
 
 ## Progress Report
 
@@ -287,12 +373,17 @@ For each open PR, verify:
 - **Target Backlog**: Maintain 20 ready tasks at all times
 - If backlog < 15 tasks: Create new enhancement/feature tasks to reach 20
 - If backlog > 25 tasks: Focus on execution, defer new planning
-- **Target PRs**: Maintain at least 5 open PRs (or draft PRs) at all times
+- **Target PRs**: Maintain 5-10 open PRs (or draft PRs), maximum 10
 - Each PR should handle a single `.task` file
 - If open PRs < 5: Prioritize delegation to Implementation Agent for new tasks
+- If open PRs ≥ 10: Pause new delegations, focus on PR review/merge
+- **Comprehensive PR Review**: Check description, comments, file comments, reviews - everything in the PR
+- **Commit/Push Before Delegation**: When cloud agents available, commit and push orchestrator work (task creation, updates) before spawning agents to ensure they have latest context
+- **Update PR Branches**: Before delegating to existing agent work, update PR branches if behind master
 - Select highest-priority task and delegate to Planner or Implementation Agent
 - **Task Refinement**: Regularly review "Not Started" tasks for clarity and completeness
 - **Task Delegation**: Continuously delegate refined tasks to Implementation Agent
+- **Automatic Invocation**: If agent invocation tools available (runSubagent spawns cloud agents), directly invoke GPT-5.1-Codex-Max cloud agents instead of outputting code blocks
 
 **Implementation Agent** - After completing implementation:
 
@@ -311,8 +402,8 @@ For each open PR, verify:
 
 **To Implementation Agent** (use 4-backtick code block):
 ````markdown
-**Task**: [Planning/Task.task.template](../../Planning/Task.task.template)  
-**Role**: Implementer (see [Implementation.prompt.md](Implementation.prompt.md))  
+**Task**: [Planning/Task.task.template](../../Planning/Task.task.template)
+**Role**: Implementer (see [Implementation.prompt.md](Implementation.prompt.md))
 **Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
 ````
 
@@ -321,8 +412,8 @@ Add 1–2 sentences of context after the block.
 **To Strategic Agent (from Implementation Agent)** (use 4-backtick code block when you cannot continue working):
 
 ````markdown
-**Task**: [Contracts/ContractRenderer.task](../../Contracts/ContractRenderer.task)  
-**Role**: Reviewer (see [Strategic.prompt.md](Strategic.prompt.md))  
+**Task**: [Contracts/ContractRenderer.task](../../Contracts/ContractRenderer.task)
+**Role**: Reviewer (see [Strategic.prompt.md](Strategic.prompt.md))
 **Target Audience**: Strategic Agent (Claude Sonnet 4.5)
 
 Context: {What changed, verification evidence, blockers if any}
