@@ -20,6 +20,7 @@ Standardizes branch prefixes to enforce PR-based workflow and align task work wi
 - ✅ **Bug fixes**: `fix/{issue-description}`
 - ✅ **Chores/tooling**: `chore/{description}`
 - ✅ Use kebab-case for `{name}` segments; keep names short and descriptive
+- ✅ Keep branch names concise (ideally <50 characters) to avoid tooling issues
 - ✅ Create branches from `master` before committing: `git checkout -b task/{task-name}`
 - ✅ Reference the related task file in the PR description
 - ❌ Do not commit directly to `master`

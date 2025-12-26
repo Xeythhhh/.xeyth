@@ -49,8 +49,8 @@ See [Conventions/BranchNamingConvention.convention](../Conventions/BranchNamingC
 
 ### Task ↔ PR Linking
 
-- Every PR must include a **Task File** link in the template (`Git/{TaskName}.task`, etc.)
-- Use the **Deliverables** checklist in the PR body to track progress for that task
+- Every PR must include a **Task File** link in the template (e.g., `Git/PrWorkflowEnforcement.task`)
+- Use the **deliverables** checklist in the PR body to track progress for that task
 - After merge, add the PR URL to the task Progress Log and mark deliverables complete
 
 ## Commit Message Format

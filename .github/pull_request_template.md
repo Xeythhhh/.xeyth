@@ -6,8 +6,8 @@
 
 **Task File**: <!-- Link to .task file, e.g., [Git/PrWorkflowEnforcement.task](../Git/PrWorkflowEnforcement.task) -->
 
-**Deliverables**:
-- [ ] D1:
+**Deliverables** (copy from the task file and mark complete):
+- [ ] D1: <!-- e.g., PR template created -->
 - [ ] D2:
 - [ ] D3:
 - [ ] D4:
