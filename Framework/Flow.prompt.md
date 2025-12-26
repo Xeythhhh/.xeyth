@@ -179,7 +179,7 @@ When invoked in Copilot Cloud (via `file:Flow.prompt.md`), Strategic Agent (Orch
 
 ````markdown
 **Task**: [{TaskPath}]({TaskPath})  
-**Role**: {Role} (see [Framework/{Prompt}.prompt.md](Framework/{Prompt}.prompt.md))  
+**Role**: {Role} (see [../Framework/{Prompt}.prompt.md](../Framework/{Prompt}.prompt.md))  
 **Target Audience**: {Agent} ({Model})
 
 {Context}
