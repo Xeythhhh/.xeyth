@@ -15,8 +15,7 @@ internal sealed class DeferProposalCommand : PlanningCommandBase
     {
         _discoveryService = discoveryService ?? throw new ArgumentNullException(nameof(discoveryService));
         _decisionService = decisionService ?? throw new ArgumentNullException(nameof(decisionService));
-    }
-
+}
     public override string Name => "defer-proposal";
     public override string Description => "Defer a proposal and archive it with rationale.";
 
