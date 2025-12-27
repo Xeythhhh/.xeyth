@@ -1,29 +1,59 @@
-# Test Path Migration to Slice/Tests Convention
+# Test Path Migration to Centralized Testing Convention
 
-**Status**: Not Started  
-**Owner**: Strategic Agent (Planner)  
+**Status**: Superseded  
+**Owner**: Implementation Agent  
 **Priority**: Medium  
 **Effort**: Medium  
 
 ## Objective
 
-Create and execute a migration plan to align all test projects and fixtures under the `{Slice}/Tests/` directory convention across the repository.
+~~Create and execute a migration plan to align all test projects and fixtures under the `{Slice}/Tests/` directory convention across the repository.~~
 
-## Scope
+**Superseded by**: [Testing/TestOrganization.task](../Testing/TestOrganization.task)
 
-- Inventory existing test projects and utilities outside `{Slice}/Tests/`
-- Define migration steps per slice (Automation, Contracts, etc.)
-- Update solution/project references and CI scripts as needed
-- Ensure tooling and documentation reflect the new layout
+This task was superseded by a framework-wide test reorganization that established a centralized `Testing/` directory structure instead of the originally proposed `{Slice}/Tests/` pattern.
 
-## Deliverables
+## Resolution
 
-- [ ] D1: Inventory report of current test locations
-- [ ] D2: Migration plan per slice with timelines
-- [ ] D3: Updated solution and project references
-- [ ] D4: CI/test scripts adjusted for new paths
-- [ ] D5: Documentation updated for test layout convention
+Test projects were reorganized under a centralized `Testing/` directory with slice-based subdirectories:
+- `Testing/Automation/` - Automation slice tests
+- `Testing/Contracts/` - Contracts slice tests  
+- `Testing/Git/` - Git slice tests
+- `Testing/Shared/` - Shared test infrastructure
+
+This approach provides:
+- Better discoverability (all tests in one place)
+- Clearer separation between tests and source code
+- Consistent structure across all slices
+- Foundation for shared test infrastructure
+
+## Migration Completed
+
+All test projects have been migrated:
+- `Git/Tests/GitTool.Tests` → `Testing/Git/GitTool.Tests`
+- `src/tests/Automation.*` → `Testing/Automation/`
+- `src/tests/Contracts.*` → `Testing/Contracts/`
+
+See [Testing/TestOrganization.convention](../Testing/TestOrganization.convention) for comprehensive test organization rules.
+
+## Original Scope
+
+- ~~Inventory existing test projects and utilities outside `{Slice}/Tests/`~~
+- ~~Define migration steps per slice (Automation, Contracts, etc.)~~
+- ~~Update solution/project references and CI scripts as needed~~
+- ~~Ensure tooling and documentation reflect the new layout~~
+
+## Deliverables (Completed in TestOrganization.task)
+
+- [x] D1: Inventory report of current test locations (completed via analysis)
+- [x] D2: Migration plan per slice with timelines (completed via TestOrganization.task)
+- [x] D3: Updated solution and project references (completed)
+- [x] D4: CI/test scripts adjusted for new paths (N/A - no changes needed)
+- [x] D5: Documentation updated for test layout convention (TestOrganization.convention, Testing/README.md)
 
 ## Progress Log
 
 - 2025-12-26: Task created to track test path convention migration
+- 2025-12-27: Superseded by TestOrganization.task
+- 2025-12-27: All test migration work completed under centralized Testing/ structure
+

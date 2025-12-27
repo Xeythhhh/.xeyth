@@ -19,23 +19,23 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automation.Build", "src\Aut
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automation.Verify", "src\Automation.Verify\Automation.Verify.csproj", "{0D6B5A79-5DCB-4E66-9B63-BEC86FE5E11A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{CEA09484-30F6-4D44-02F6-822E06DBC57C}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Testing", "Testing", "{CEA09484-30F6-4D44-02F6-822E06DBC57C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts.Core.Tests", "src\tests\Contracts.Core.Tests\Contracts.Core.Tests.csproj", "{DDAD0457-6C79-4365-BC7B-20DA06AA1DCA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts.Core.Tests", "Testing\Contracts\Contracts.Core.Tests\Contracts.Core.Tests.csproj", "{DDAD0457-6C79-4365-BC7B-20DA06AA1DCA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automation.Framework.Tests", "src\tests\Automation.Framework.Tests\Automation.Framework.Tests.csproj", "{4B70FB05-95A5-4F68-A486-0A623E35AB8B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automation.Framework.Tests", "Testing\Automation\Automation.Framework.Tests\Automation.Framework.Tests.csproj", "{4B70FB05-95A5-4F68-A486-0A623E35AB8B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automation.Verify.Tests", "src\tests\Automation.Verify.Tests\Automation.Verify.Tests.csproj", "{B6E2D3EB-5A01-4D92-9E6C-2A5C9B6B1E9D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automation.Verify.Tests", "Testing\Automation\Automation.Verify.Tests\Automation.Verify.Tests.csproj", "{B6E2D3EB-5A01-4D92-9E6C-2A5C9B6B1E9D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automation.Planning.Tests", "src\tests\Automation.Planning.Tests\Automation.Planning.Tests.csproj", "{1D9A7BA9-5A1B-4A42-975A-BB8EC8A6CEEB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automation.Planning.Tests", "Testing\Automation\Automation.Planning.Tests\Automation.Planning.Tests.csproj", "{1D9A7BA9-5A1B-4A42-975A-BB8EC8A6CEEB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Build", "Build\Build.csproj", "{7FEC1F90-72C9-4C8B-87B8-4E4EA927F668}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automation.Cli.Common", "src\Automation.Cli.Common\Automation.Cli.Common.csproj", "{F536D18B-81C2-4D45-89BC-DB356F69E2A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automation.Cli.Common.Tests", "src\tests\Automation.Cli.Common.Tests\Automation.Cli.Common.Tests.csproj", "{EEC2B114-9778-47DD-A1E3-B91D684A4D3C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automation.Cli.Common.Tests", "Testing\Automation\Automation.Cli.Common.Tests\Automation.Cli.Common.Tests.csproj", "{EEC2B114-9778-47DD-A1E3-B91D684A4D3C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTool.Tests", "Git\Tests\GitTool.Tests\GitTool.Tests.csproj", "{70416635-3881-4270-9C54-D7685AE11A0E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTool.Tests", "Testing\Git\GitTool.Tests\GitTool.Tests.csproj", "{70416635-3881-4270-9C54-D7685AE11A0E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,0 +1,340 @@
+---
+type: Testing
+scope: Framework-wide
+applies_to: All test projects
+status: Active
+enforcement: Manual
+version: 1.0
+---
+
+# Test Organization Convention
+
+## Convention Summary
+
+Defines standardized test organization structure, naming conventions, and categorization for all test projects in the .xeyth framework to ensure consistency, discoverability, and maintainability.
+
+## Rules
+
+### Directory Structure
+
+Tests are organized in the `Testing/` directory, mirroring the slice-based architecture:
+
+```
+Testing/
+  Automation/           # Automation slice tests
+    {ProjectName}.Tests/
+  Contracts/            # Contracts slice tests
+    {ProjectName}.Tests/
+  Git/                  # Git slice tests
+    {ProjectName}.Tests/
+  Shared/               # Shared test infrastructure
+    TestUtilities/
+    TestFixtures/
+```
+
+- ✅ MUST organize tests by slice (Automation, Contracts, Git, etc.)
+- ✅ MUST use `.Tests` suffix for test project directories
+- ✅ MUST place shared test utilities in `Testing/Shared/`
+- ❌ MUST NOT mix test projects with source code in `src/` directory
+- ❌ MUST NOT create ad-hoc test directories outside `Testing/`
+
+### Test Project Naming
+
+Test projects follow the pattern: `{SourceProjectName}.Tests`
+
+**Examples**:
+- Source: `Automation.Planning` → Test: `Automation.Planning.Tests`
+- Source: `Contracts.Core` → Test: `Contracts.Core.Tests`
+- Source: `GitTool` → Test: `GitTool.Tests`
+
+- ✅ MUST match source project name exactly
+- ✅ MUST use `.Tests` suffix
+- ✅ MUST use PascalCase
+- ❌ MUST NOT abbreviate project names
+- ❌ MUST NOT include test type in project name (e.g., avoid `*.UnitTests`, `*.IntegrationTests`)
+
+### Test File Naming
+
+Test files follow the pattern: `{ClassName}Tests.cs`
+
+**Examples**:
+- Class: `TaskParser` → Test: `TaskParserTests.cs`
+- Class: `ConventionValidator` → Test: `ConventionValidatorTests.cs`
+
+- ✅ MUST match source class name exactly
+- ✅ MUST use `Tests` suffix (plural)
+- ✅ MUST use PascalCase
+- ✅ MUST contain one test class per file
+- ❌ MUST NOT use underscores or hyphens
+
+### Test Class Naming
+
+Test classes follow the pattern: `{ClassName}Tests`
+
+```csharp
+public class TaskParserTests
+{
+    [Fact]
+    public void Parse_ValidTask_ReturnsTaskObject() { }
+    
+    [Theory]
+    [InlineData("invalid")]
+    public void Parse_InvalidTask_ThrowsException(string input) { }
+}
+```
+
+- ✅ MUST match source class name
+- ✅ MUST use `Tests` suffix (plural)
+- ✅ MUST be public
+- ❌ MUST NOT nest test classes unless testing nested source classes
+
+### Test Method Naming
+
+Test methods follow the pattern: `{MethodName}_{Scenario}_{ExpectedBehavior}`
+
+**Examples**:
+- `Parse_ValidInput_ReturnsCorrectResult`
+- `Validate_NullArgument_ThrowsArgumentNullException`
+- `Execute_WithTimeout_CompletesSuccessfully`
+
+- ✅ MUST use underscores to separate components
+- ✅ MUST describe the scenario being tested
+- ✅ MUST describe the expected behavior
+- ✅ MUST be descriptive and readable
+- ❌ MUST NOT use "Test" prefix or suffix
+
+### Test Categorization
+
+Tests are categorized using xUnit traits for filtering:
+
+```csharp
+[Trait("Category", "Unit")]
+public class TaskParserTests { }
+
+[Trait("Category", "Integration")]
+public class DatabaseRepositoryTests { }
+
+[Trait("Category", "Architecture")]
+public class ArchitectureTests { }
+
+[Trait("Category", "E2E")]
+public class WorkflowTests { }
+```
+
+**Test Categories**:
+
+1. **Unit Tests** (default)
+   - Test single class in isolation
+   - Fast execution (< 100ms per test)
+   - No external dependencies (filesystem, network, database)
+   - Use mocks/stubs for dependencies
+
+2. **Integration Tests**
+   - Test multiple components together
+   - May use filesystem, temp databases
+   - Moderate execution time
+   - Test component interactions
+
+3. **Architecture Tests**
+   - Validate architectural rules using NetArchTest
+   - Check dependencies, naming conventions, patterns
+   - Fast execution
+   - Project structure validation
+
+4. **E2E Tests** (End-to-End)
+   - Test complete workflows
+   - May use Playwright for browser testing
+   - Slow execution
+   - Full system integration
+
+- ✅ MUST categorize tests using `[Trait("Category", "...")]`
+- ✅ MUST use one of the defined categories
+- ✅ MAY combine categories for comprehensive tests
+- ✅ SHOULD default to "Unit" if uncategorized
+
+### Project File Structure
+
+Test projects must include standard properties and references:
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\{SourceProject}\{SourceProject}.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+</Project>
+```
+
+- ✅ MUST target .NET 10 (`net10.0`)
+- ✅ MUST enable implicit usings and nullable reference types
+- ✅ MUST set `IsPackable` to `false`
+- ✅ MUST include xUnit packages
+- ✅ MUST include `coverlet.collector` for code coverage
+- ✅ MUST reference source project being tested
+- ✅ MUST include global `using Xunit`
+
+### Shared Test Infrastructure
+
+Shared test utilities and fixtures are organized in `Testing/Shared/`:
+
+```
+Testing/Shared/
+  TestUtilities/
+    TestUtilities.csproj
+    Builders/
+      TaskBuilder.cs
+      ConventionBuilder.cs
+    Helpers/
+      FileSystemHelper.cs
+      AssertionHelper.cs
+  TestFixtures/
+    TestFixtures.csproj
+    Fixtures/
+      DatabaseFixture.cs
+      TempDirectoryFixture.cs
+```
+
+- ✅ MUST place reusable test utilities in `Testing/Shared/TestUtilities/`
+- ✅ MUST place xUnit fixtures in `Testing/Shared/TestFixtures/`
+- ✅ SHOULD use builder pattern for complex test data
+- ✅ SHOULD create helpers for common assertions
+- ❌ MUST NOT duplicate test infrastructure across projects
+
+## Examples
+
+### ✅ Good Structure
+
+```
+Testing/
+  Automation/
+    Automation.Planning.Tests/
+      Automation.Planning.Tests.csproj
+      Services/
+        TaskParserTests.cs
+        PlanGeneratorTests.cs
+      Commands/
+        CreateCommandTests.cs
+  Contracts/
+    Contracts.Core.Tests/
+      Contracts.Core.Tests.csproj
+      Services/
+        SchemaValidatorTests.cs
+  Git/
+    GitTool.Tests/
+      GitTool.Tests.csproj
+      CommitMessageValidatorTests.cs
+      Infrastructure/
+        TempDirectory.cs
+  Shared/
+    TestUtilities/
+      Builders/
+        TaskBuilder.cs
+```
+
+### ❌ Bad Structure
+
+```
+src/tests/              # Wrong: tests in src directory
+  AutomationTests/      # Wrong: missing .Tests suffix
+    task-parser.test.cs # Wrong: kebab-case, wrong suffix
+    
+Git/Tests/              # Wrong: inconsistent location
+  GitTests/             # Wrong: doesn't match source project name
+```
+
+## Migration Guide
+
+### From Current Structure
+
+Current test locations:
+- `src/tests/` → Move to `Testing/Automation/` and `Testing/Contracts/`
+- `Git/Tests/` → Move to `Testing/Git/`
+
+Migration steps:
+
+1. Create target directory structure:
+   ```bash
+   mkdir -p Testing/{Automation,Contracts,Git,Shared}
+   ```
+
+2. Move test projects:
+   ```bash
+   # Automation tests
+   mv src/tests/Automation.*.Tests Testing/Automation/
+   
+   # Contracts tests
+   mv src/tests/Contracts.*.Tests Testing/Contracts/
+   
+   # Git tests
+   mv Git/Tests/GitTool.Tests Testing/Git/
+   ```
+
+3. Update solution file:
+   - Add new test project paths
+   - Remove old paths
+   - Group under "Testing" solution folder
+
+4. Update project references:
+   - Update relative paths to source projects
+   - Update shared test utility references
+
+5. Verify:
+   ```bash
+   dotnet build
+   dotnet test
+   ```
+
+## Validation
+
+### Manual Checklist
+
+- [ ] All test projects in `Testing/` directory
+- [ ] Test projects organized by slice
+- [ ] All test projects use `.Tests` suffix
+- [ ] All test files use `Tests.cs` suffix
+- [ ] All test methods follow naming pattern
+- [ ] Tests categorized with traits
+- [ ] Shared infrastructure in `Testing/Shared/`
+- [ ] Solution file updated
+- [ ] All tests pass
+
+### Automated Validation
+
+```bash
+# Build all test projects
+dotnet build Testing/**/*.csproj
+
+# Run all tests
+dotnet test
+
+# Run tests by category
+dotnet test --filter "Category=Unit"
+dotnet test --filter "Category=Integration"
+dotnet test --filter "Category=Architecture"
+
+# Check code coverage
+dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+```
+
+## See Also
+
+- [NamingConventions.convention](../Conventions/NamingConventions.convention) - General naming rules
+- [Testing/SnapshotTestImprovements.task](SnapshotTestImprovements.task) - Snapshot testing
+- [Testing/IntegrationTestFramework.task](IntegrationTestFramework.task) - Integration testing
