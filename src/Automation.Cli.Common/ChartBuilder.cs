@@ -103,7 +103,7 @@ public static class ChartBuilder
     /// <param name="value">The value for the item.</param>
     /// <param name="color">The color for the item.</param>
     /// <returns>The chart for method chaining.</returns>
-    public static BarChart AddItem(this BarChart chart, string label, double value, Color color)
+    public static BarChart AddItemSafe(this BarChart chart, string label, double value, Color color)
     {
         if (chart is null)
         {
