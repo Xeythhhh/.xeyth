@@ -131,9 +131,6 @@ public static class CliApp
 
         var options = new ValidateOptions(absoluteTarget.Value, contractName, strict);
         return new ParseResult(true, false, options, null);
-        var resolvedPath = Path.GetFullPath(targetPath ?? Directory.GetCurrentDirectory());
-        var options = new ValidateOptions(resolvedPath, contractName, strict);
-        return ParseResult.ValidateCommand(options);
     }
 
     private static ParseResult ParseListCommand(string[] args)
@@ -281,4 +278,3 @@ internal sealed record ParseResult(bool Success, bool ShowHelp, ValidateOptions?
     public static ParseResult Help() => new(false, true, null, null, null);
     public static ParseResult WithError(string error) => new(false, false, null, null, error);
 }
-
