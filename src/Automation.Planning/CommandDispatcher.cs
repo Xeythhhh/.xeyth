@@ -17,12 +17,12 @@ internal sealed class CommandDispatcher
             ?? throw new ArgumentNullException(nameof(commands));
     }
 
-    internal Task<int> ExecuteAsync(string[] args, CancellationToken cancellationToken = default)
+    internal async Task<int> ExecuteAsync(string[] args, CancellationToken cancellationToken = default)
     {
         if (args.Length == 0 || IsHelp(args[0]))
         {
             _reporter.Help(_commands.Values.Select(c => (c.Name, c.Description)));
-            return Task.FromResult(0);
+            return 0;
         }
 
         var commandName = args[0];
@@ -30,18 +30,18 @@ internal sealed class CommandDispatcher
         {
             _reporter.Error($"Unknown command: {commandName}");
             _reporter.Help(_commands.Values.Select(c => (c.Name, c.Description)));
-            return Task.FromResult(1);
+            return 1;
         }
 
         try
         {
-            return command.ExecuteAsync(args.Skip(1).ToArray(), cancellationToken);
+            return await command.ExecuteAsync(args.Skip(1).ToArray(), cancellationToken);
         }
         catch (ArgumentException ex)
         {
             _reporter.Error(ex.Message);
             _reporter.Info($"Use '{command.Name} --help' for usage.");
-            return Task.FromResult(2);
+            return 2;
         }
     }
 

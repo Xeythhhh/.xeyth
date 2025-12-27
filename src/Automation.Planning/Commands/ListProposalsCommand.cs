@@ -68,9 +68,9 @@ internal sealed class ListProposalsCommand : PlanningCommandBase
         table.AddColumn(new TableColumn(string.Empty));
         table.AddColumn(new TableColumn(string.Empty));
 
-        table.AddRow("[bold]Usage[/]", "xeyth-planning list-proposals [--pending|--all|--status <Status>] [--root <path>]");
+        table.AddRow("[bold]Usage[/]", Markup.Escape("xeyth-planning list-proposals [--pending|--all|--status <Status>] [--root <path>]"));
         table.AddEmptyRow();
-        table.AddRow("[bold]Options[/]", "--pending       Show pending proposals (default)\n--all           Show all proposals\n--status <s>    Filter by status (Pending, Accepted, Deferred, Rejected)\n--root <path>   Root directory (defaults to current)");
+        table.AddRow("[bold]Options[/]", Markup.Escape("--pending       Show pending proposals (default)\n--all           Show all proposals\n--status <s>    Filter by status (Pending, Accepted, Deferred, Rejected)\n--root <path>   Root directory (defaults to current)"));
 
         console.Write(table);
         console.WriteLine();

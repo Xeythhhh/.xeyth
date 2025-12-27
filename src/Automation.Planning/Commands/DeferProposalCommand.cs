@@ -15,7 +15,8 @@ internal sealed class DeferProposalCommand : PlanningCommandBase
     {
         _discoveryService = discoveryService ?? throw new ArgumentNullException(nameof(discoveryService));
         _decisionService = decisionService ?? throw new ArgumentNullException(nameof(decisionService));
-}
+    }
+
     public override string Name => "defer-proposal";
     public override string Description => "Defer a proposal and archive it with rationale.";
 
@@ -51,9 +52,9 @@ internal sealed class DeferProposalCommand : PlanningCommandBase
         table.AddColumn(new TableColumn(string.Empty));
         table.AddColumn(new TableColumn(string.Empty));
 
-        table.AddRow("[bold]Usage[/]", "xeyth-planning defer-proposal <name> --reason <text> [--root <path>]");
+        table.AddRow("[bold]Usage[/]", Markup.Escape("xeyth-planning defer-proposal <name> --reason <text> [--root <path>]"));
         table.AddEmptyRow();
-        table.AddRow("[bold]Options[/]", "--reason <text>  Rationale for deferring (required)\n--root <path>   Root directory (defaults to current)");
+        table.AddRow("[bold]Options[/]", Markup.Escape("--reason <text>  Rationale for deferring (required)\n--root <path>   Root directory (defaults to current)"));
 
         console.Write(table);
         console.WriteLine();

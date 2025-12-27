@@ -51,9 +51,9 @@ internal sealed class RejectProposalCommand : PlanningCommandBase
         table.AddColumn(new TableColumn(string.Empty));
         table.AddColumn(new TableColumn(string.Empty));
 
-        table.AddRow("[bold]Usage[/]", "xeyth-planning reject-proposal <name> --reason <text> [--root <path>]");
+        table.AddRow("[bold]Usage[/]", Markup.Escape("xeyth-planning reject-proposal <name> --reason <text> [--root <path>]"));
         table.AddEmptyRow();
-        table.AddRow("[bold]Options[/]", "--reason <text>  Rationale for rejection (required)\n--root <path>   Root directory (defaults to current)");
+        table.AddRow("[bold]Options[/]", Markup.Escape("--reason <text>  Rationale for rejection (required)\n--root <path>   Root directory (defaults to current)"));
 
         console.Write(table);
         console.WriteLine();

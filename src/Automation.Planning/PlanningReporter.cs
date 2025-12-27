@@ -22,7 +22,7 @@ internal sealed class PlanningReporter
 
     internal void Help(IEnumerable<(string Name, string Description)> commands)
     {
-        var usagePanel = new Panel("xeyth-planning <command> [options]")
+        var usagePanel = new Panel(Markup.Escape("xeyth-planning <command> [options]"))
             .Header("[bold]Usage[/]")
             .Border(BoxBorder.Rounded)
             .BorderStyle(new Style(ColorScheme.Primary));
@@ -39,7 +39,7 @@ internal sealed class PlanningReporter
 
         foreach (var command in commands)
         {
-            table.AddRow($"[bold]{command.Name}[/]", command.Description);
+            table.AddRow($"[bold]{Markup.Escape(command.Name)}[/]", Markup.Escape(command.Description));
         }
 
         _console.Write(table);
