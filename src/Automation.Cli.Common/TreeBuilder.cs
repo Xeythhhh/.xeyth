@@ -46,7 +46,7 @@ public static class TreeBuilder
     /// <param name="parent">The parent tree node.</param>
     /// <param name="label">The label for the new node.</param>
     /// <returns>The newly created tree node.</returns>
-    public static IHasTreeNodes AddNode(this IHasTreeNodes parent, string label)
+    public static IHasTreeNodes AddNodeSafe(this IHasTreeNodes parent, string label)
     {
         if (parent is null)
         {
@@ -68,7 +68,7 @@ public static class TreeBuilder
     /// <param name="label">The label for the new node.</param>
     /// <param name="color">The color to use for the node label.</param>
     /// <returns>The newly created tree node.</returns>
-    public static IHasTreeNodes AddColoredNode(this IHasTreeNodes parent, string label, Color color)
+    public static IHasTreeNodes AddNodeColored(this IHasTreeNodes parent, string label, Color color)
     {
         if (parent is null)
         {

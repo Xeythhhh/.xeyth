@@ -21,19 +21,19 @@ public sealed class TreeBuilderTests
     }
 
     [Fact]
-    public void AddNode_WithValidLabel_AddsNode()
+    public void AddNodeSafe_WithValidLabel_AddsNode()
     {
         var tree = TreeBuilder.Create("Root");
-        var node = tree.AddNode("Child");
+        var node = tree.AddNodeSafe("Child");
 
         Assert.NotNull(node);
     }
 
     [Fact]
-    public void AddColoredNode_WithValidLabel_AddsColoredNode()
+    public void AddNodeColored_WithValidLabel_AddsColoredNode()
     {
         var tree = TreeBuilder.Create("Root");
-        var node = tree.AddColoredNode("Child", ColorScheme.Success);
+        var node = tree.AddNodeColored("Child", ColorScheme.Success);
 
         Assert.NotNull(node);
     }
@@ -43,8 +43,8 @@ public sealed class TreeBuilderTests
     {
         var console = new TestConsole();
         var tree = TreeBuilder.Create("Root");
-        tree.AddNode("Child 1");
-        tree.AddNode("Child 2");
+        tree.AddNodeSafe("Child 1");
+        tree.AddNodeSafe("Child 2");
 
         console.Write(tree);
         var output = console.Output;
