@@ -20,7 +20,7 @@
 
 ## Verification
 
-- `dotnet test` (passes; includes build)
+- `./build.sh Test` (passes on Linux; rerun to validate current branch state)
 
 ## Next Steps
 
