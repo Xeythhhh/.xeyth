@@ -25,3 +25,4 @@
 ## Next Steps
 
 - Reviewer to validate implementation and task bookkeeping.
+- CI rerun pending after workflow fix (PR #41); verify macOS/Ubuntu/Windows jobs once complete.
