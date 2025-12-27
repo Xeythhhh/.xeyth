@@ -9,10 +9,11 @@ public sealed class ResolveTargetDirectoryTests : IDisposable
 
     public ResolveTargetDirectoryTests()
     {
-        _workspaceRoot = Path.Combine(Path.GetTempPath(), "xeyth-verify-workspace-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_workspaceRoot);
         _originalCwd = Directory.GetCurrentDirectory();
-        Directory.SetCurrentDirectory(_workspaceRoot);
+        var workspaceRoot = Path.Combine(Path.GetTempPath(), "xeyth-verify-workspace-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(workspaceRoot);
+        Directory.SetCurrentDirectory(workspaceRoot);
+        _workspaceRoot = Directory.GetCurrentDirectory();
     }
 
     [Fact]

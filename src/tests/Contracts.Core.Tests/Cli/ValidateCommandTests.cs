@@ -11,10 +11,11 @@ public sealed class ValidateCommandTests : IDisposable
 
     public ValidateCommandTests()
     {
-        _root = Path.Combine(Path.GetTempPath(), "contracts-cli-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_root);
         _originalCwd = Directory.GetCurrentDirectory();
-        Directory.SetCurrentDirectory(_root);
+        var root = Path.Combine(Path.GetTempPath(), "contracts-cli-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(root);
+        Directory.SetCurrentDirectory(root);
+        _root = Directory.GetCurrentDirectory();
     }
 
     [Fact]
