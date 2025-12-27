@@ -77,9 +77,9 @@ internal sealed class ShowProposalCommand : PlanningCommandBase
         table.AddColumn(new TableColumn(string.Empty));
         table.AddColumn(new TableColumn(string.Empty));
 
-        table.AddRow("[bold]Usage[/]", "xeyth-planning show-proposal <name> [--root <path>]");
+        table.AddRow("[bold]Usage[/]", Markup.Escape("xeyth-planning show-proposal <name> [--root <path>]"));
         table.AddEmptyRow();
-        table.AddRow("[bold]Options[/]", "--root <path>   Root directory (defaults to current)");
+        table.AddRow("[bold]Options[/]", Markup.Escape("--root <path>   Root directory (defaults to current)"));
 
         console.Write(table);
         console.WriteLine();
