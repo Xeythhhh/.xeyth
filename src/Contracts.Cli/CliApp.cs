@@ -126,11 +126,11 @@ public static class CliApp
 
         if (!absoluteTarget.IsUnder(workspaceRoot))
         {
-            return new ParseResult(false, false, null, $"Path must be within workspace root: {workspaceRoot}");
+            return ParseResult.WithError($"Path must be within workspace root: {workspaceRoot}");
         }
 
         var options = new ValidateOptions(absoluteTarget.Value, contractName, strict);
-        return new ParseResult(true, false, options, null);
+        return ParseResult.ValidateCommand(options);
     }
 
     private static ParseResult ParseListCommand(string[] args)
