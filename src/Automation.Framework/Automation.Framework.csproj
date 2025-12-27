@@ -9,4 +9,8 @@
     <ToolCommandName>xeyth-workspace</ToolCommandName>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Automation.Cli.Common\Automation.Cli.Common.csproj" />
+  </ItemGroup>
+
 </Project>

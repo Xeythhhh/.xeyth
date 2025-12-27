@@ -1,0 +1,35 @@
+---
+type: Coding Standard
+scope: Framework-wide
+applies_to: Path handling in CLI and services
+status: Active
+---
+
+# AbsolutePath Usage
+
+## Convention Summary
+
+Use the shared `Xeyth.Common.IO.Paths.AbsolutePath` helper for any user-supplied or workspace-relative filesystem paths to guarantee normalization and root-bound traversal safety.
+
+## Rules
+
+- MUST construct absolute paths with `AbsolutePath.From(...)`.
+- MUST validate user-provided paths stay under the workspace root via `absolute.IsUnder(workspaceRoot)`.
+- SHOULD compose child paths with `AbsolutePath.Combine(...)` instead of string concatenation.
+- MUST NOT rely on bare `Path.GetFullPath`/`Path.Combine` for user input without boundary checks.
+
+## Examples
+
+- Good: `var root = AbsolutePath.From(workspace); var target = root.Combine("Planning/Task.task");`
+- Good: `if (!target.IsUnder(root)) throw new InvalidOperationException(...);`
+- Bad: `var target = Path.GetFullPath(userPath); // no root check`
+
+## Validation
+
+- Manual: Inspect path-sensitive code to ensure `AbsolutePath` is used for user inputs and `IsUnder` guards root traversal.
+- Automated: `dotnet test` (contracts/planning/verify suites include path safety coverage).
+- CI: `./build.sh Test` executes the full test battery on supported agents.
+
+## See Also
+
+- `src/Automation.Cli.Common/Paths/AbsolutePath.cs`
