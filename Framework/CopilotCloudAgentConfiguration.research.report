@@ -1,0 +1,904 @@
+# Copilot Cloud Agent Configuration Research Report
+
+**Date**: 2025-12-26  
+**Researcher**: Strategic Agent (Planner)  
+**Task**: [Framework/CopilotCloudAgentConfiguration.task](CopilotCloudAgentConfiguration.task)
+
+---
+
+## Executive Summary
+
+GitHub Copilot Cloud agents support extensive configuration through:
+1. **MCP (Model Context Protocol)** - Enables external tool/API integration
+2. **Custom Agents** - Repository/org-level agent personas (`.github/agents/`)
+3. **Agent Skills** - Reusable task templates (`.github/skills/`)
+4. **Environment Customization** - Limited setup via `.github/workflows/copilot-setup-steps.yml`
+5. **Agent Invocation** - Programmatic via `runSubagent` API and cross-agent communication
+
+**Critical Findings**:
+- Cloud agents run in **ephemeral, sandboxed environments** (GitHub Actions-based)
+- **No persistent state** across invocations - all work flows through PRs
+- **Limited environment variable access** - `GITHUB_TOKEN` and secrets NOT accessible during agent operations
+- **MCP servers** enable powerful external integrations but require careful security configuration
+- **Global tools** (gh CLI, Copilot CLI) can be preinstalled via setup workflow
+
+---
+
+## 1. MCP (Model Context Protocol) Integration
+
+### What is MCP?
+
+MCP is an open standard (backed by Anthropic, Microsoft, Google, Amazon, OpenAI) allowing AI agents to interact with external tools, APIs, and data sources in a structured manner.
+
+### Configuration Methods
+
+#### 1.1 Repository-Level Configuration
+
+Configure in **GitHub Repository Settings → Copilot → Coding agent**:
+
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx github-mcp-server",
+      "args": ["--token", "${COPILOT_MCP_GITHUB_TOKEN}"]
+    },
+    "taskmanager": {
+      "command": "npx mcp-taskmanager",
+      "args": []
+    },
+    "custom-api": {
+      "command": "node",
+      "args": ["server.js"],
+      "env": { "API_KEY": "${COPILOT_MCP_API_KEY}" },
+      "cwd": "/path/to/server"
+    }
+  }
+}
+```
+
+**Critical**: Secrets must use `COPILOT_MCP_` prefix and be configured in repository settings.
+
+#### 1.2 VS Code Workspace Configuration
+
+Create `.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${input:github_mcp_pat}"
+      }
+    }
+  },
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "github_mcp_pat",
+      "description": "GitHub Personal Access Token",
+      "password": true
+    }
+  ]
+}
+```
+
+#### 1.3 Copilot CLI Configuration
+
+Create `~/.copilot/mcp-config.json`:
+
+```json
+{
+  "mcpServers": {
+    "my-server": {
+      "command": "node",
+      "args": ["server.js"],
+      "env": { "API_KEY": "${MY_API_KEY}" }
+    }
+  }
+}
+```
+
+**Note**: As of v0.0.340, environment variables require `${VAR}` syntax.
+
+### MCP Server Types
+
+**Popular MCP Servers**:
+- `github-mcp-server` - GitHub API integration (issues, PRs, actions)
+- `mcp-taskmanager` - Task planning and workflow automation
+- `mcp-sequentialthinking` - Logical step-by-step workflows
+- Custom servers - Node.js, Python, TypeScript, Docker-based
+
+### Security Considerations
+
+- **OAuth 2.0** for user-level data authorization (preferred)
+- **API keys** for simple access (use `COPILOT_MCP_` prefix)
+- **Trust verification** - Only install trusted MCP servers
+- **Enterprise controls** - Admins can enable/disable MCP policy-wide
+
+### MCP Capabilities
+
+- Execute tasks without asking for approval (autonomous mode)
+- Fetch data from external sources
+- Manage tool orchestration
+- Cross-repo operations
+- Issue/PR creation and evaluation
+- File search and modification
+
+---
+
+## 2. Custom Agents (`.github/agents/`)
+
+### Purpose
+
+Define AI "teammates" with specialized expertise using YAML frontmatter + markdown instructions.
+
+### Configuration Structure
+
+Create `.github/agents/{agent-name}.agent.md`:
+
+```yaml
+---
+name: frontend-specialist
+description: Enforces React and UI conventions, handles front-end guidance.
+target: github-copilot
+tools: [search, edit, read]  # Or ["*"] for all tools
+infer: true  # Auto-select agent when relevant
+metadata:
+  team: frontend
+  purpose: enforce consistency
+---
+# Agent Instructions
+
+Follow React code style outlined in CONTRIBUTING.md.
+Review all JSX for accessibility best practices.
+Ensure all components use TypeScript strict mode.
+
+## Responsibilities
+
+1. Review PRs for React/UI changes
+2. Suggest accessibility improvements
+3. Enforce naming conventions
+4. Validate component structure
+
+## Examples
+
+[Provide examples of correct patterns]
+```
+
+### Scope Levels
+
+1. **Repository**: `.github/agents/` - Project-specific agents
+2. **Organization**: `{org}/.github/agents/` - Org-wide agents
+3. **Global**: `~/.copilot/agents/` - User-specific agents (VS Code)
+
+**Precedence**: Most-local configuration wins (repository > org > global).
+
+### Configuration Limits
+
+- **Instructions**: Up to 30,000 characters
+- **Deduplication**: By file name across scopes
+- **Tools**: Can specify subset or all (`["*"]`)
+- **Targets**: `github-copilot`, `vscode`, or both
+
+### Use Cases
+
+- Enforce team coding standards
+- Domain-specific expertise (frontend, backend, DevOps)
+- Compliance and security checks
+- Documentation generation
+- Code review automation
+
+---
+
+## 3. Agent Skills (`.github/skills/`)
+
+### Purpose
+
+Reusable, focused task templates with instructions, scripts, and resources.
+
+### Structure
+
+```
+.github/
+  skills/
+    webapp-testing/
+      SKILL.md           # Metadata + instructions
+      test-script.sh     # Automation script
+      example-tests.js   # Sample code
+      templates/         # Optional resources
+```
+
+### SKILL.md Format
+
+```yaml
+---
+name: webapp-testing
+description: Automated web application testing workflow
+category: testing
+tools: [playwright, jest]
+---
+# Skill: Web Application Testing
+
+## Purpose
+Automate E2E testing for web applications.
+
+## Workflow
+1. Install dependencies: `npm install --save-dev playwright`
+2. Create test files in `tests/e2e/`
+3. Run tests: `npm run test:e2e`
+
+## Examples
+[Provide test examples and patterns]
+```
+
+### Skills vs. Custom Instructions
+
+| Feature           | Agent Skills                   | Custom Instructions             |
+|-------------------|-------------------------------|---------------------------------|
+| Purpose           | Teach workflows/tasks          | Set standards/guidelines        |
+| Portability       | Works across Copilot, VS Code  | Repo/VS Code only               |
+| Content           | Instructions, scripts, assets  | Instructions only               |
+| Scope             | Task-specific, loaded as needed| Always applied                  |
+| Location          | `.github/skills/`              | `.github/copilot-instructions.md` |
+
+### Auto-Loading
+
+Skills are automatically loaded when contextually relevant to the current task.
+
+---
+
+## 4. Environment Customization
+
+### 4.1 Copilot Setup Workflow
+
+Create `.github/workflows/copilot-setup-steps.yml`:
+
+```yaml
+name: Copilot Agent Setup
+on:
+  workflow_dispatch:  # Manual trigger only
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install global tools
+        run: |
+          # Install gh CLI
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+          sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+          sudo apt update
+          sudo apt install gh -y
+          
+          # Install Copilot CLI
+          npm install -g @github/copilot
+          
+          # Install dotnet tools (if applicable)
+          dotnet tool install -g xeyth-planning
+          dotnet tool install -g xeyth-contracts
+
+      - name: Configure environment
+        run: |
+          # Set PATH for tools
+          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+          
+          # Configure gh CLI
+          gh config set editor vim
+          gh config set git_protocol https
+
+      - name: Verify installations
+        run: |
+          gh --version
+          copilot --version
+          dotnet tool list -g
+```
+
+**CRITICAL LIMITATIONS**:
+- This workflow runs **only during setup phase**, NOT during agent operations
+- Environment variables set here are **NOT accessible** during agent runtime
+- Agents run in **ephemeral environments** - each task gets fresh sandbox
+- No persistent state between invocations
+
+### 4.2 Global Tool Installation Options
+
+#### gh CLI (GitHub CLI)
+
+**Installation Methods**:
+```bash
+# WinGet (Windows)
+winget install GitHub.cli
+
+# Homebrew (macOS/Linux)
+brew install gh
+
+# APT (Debian/Ubuntu)
+curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+sudo apt update && sudo apt install gh
+
+# Prebuilt binary
+# Download from https://github.com/cli/cli/releases
+```
+
+#### Copilot CLI
+
+**Prerequisites**:
+- Node.js v22+
+- npm v10+
+- PowerShell v6+ (Windows)
+- Active Copilot subscription
+
+**Installation Methods**:
+```bash
+# npm (recommended)
+npm install -g @github/copilot
+
+# Homebrew (macOS/Linux)
+brew install copilot-cli
+
+# WinGet (Windows)
+winget install GitHub.Copilot
+
+# Install script (macOS/Linux)
+curl -fsSL https://gh.io/copilot-install | bash
+# or
+wget -qO- https://gh.io/copilot-install | bash
+
+# Prebuilt executables
+# Download from https://github.com/github/copilot-cli/releases
+```
+
+**Authentication**:
+```bash
+# Interactive login
+copilot /login
+
+# Headless/automated (requires PAT with Copilot Requests permissions)
+export GH_TOKEN="ghp_..."
+export GITHUB_TOKEN="ghp_..."
+```
+
+### 4.3 Environment Variables
+
+**CRITICAL**: Copilot Cloud agents have **severely limited** access to environment variables:
+
+| Variable         | Available in Setup | Available at Runtime | Notes                           |
+|------------------|-------------------|----------------------|---------------------------------|
+| `GITHUB_TOKEN`   | ✅ Yes            | ❌ **NO**            | Security restriction            |
+| `PATH`           | ✅ Yes            | ⚠️ Partial           | Tools must be in standard paths |
+| Custom vars      | ✅ Yes            | ❌ **NO**            | Cannot pass to agent            |
+| `COPILOT_MCP_*`  | ✅ Yes            | ✅ Yes (MCP only)    | For MCP server auth             |
+
+**Why Restrictions?**:
+- **Security**: Prevent secrets leakage from autonomous agents
+- **Isolation**: Each agent task runs in fresh, isolated sandbox
+- **Compliance**: Audit logs and access controls
+
+**Workarounds**:
+- Use MCP servers for external API access (with `COPILOT_MCP_` secrets)
+- Embed configuration in codebase (config files, not env vars)
+- Use repository settings for sensitive values
+- Rely on PR workflow for state persistence
+
+### 4.4 Workspace Persistence
+
+**Ephemeral Model**:
+- Each agent task spins up **fresh environment** (GitHub Actions runner)
+- Workspace is **torn down** after task completion
+- **No persistent disk or session state**
+- Changes persisted **only via Git commits/PRs**
+
+**State Management**:
+- Agent creates branches (`copilot/*`) for work
+- All changes go through pull requests
+- Human review required before merge
+- Agent can iterate on PRs based on feedback
+
+**Implications for Framework**:
+- Cannot rely on environment variables for configuration
+- Must use Git-tracked files for all context
+- Agent invocation requires fresh setup each time
+- No "session memory" across delegations
+
+---
+
+## 5. Agent Invocation and Delegation
+
+### 5.1 Programmatic Invocation (`runSubagent` API)
+
+**Purpose**: Enable one agent to invoke another programmatically for subtask delegation.
+
+**Example Workflow**:
+```javascript
+// Conceptual API (actual implementation may vary)
+const result = await runSubagent({
+  model: "GPT-5.1-Codex-Max",  // or "Claude Sonnet 4.5"
+  prompt: "Implement React component with TypeScript",
+  context: {
+    taskFile: "Framework/ComponentImplementation.task",
+    role: "Implementer",
+    files: ["src/components/Button.tsx"]
+  },
+  description: "Frontend component implementation"
+});
+```
+
+**Use Cases**:
+- Main agent analyzes requirements → creates subtasks
+- Delegate portions to specialized agents (frontend, backend, DevOps)
+- Parallel execution of independent tasks
+- Agent orchestration for complex workflows
+
+**Integration with MCP**:
+- Agents can invoke subagents through MCP protocol
+- Pass context and execution results between agents
+- Enable cross-agent communication channels
+- Multi-agent orchestration for large projects
+
+### 5.2 Cross-Agent Communication
+
+**Communication Channels**:
+1. **PR Comments** - Agents post updates/questions via PR comments
+2. **MCP Protocol** - Structured data exchange via MCP servers
+3. **Git Commits** - Share code/context via commits
+4. **Issue Assignments** - Delegate via GitHub issue assignments
+
+**Workflow Example**:
+```
+1. Orchestrator Agent analyzes issue
+   ↓
+2. Creates subtask issues
+   ↓
+3. Assigns to specialized agents (via @mention or assignment)
+   ↓
+4. Agents work in parallel, create PRs
+   ↓
+5. Orchestrator reviews PRs, provides feedback
+   ↓
+6. Agents iterate based on feedback
+   ↓
+7. Orchestrator merges when ready
+```
+
+**Logging and Traceability**:
+- All agent actions logged in PR comments
+- Audit trail for compliance
+- Human oversight at all stages
+- Review/approval gates before merge
+
+### 5.3 Agent Invocation in Framework
+
+**Current Limitations**:
+- `runSubagent` API **not directly available** in current Copilot Cloud setup
+- Framework relies on **manual delegation via code blocks**
+- User must copy/paste delegation prompts to invoke correct model
+
+**Delegation Pattern** (as documented in `Framework/Delegation.instructions.md`):
+
+```markdown
+````markdown
+**Task**: [Framework/TaskName.task](Framework/TaskName.task)
+**Role**: Implementer (see [Framework/Implementation.prompt.md](Framework/Implementation.prompt.md))
+**Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
+
+{1-2 sentence context}
+````
+```
+
+**Future Automation** (when `runSubagent` available):
+
+Strategic Agent (Orchestrator) could:
+1. Commit task creation/updates to master
+2. Push changes: `git push origin master`
+3. Update PR branches if behind master
+4. Programmatically invoke Implementation Agents:
+   ```
+   runSubagent(
+     model: "GPT-5.1-Codex-Max",
+     prompt: "{Full delegation prompt}",
+     description: "{TaskName} - Implementation"
+   )
+   ```
+5. Monitor active agents via PR status
+6. Post refinement comments automatically
+7. Approve/merge when ready
+
+**Tool Availability Check**:
+```javascript
+// Conceptual check
+if (typeof runSubagent === 'function') {
+  // Auto-delegate to cloud agents
+  await runSubagent({...});
+} else {
+  // Fall back to code block delegation
+  console.log("Manual delegation required");
+}
+```
+
+---
+
+## 6. Configuration Guide with Examples
+
+### 6.1 Repository Setup Checklist
+
+- [ ] **MCP Configuration** (if external APIs needed)
+  - [ ] Configure in repository settings (Copilot → Coding agent)
+  - [ ] Set `COPILOT_MCP_*` secrets
+  - [ ] Test MCP server connectivity
+  
+- [ ] **Custom Agents** (if specialized expertise needed)
+  - [ ] Create `.github/agents/` directory
+  - [ ] Define agent personas in `{name}.agent.md` files
+  - [ ] Test agent auto-selection with `infer: true`
+  
+- [ ] **Agent Skills** (if reusable workflows needed)
+  - [ ] Create `.github/skills/` directory
+  - [ ] Add skill subdirectories with `SKILL.md`
+  - [ ] Include scripts and resources
+  
+- [ ] **Environment Setup** (if global tools needed)
+  - [ ] Create `.github/workflows/copilot-setup-steps.yml`
+  - [ ] Add tool installation steps
+  - [ ] Verify PATH configuration
+  
+- [ ] **Instruction Files**
+  - [ ] Create/update `.github/copilot-instructions.md`
+  - [ ] Reference framework instructions
+  - [ ] Document project-specific conventions
+
+### 6.2 Example: AI Framework Configuration
+
+**Recommended Setup for `.xeyth` Framework**:
+
+#### MCP Servers
+
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx github-mcp-server",
+      "args": ["--token", "${COPILOT_MCP_GITHUB_TOKEN}"]
+    }
+  }
+}
+```
+
+**Benefits**:
+- Agents can query issues, PRs, actions directly
+- Automate PR review and approval
+- Cross-repo coordination
+
+#### Custom Agents
+
+**`.github/agents/strategic-agent.agent.md`**:
+```yaml
+---
+name: strategic-agent
+description: Orchestrator, Planner, Reviewer roles for AI Framework
+target: github-copilot
+tools: ["*"]
+infer: true
+metadata:
+  model: Claude Sonnet 4.5
+  roles: [orchestrator, planner, reviewer]
+---
+# Strategic Agent
+
+**Model**: Claude Sonnet 4.5 only
+
+## Roles
+
+- **Orchestrator**: Task selection, PR management, delegation
+- **Planner**: Architecture and design decisions
+- **Reviewer**: Quality verification and approval
+
+## References
+
+See [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md)
+```
+
+**`.github/agents/implementation-agent.agent.md`**:
+```yaml
+---
+name: implementation-agent
+description: Plan review and implementation for AI Framework
+target: github-copilot
+tools: ["*"]
+infer: true
+metadata:
+  model: GPT-5.1-Codex-Max
+  roles: [implementer]
+---
+# Implementation Agent
+
+**Model**: GPT-5.1-Codex-Max only
+
+## Role
+
+- Implementer: Plan review + code implementation
+
+## References
+
+See [Framework/Implementation.prompt.md](../Framework/Implementation.prompt.md)
+```
+
+#### Agent Skills
+
+**`.github/skills/task-management/SKILL.md`**:
+```yaml
+---
+name: task-management
+description: Create and manage .task files using framework conventions
+category: workflow
+tools: [read, edit, create]
+---
+# Skill: Task Management
+
+## Purpose
+Manage .task files according to AI Framework conventions.
+
+## Template
+Use [Planning/Task.task.template](../../Planning/Task.task.template)
+
+## Workflow
+1. Create task file in appropriate slice
+2. Add delegation prompt with 4-backtick code block
+3. Define deliverables and success criteria
+4. Create progress/blocker reports as needed
+5. Archive when complete
+```
+
+#### Environment Setup
+
+**`.github/workflows/copilot-setup-steps.yml`**:
+```yaml
+name: Copilot Agent Setup
+on:
+  workflow_dispatch:
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install gh CLI
+        run: |
+          sudo apt update
+          sudo apt install gh -y
+          gh --version
+
+      - name: Install Copilot CLI
+        run: |
+          npm install -g @github/copilot
+          copilot --version
+
+      - name: Install .NET tools
+        run: |
+          dotnet tool install -g xeyth-planning || true
+          dotnet tool install -g xeyth-contracts || true
+          dotnet tool list -g
+
+      - name: Configure PATH
+        run: |
+          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+```
+
+### 6.3 VS Code Workspace Configuration
+
+**`.vscode/mcp.json`**:
+```json
+{
+  "servers": {
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${input:github_mcp_pat}"
+      }
+    }
+  },
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "github_mcp_pat",
+      "description": "GitHub Personal Access Token",
+      "password": true
+    }
+  ]
+}
+```
+
+**`.vscode/settings.json`**:
+```json
+{
+  "chat.agent.enabled": true,
+  "chat.mcp.gallery.enabled": true,
+  "github.copilot.enable": {
+    "*": true,
+    "markdown": true,
+    "yaml": true
+  }
+}
+```
+
+---
+
+## 7. Key Findings and Recommendations
+
+### 7.1 MCP Configuration
+
+**Finding**: MCP servers are well-supported and provide powerful external integration capabilities.
+
+**Recommendation**: 
+- ✅ **Implement** MCP server for GitHub API access
+- ✅ **Configure** `COPILOT_MCP_GITHUB_TOKEN` secret
+- ⚠️ **Be cautious** with autonomous mode - agents act without approval
+- ✅ **Use** OAuth 2.0 for sensitive operations
+
+### 7.2 Global Tools
+
+**Finding**: Tools CAN be preinstalled via setup workflow, but environment is ephemeral.
+
+**Recommendation**:
+- ✅ **Create** `.github/workflows/copilot-setup-steps.yml` with gh CLI, Copilot CLI
+- ⚠️ **Understand** tools are available only during setup phase
+- ❌ **Don't rely** on persistent tool state across agent invocations
+- ✅ **Use** MCP servers for runtime tool access instead
+
+### 7.3 Environment Customization
+
+**Finding**: Environment variables and secrets have severe limitations for security reasons.
+
+**Recommendation**:
+- ❌ **Don't expect** `GITHUB_TOKEN` or custom env vars during agent runtime
+- ✅ **Use** `COPILOT_MCP_*` secrets for MCP server authentication
+- ✅ **Embed** configuration in Git-tracked files, not env vars
+- ✅ **Accept** ephemeral workspace model - no persistent state
+
+### 7.4 Agent Invocation
+
+**Finding**: `runSubagent` API exists but is not directly accessible in current setup.
+
+**Recommendation**:
+- ✅ **Continue** using code block delegation pattern (current approach)
+- ✅ **Monitor** GitHub changelog for `runSubagent` API availability
+- ✅ **Prepare** framework for future automation (documented in `Strategic.prompt.md`)
+- ✅ **Use** MCP for cross-agent communication when needed
+
+### 7.5 Custom Agents and Skills
+
+**Finding**: `.github/agents/` and `.github/skills/` provide powerful customization.
+
+**Recommendation**:
+- ✅ **Create** custom agents for Strategic and Implementation roles
+- ✅ **Define** skills for task management, PR workflow, etc.
+- ✅ **Use** `infer: true` for automatic agent selection
+- ✅ **Document** agent personas and responsibilities
+
+---
+
+## 8. Implementation Priorities
+
+### High Priority (Unblocks Automation)
+
+1. **Document current delegation pattern** ✅ (Already in `Delegation.instructions.md`)
+2. **Create custom agents** for Strategic and Implementation roles
+3. **Add MCP server** for GitHub API access
+4. **Create skills** for common workflows (task management, PR review)
+
+### Medium Priority (Improves Workflow)
+
+5. **Create setup workflow** with gh CLI and Copilot CLI
+6. **Add VS Code workspace configuration** for MCP
+7. **Document environment limitations** for future contributors
+8. **Create troubleshooting guide** for agent issues
+
+### Low Priority (Future Enhancement)
+
+9. **Monitor `runSubagent` API** availability
+10. **Prepare automation scripts** for when API becomes available
+11. **Explore advanced MCP integrations** (custom servers)
+12. **Create more specialized agents** for specific domains
+
+---
+
+## 9. Answers to Research Questions
+
+### MCP (Model Context Protocol)
+
+**Q: Does GitHub Copilot Cloud support MCP servers?**
+✅ **YES** - Full support for local and remote MCP servers (as of mid-2025).
+
+**Q: How to configure MCP servers for cloud agents?**
+✅ **Repository settings** (Copilot → Coding agent) or `.vscode/mcp.json`.
+
+**Q: Can MCP provide repository context, documentation, APIs?**
+✅ **YES** - MCP enables access to GitHub API, external tools, documentation, and custom APIs.
+
+### Global Tools
+
+**Q: Can we preinstall gh CLI in Copilot Cloud environments?**
+✅ **YES** - Via `.github/workflows/copilot-setup-steps.yml` during setup phase.
+
+**Q: How to install dotnet global tools?**
+✅ **Use** `dotnet tool install -g {tool-name}` in setup workflow.
+
+**Q: Are tools persistent across agent sessions?**
+❌ **NO** - Agents run in ephemeral environments. Tools must be reinstalled each time.
+
+### Environment Customization
+
+**Q: Is there a configuration file for agent environments?**
+✅ **YES** - `.github/workflows/copilot-setup-steps.yml` for setup phase.
+
+**Q: Can we set environment variables (GITHUB_TOKEN, etc.)?**
+❌ **NO** - `GITHUB_TOKEN` and custom env vars NOT accessible during runtime (security restriction).
+
+**Q: How to customize PATH and other shell settings?**
+⚠️ **PARTIAL** - Can set PATH during setup, but agents run in fresh environments each time.
+
+### Agent Invocation
+
+**Q: Can Strategic Agent invoke Implementation Agent programmatically?**
+⚠️ **NOT YET** - `runSubagent` API exists but not directly accessible. Use code block delegation.
+
+**Q: What tools/APIs enable agent-to-agent communication?**
+✅ **MCP protocol**, PR comments, GitHub API, issue assignments.
+
+**Q: How to pass context between agents?**
+✅ **Git commits**, PR descriptions, MCP servers, issue/PR comments.
+
+### Workspace Persistence
+
+**Q: How do agents access workspace files?**
+✅ **Fresh clone** of repository for each task.
+
+**Q: Is git state preserved across invocations?**
+❌ **NO** - Each task gets fresh environment. State persists only via commits/PRs.
+
+**Q: Can agents commit/push to branches?**
+✅ **YES** - Agents create `copilot/*` branches and push changes via PRs.
+
+---
+
+## 10. References
+
+### Official Documentation
+
+1. [Extending GitHub Copilot coding agent with MCP](https://docs.github.com/enterprise-cloud@latest/copilot/using-github-copilot/coding-agent/extending-copilot-coding-agent-with-mcp)
+2. [Custom agents configuration](https://docs.github.com/en/copilot/reference/custom-agents-configuration)
+3. [Creating custom agents](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/create-custom-agents)
+4. [Agent Skills](https://code.visualstudio.com/docs/copilot/customization/agent-skills)
+5. [Installing GitHub Copilot CLI](https://docs.github.com/copilot/github-copilot-in-the-cli/setting-up-github-copilot-in-the-cli)
+6. [Customizing the development environment](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/customize-the-agent-environment)
+
+### Community Resources
+
+7. [4sysops: Install MCP server for GitHub Copilot](https://4sysops.com/archives/install-an-mcp-server-for-github-copilot-in-vs-code/)
+8. [DEV Community: Supercharge VS Code with MCP](https://dev.to/pwd9000/supercharge-vscode-github-copilot-using-model-context-protocol-mcp-easy-setup-guide-371e)
+9. [GitHub Blog: Agentic workflows](https://github.blog/ai-and-ml/github-copilot/from-idea-to-pr-a-guide-to-github-copilots-agentic-workflows/)
+10. [GitHub Blog: Agent mode 101](https://github.blog/ai-and-ml/github-copilot/agent-mode-101-all-about-github-copilots-powerful-mode/)
+
+### GitHub Changelog
+
+11. [Copilot coding agent supports remote MCP servers](https://github.blog/changelog/2025-07-09-copilot-coding-agent-now-supports-remote-mcp-servers/)
+12. [Custom agents for GitHub Copilot](https://github.blog/changelog/2025-10-28-custom-agents-for-github-copilot/)
+13. [GitHub Copilot supports Agent Skills](https://github.blog/changelog/2025-12-18-github-copilot-now-supports-agent-skills/)
+
+---
+
+## Conclusion
+
+GitHub Copilot Cloud agents offer extensive configuration options through MCP servers, custom agents, and agent skills. However, the ephemeral, sandboxed environment model imposes significant limitations on environment variables and persistent state.
+
+**For the AI Framework**:
+- ✅ **Current delegation pattern** (code blocks) remains necessary until `runSubagent` API is accessible
+- ✅ **MCP integration** recommended for GitHub API access
+- ✅ **Custom agents and skills** should be created for framework roles and workflows
+- ⚠️ **Environment limitations** must be documented and accepted
+- ✅ **Future automation** can be prepared in advance for when tools become available
+
+**Priority 9 status justified** - This research unblocks understanding of automation capabilities and limitations, enabling informed decisions about framework architecture and agent workflows.
