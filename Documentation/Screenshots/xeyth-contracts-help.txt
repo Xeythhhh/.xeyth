@@ -1,0 +1,25 @@
+[96m╭─[0m[1;96m📋 xeyth-contracts[0m[96m───────────────────────────────────────────────────────────────────────────────────────────────────╮[0m
+[96m│[0m                                                   [1mxeyth-contracts[0m                                                    [96m│[0m
+[96m│[0m                                                        [2mv1.0.0[0m                                                        [96m│[0m
+[96m│[0m                                                 Contract validation                                                  [96m│[0m
+[96m╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯[0m
+
+[1mUsage[0m             xeyth-contracts <command> [options]                                       
+                                                                                            
+[1mCommands[0m          validate         Validate files against contracts                         
+                  list             List discovered contracts                                
+                                                                                            
+[1mvalidate options[0m  --path, -p       File or directory to validate (defaults to current)      
+                  --contract, -c   Filter by contract file name (without .metadata)         
+                  --strict         Treat warnings as errors                                 
+                                                                                            
+[1mlist options[0m      --path, -p       Directory to search (defaults to current)                
+                  --format, -f     Output format: card, table, tree, compact (default: card)
+                  --verbose, -v    Include verbose details                                  
+                  --no-color       Disable color output                                     
+                  --width, -w      Maximum output width                                     
+                                                                                            
+[1mGlobal options[0m    --help, -h       Show help                                                
+                                                                                            
+[1mExit Codes[0m        0 = success/warnings, 1 = errors or strict warnings, 2 = usage errors     
+
