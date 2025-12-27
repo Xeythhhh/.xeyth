@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Tool\GitTool.csproj" />
+    <ProjectReference Include="..\..\..\Git\Tool\GitTool.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -22,8 +22,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Contracts.Cli\Contracts.Cli.csproj" />
-    <ProjectReference Include="..\..\Contracts.Core\Contracts.Core.csproj" />
+    <ProjectReference Include="..\..\..\src\Contracts.Cli\Contracts.Cli.csproj" />
+    <ProjectReference Include="..\..\..\src\Contracts.Core\Contracts.Core.csproj" />
   </ItemGroup>
 
 </Project>
