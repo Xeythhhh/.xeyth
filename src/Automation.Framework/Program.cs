@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Linq;
 using Xeyth.Common.IO.Paths;
+using Automation.Cli.Common;
 
 internal static class Program
 {
@@ -62,7 +63,10 @@ internal static class Program
     {
         if (!rootPath.IsUnder(workspaceDirectory))
         {
-            throw new InvalidOperationException($"Root '{rootPath}' must be within workspace directory '{workspaceDirectory}'.");
+            throw new InvalidOperationException(ErrorMessages.PathMustBeWithinWorkspace(
+                rootPath.Value,
+                workspaceDirectory.Value,
+                "Use --root to specify a path within the workspace directory."));
         }
     }
 
@@ -72,7 +76,9 @@ internal static class Program
     {
         if (!Directory.Exists(rootPath.Value))
         {
-            throw new DirectoryNotFoundException($"Root path not found: {rootPath}");
+            throw new DirectoryNotFoundException(ErrorMessages.DirectoryNotFound(
+                rootPath.Value,
+                "Use --root to specify a valid directory path."));
         }
 
         var locations = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -165,14 +171,16 @@ internal static class Program
     {
         if (!File.Exists(workspacePath.Value))
         {
-            throw new FileNotFoundException($"Workspace file not found: {workspacePath}");
+            throw new FileNotFoundException(ErrorMessages.FileNotFound(
+                workspacePath.Value,
+                "Use --workspace to specify a valid .code-workspace file."));
         }
 
         var json = File.ReadAllText(workspacePath.Value);
         var node = JsonNode.Parse(json) as JsonObject;
         if (node is null)
         {
-            throw new InvalidOperationException($"Workspace file is not valid JSON: {workspacePath}");
+            throw new InvalidOperationException(ErrorMessages.InvalidJson(workspacePath.Value));
         }
 
         return node;
@@ -226,12 +234,17 @@ internal static class Program
             var resolved = AbsolutePath.From(workspacePath);
             if (!File.Exists(resolved.Value))
             {
-                throw new FileNotFoundException($"Workspace file not found: {resolved}");
+                throw new FileNotFoundException(ErrorMessages.FileNotFound(
+                    resolved.Value,
+                    "Check that the workspace file path is correct."));
             }
 
             if (!resolved.IsUnder(root))
             {
-                throw new InvalidOperationException($"Workspace file must be within '{root}'.");
+                throw new InvalidOperationException(ErrorMessages.PathMustBeWithinWorkspace(
+                    resolved.Value,
+                    root.Value,
+                    "The workspace file must be within the current directory."));
             }
 
             return resolved;
@@ -248,7 +261,9 @@ internal static class Program
 
         if (firstWorkspacePath is null)
         {
-            throw new FileNotFoundException("No .code-workspace file found. Specify one with --workspace.");
+            throw new FileNotFoundException(ErrorMessages.FileNotFound(
+                "*.code-workspace",
+                "Create a .code-workspace file or specify one with --workspace <path>."));
         }
 
         return AbsolutePath.From(firstWorkspacePath);
@@ -329,7 +344,9 @@ internal static class Program
                         excludes.Add(DequeueValue(queue, token));
                         break;
                     default:
-                        throw new ArgumentException($"Unknown argument: {token}");
+                        throw new ArgumentException(ErrorMessages.UnknownOption(
+                            token,
+                            new[] { "--root", "--workspace", "--exclude" }));
                 }
             }
 
@@ -340,7 +357,14 @@ internal static class Program
         {
             if (queue.Count == 0)
             {
-                throw new ArgumentException($"Missing value for {token}");
+                var valueType = token switch
+                {
+                    "--root" => "path",
+                    "--workspace" => "file",
+                    "--exclude" => "directory",
+                    _ => "value"
+                };
+                throw new ArgumentException(ErrorMessages.MissingValue(token, valueType));
             }
 
             return queue.Dequeue();

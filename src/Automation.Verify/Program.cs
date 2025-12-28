@@ -145,7 +145,10 @@ internal sealed class CommandDispatcher
 
         if (!resolved.IsUnder(workspaceRoot))
         {
-            throw new InvalidOperationException($"Target directory must be within workspace root '{workspaceRoot}'.");
+            throw new InvalidOperationException(ErrorMessages.PathMustBeWithinWorkspace(
+                resolved.Value,
+                workspaceRoot.Value,
+                "Use --path to specify a directory within the workspace."));
         }
 
         return resolved;
@@ -171,7 +174,8 @@ internal sealed record SetupOptions(DiffTool? Tool, string? TargetDirectory)
                     var requested = queue.Dequeue();
                     if (!DiffTool.TryParse(requested, out tool))
                     {
-                        throw new ArgumentException($"Unknown diff tool: {requested}");
+                        var validTools = DiffTool.All.Select(t => t.DisplayName);
+                        throw new ArgumentException(ErrorMessages.InvalidValue(token, requested, validTools));
                     }
 
                     break;
@@ -184,7 +188,9 @@ internal sealed record SetupOptions(DiffTool? Tool, string? TargetDirectory)
                     break;
 
                 default:
-                    throw new ArgumentException($"Unknown option: {token}");
+                    throw new ArgumentException(ErrorMessages.UnknownOption(
+                        token,
+                        new[] { "--tool", "-t", "--path", "-p", "--target" }));
             }
         }
 
@@ -195,7 +201,13 @@ internal sealed record SetupOptions(DiffTool? Tool, string? TargetDirectory)
     {
         if (queue.Count == 0)
         {
-            throw new ArgumentException($"Missing value for {token}");
+            var valueType = token switch
+            {
+                "--tool" or "-t" => "tool",
+                "--path" or "-p" or "--target" => "path",
+                _ => "value"
+            };
+            throw new ArgumentException(ErrorMessages.MissingValue(token, valueType));
         }
     }
 }
@@ -219,7 +231,9 @@ internal sealed record ValidateOptions(string? TargetDirectory)
                     targetDirectory = queue.Dequeue();
                     break;
                 default:
-                    throw new ArgumentException($"Unknown option: {token}");
+                    throw new ArgumentException(ErrorMessages.UnknownOption(
+                        token,
+                        new[] { "--path", "-p", "--target" }));
             }
         }
 
