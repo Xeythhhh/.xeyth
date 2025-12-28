@@ -81,7 +81,9 @@ internal sealed class AcceptProposalCommand : PlanningCommandBase
         {
             if (args.Length == 0)
             {
-                throw new ArgumentException("Proposal name is required");
+                throw new ArgumentException(ErrorMessages.MissingRequiredArgument(
+                    "proposal name",
+                    "xeyth-planning accept-proposal <name> --task <path>"));
             }
 
             var name = args[0];
@@ -113,13 +115,17 @@ internal sealed class AcceptProposalCommand : PlanningCommandBase
                         break;
 
                     default:
-                        throw new ArgumentException($"Unknown option: {token}");
+                        throw new ArgumentException(ErrorMessages.UnknownOption(
+                            token,
+                            new[] { "--task", "-t", "--reason", "-r", "--root" }));
                 }
             }
 
             if (string.IsNullOrWhiteSpace(taskPath))
             {
-                throw new ArgumentException("Task path is required (--task)");
+                throw new ArgumentException(ErrorMessages.MissingRequiredArgument(
+                    "--task",
+                    "xeyth-planning accept-proposal <name> --task <path>"));
             }
 
             return new AcceptProposalOptions(name, taskPath, Path.GetFullPath(root), reason);

@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using Automation.Planning.Models;
+using Automation.Cli.Common;
 
 namespace Automation.Planning.Services;
 
@@ -11,13 +12,13 @@ public sealed class ProposalParser
     {
         if (string.IsNullOrWhiteSpace(path))
         {
-            throw new ArgumentException("Path is required", nameof(path));
+            throw new ArgumentException(ErrorMessages.RequiredValue("Path"));
         }
 
         var fullPath = Path.GetFullPath(path);
         if (!File.Exists(fullPath))
         {
-            throw new FileNotFoundException("Proposal file not found", fullPath);
+            throw new FileNotFoundException(ErrorMessages.FileNotFound(fullPath));
         }
 
         var content = File.ReadAllText(fullPath);
