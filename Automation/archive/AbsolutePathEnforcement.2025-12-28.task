@@ -25,14 +25,14 @@ Recent CLI work needs stronger guarantees that user-supplied paths remain inside
 
 ### Deliverables
 
-- [ ] **D1**: `AbsolutePath` helper added and documented
-- [ ] **D2**: Path-sensitive features migrated to use `AbsolutePath`
-- [ ] **D3**: Tests/linters guard against unsafe path handling
+- [x] **D1**: `AbsolutePath` helper added and documented
+- [x] **D2**: Path-sensitive features migrated to use `AbsolutePath`
+- [x] **D3**: Tests/linters guard against unsafe path handling
 
 ### Verification Steps
 
-- [ ] `dotnet build` succeeds (0 errors, 0 warnings)
-- [ ] `dotnet test` passes
+- [x] `dotnet build` succeeds (0 errors, 0 warnings)
+- [x] `dotnet test` passes
 
 ### Reports
 
@@ -80,10 +80,21 @@ Adopt `AbsolutePath` for workspace-safe path handling and enforce it across path
 
 ## Success Criteria
 
-- [ ] `dotnet build` succeeds (0 warnings)
-- [ ] `dotnet test` passes
-- [ ] Path-sensitive code rejects traversal attempts
+- [x] `dotnet build` succeeds (0 warnings)
+- [x] `dotnet test` passes
+- [x] Path-sensitive code rejects traversal attempts
 
 ## Progress Log
 
 - 2025-12-26: Task created for AbsolutePath enforcement
+- 2025-12-26: Implementation complete; AbsolutePath moved to `Xeyth.Common.IO.Paths`, path-sensitive flows migrated, tests added/passing (`dotnet test`). See AbsolutePathEnforcement.task.Implementation.report.
+
+### Delegation
+
+````markdown
+**Task**: [Automation/AbsolutePathEnforcement.task](Automation/AbsolutePathEnforcement.task)  
+**Role**: Reviewer (see [Framework/Implementation.prompt.md](../Framework/Implementation.prompt.md))  
+**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+
+Implementation complete; verification attached in task file.
+````
