@@ -35,7 +35,9 @@ public sealed class TaskCreationService
         var targetDirectory = Path.GetDirectoryName(targetPath);
         if (string.IsNullOrWhiteSpace(targetDirectory))
         {
-            throw new InvalidOperationException($"Could not resolve directory for task path: {targetPath}");
+            throw new InvalidOperationException(ErrorMessages.RequiredValue(
+                "Task directory",
+                $"Could not resolve directory for task path: {targetPath}"));
         }
 
         Directory.CreateDirectory(targetDirectory);
