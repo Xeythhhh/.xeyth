@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Automation.Cli.Common;
 
 namespace Automation.Verify;
 
@@ -9,7 +10,7 @@ internal static class VerifyConfigurator
     {
         if (string.IsNullOrWhiteSpace(targetDirectory))
         {
-            throw new ArgumentException("Target directory is required", nameof(targetDirectory));
+            throw new ArgumentException(ErrorMessages.RequiredValue("Target directory"));
         }
 
         var verifyDirectory = Path.Combine(targetDirectory, ".verify");

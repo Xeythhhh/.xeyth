@@ -54,6 +54,7 @@ Desktop.ini
 # Build Tools
 .nuke/
 .tools/
+.verify/
 
 # Rider
 .idea/

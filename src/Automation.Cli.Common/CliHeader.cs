@@ -13,7 +13,7 @@ public sealed class CliHeader
     public CliHeader(string toolName, string? version = null, string? subtitle = null, string? icon = null)
     {
         _toolName = string.IsNullOrWhiteSpace(toolName)
-            ? throw new ArgumentException("Tool name is required", nameof(toolName))
+            ? throw new ArgumentException(ErrorMessages.RequiredValue("Tool name"))
             : toolName;
         _version = version;
         _subtitle = subtitle;

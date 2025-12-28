@@ -1,5 +1,6 @@
 using Xeyth.Common.IO.Paths;
 using Automation.Planning.Models;
+using Automation.Cli.Common;
 
 namespace Automation.Planning.Services;
 
@@ -16,13 +17,15 @@ public sealed class ProposalDiscoveryService
     {
         if (string.IsNullOrWhiteSpace(rootPath))
         {
-            throw new ArgumentException("Root path is required", nameof(rootPath));
+            throw new ArgumentException(ErrorMessages.RequiredValue("Root path"));
         }
 
         var fullRoot = AbsolutePath.From(rootPath);
         if (!Directory.Exists(fullRoot.Value))
         {
-            throw new DirectoryNotFoundException($"Root path not found: {fullRoot}");
+            throw new DirectoryNotFoundException(ErrorMessages.DirectoryNotFound(
+                fullRoot.Value,
+                "Use --root to specify a valid directory path."));
         }
 
         var proposalFiles = Directory
