@@ -1,3 +1,4 @@
+using Automation.Cli.Common;
 using Spectre.Console;
 
 namespace Automation.Planning.Commands;
@@ -27,7 +28,7 @@ internal abstract class PlanningCommandBase : IPlanningCommand
     {
         if (queue.Count == 0)
         {
-            throw new ArgumentException($"Missing value for {token}");
+            throw new ArgumentException(ErrorMessages.MissingValue(token));
         }
     }
 

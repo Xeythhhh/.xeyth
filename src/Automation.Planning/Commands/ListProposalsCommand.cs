@@ -117,14 +117,19 @@ internal sealed class ListProposalsCommand : PlanningCommandBase
                         var value = queue.Dequeue();
                         if (!Enum.TryParse<ProposalStatus>(value, ignoreCase: true, out var parsed) || parsed == ProposalStatus.Unknown)
                         {
-                            throw new ArgumentException($"Unknown status: {value}");
+                            var validStatuses = Enum.GetValues<ProposalStatus>()
+                                .Where(s => s != ProposalStatus.Unknown)
+                                .Select(s => s.ToString());
+                            throw new ArgumentException(ErrorMessages.InvalidValue(token, value, validStatuses));
                         }
 
                         status = parsed;
                         break;
 
                     default:
-                        throw new ArgumentException($"Unknown option: {token}");
+                        throw new ArgumentException(ErrorMessages.UnknownOption(
+                            token,
+                            new[] { "--root", "--status" }));
                 }
             }
 

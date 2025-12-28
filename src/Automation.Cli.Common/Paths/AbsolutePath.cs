@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using Automation.Cli.Common;
 
 namespace Xeyth.Common.IO.Paths;
 
@@ -13,13 +14,13 @@ public readonly record struct AbsolutePath
     {
         if (string.IsNullOrWhiteSpace(value))
         {
-            throw new ArgumentException("Path is required", nameof(value));
+            throw new ArgumentException(ErrorMessages.RequiredValue("Path"));
         }
 
         var full = Path.GetFullPath(value);
         if (!Path.IsPathRooted(full))
         {
-            throw new ArgumentException("Path must be absolute", nameof(value));
+            throw new ArgumentException(ErrorMessages.PathMustBeAbsolute(value));
         }
 
         _value = NormalizeSeparators(full);
@@ -33,7 +34,7 @@ public readonly record struct AbsolutePath
     {
         if (string.IsNullOrWhiteSpace(relative))
         {
-            throw new ArgumentException("Relative path is required", nameof(relative));
+            throw new ArgumentException(ErrorMessages.RequiredValue("Relative path"));
         }
 
         var combined = Path.Combine(_value, relative);

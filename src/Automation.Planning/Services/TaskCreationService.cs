@@ -1,6 +1,7 @@
 using System.Text;
 using Xeyth.Common.IO.Paths;
 using Automation.Planning.Models;
+using Automation.Cli.Common;
 
 namespace Automation.Planning.Services;
 
@@ -17,7 +18,7 @@ public sealed class TaskCreationService
 
         if (string.IsNullOrWhiteSpace(requestedPath))
         {
-            throw new ArgumentException("Task path is required", nameof(requestedPath));
+            throw new ArgumentException(ErrorMessages.RequiredValue("Task path", "Use --task to specify where to create the task file."));
         }
 
         var root = AbsolutePath.From(string.IsNullOrWhiteSpace(rootPath) ? Directory.GetCurrentDirectory() : rootPath);
@@ -26,20 +27,25 @@ public sealed class TaskCreationService
 
         if (!File.Exists(templatePath))
         {
-            throw new FileNotFoundException("Task template not found", templatePath);
+            throw new FileNotFoundException(ErrorMessages.FileNotFound(
+                templatePath,
+                "Ensure the Planning/Task.task.template file exists in the repository."));
         }
 
         var targetDirectory = Path.GetDirectoryName(targetPath);
         if (string.IsNullOrWhiteSpace(targetDirectory))
         {
-            throw new InvalidOperationException($"Could not resolve directory for task path '{targetPath}'.");
+            throw new InvalidOperationException($"Could not resolve directory for task path: {targetPath}");
         }
 
         Directory.CreateDirectory(targetDirectory);
 
         if (File.Exists(targetPath))
         {
-            throw new InvalidOperationException($"A task already exists at '{targetPath}'.");
+            throw new InvalidOperationException(ErrorMessages.AlreadyExists(
+                "Task",
+                targetPath,
+                "Choose a different task name or path."));
         }
 
         var content = File.ReadAllText(templatePath);
@@ -63,7 +69,10 @@ public sealed class TaskCreationService
 
         if (!absolute.IsUnder(root))
         {
-            throw new InvalidOperationException($"Task path must be within root '{root}': '{absolute.Value}'");
+            throw new InvalidOperationException(ErrorMessages.PathMustBeWithinWorkspace(
+                absolute.Value,
+                root.Value,
+                "Specify a task path within the repository root."));
         }
 
         return absolute.Value;
