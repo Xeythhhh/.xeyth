@@ -241,7 +241,7 @@ public static class CliApp
     {
         if (queue.Count == 0)
         {
-            throw new ArgumentException($"Missing value for {token}");
+            throw new ArgumentException(ErrorMessages.MissingValue(token));
         }
     }
 

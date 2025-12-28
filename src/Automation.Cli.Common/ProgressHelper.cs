@@ -75,7 +75,7 @@ public static class ProgressHelper
 
         if (string.IsNullOrWhiteSpace(description))
         {
-            throw new ArgumentException("Description is required for progress display", nameof(description));
+            throw new ArgumentException(ErrorMessages.RequiredValue("Description", "for progress display"));
         }
 
         if (items is null)
