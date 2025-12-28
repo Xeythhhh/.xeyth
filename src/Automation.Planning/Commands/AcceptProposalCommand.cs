@@ -67,9 +67,9 @@ internal sealed class AcceptProposalCommand : PlanningCommandBase
         table.AddColumn(new TableColumn(string.Empty));
         table.AddColumn(new TableColumn(string.Empty));
 
-        table.AddRow("[bold]Usage[/]", "xeyth-planning accept-proposal <name> --task <path> [--reason <text>] [--root <path>]");
+        table.AddRow("[bold]Usage[/]", Markup.Escape("xeyth-planning accept-proposal <name> --task <path> [--reason <text>] [--root <path>]"));
         table.AddEmptyRow();
-        table.AddRow("[bold]Options[/]", "--task <path>   Target task path (relative or absolute)\n--reason <text> Optional rationale to record\n--root <path>   Root directory (defaults to current)");
+        table.AddRow("[bold]Options[/]", Markup.Escape("--task <path>   Target task path (relative or absolute)\n--reason <text> Optional rationale to record\n--root <path>   Root directory (defaults to current)"));
 
         console.Write(table);
         console.WriteLine();
