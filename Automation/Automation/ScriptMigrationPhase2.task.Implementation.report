@@ -9,7 +9,7 @@
 ## Summary
 
 - Implemented the `xeyth-git` global tool with C# hook commands replacing PowerShell logic (prepare-commit-msg, commit-msg).
-- Added package metadata alignment (`PackageId` = `xeyth-git`) and retained minimal shell/Pwsh wrappers.
+- Added package metadata alignment (`PackageId` = `xeyth-git`) and retained minimal shell/pwsh wrappers.
 - Tests for template injection and commit validation are in place and passing; documentation already reflects `xeyth-git` usage.
 
 ## Deliverables
