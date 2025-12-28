@@ -1,3 +1,5 @@
+using Automation.Cli.Common;
+
 namespace Automation.Planning.Commands;
 
 internal sealed record DecisionOptions(string Name, string RootPath, string Reason)
@@ -6,7 +8,9 @@ internal sealed record DecisionOptions(string Name, string RootPath, string Reas
     {
         if (args.Length == 0)
         {
-            throw new ArgumentException("Proposal name is required");
+            throw new ArgumentException(ErrorMessages.MissingRequiredArgument(
+                "proposal name",
+                "xeyth-planning <command> <name> --reason <text>"));
         }
 
         var name = args[0];
@@ -31,13 +35,17 @@ internal sealed record DecisionOptions(string Name, string RootPath, string Reas
                     break;
 
                 default:
-                    throw new ArgumentException($"Unknown option: {token}");
+                    throw new ArgumentException(ErrorMessages.UnknownOption(
+                        token,
+                        new[] { "--reason", "-r", "--root" }));
             }
         }
 
         if (string.IsNullOrWhiteSpace(reason))
         {
-            throw new ArgumentException("Reason is required (--reason)");
+            throw new ArgumentException(ErrorMessages.MissingRequiredArgument(
+                "--reason",
+                "xeyth-planning <command> <name> --reason \"explanation\""));
         }
 
         return new DecisionOptions(name, Path.GetFullPath(root), reason);
