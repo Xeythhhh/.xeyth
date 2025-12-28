@@ -8,14 +8,14 @@
 
 ### Your Instructions:
 
-**IF you are Strategic Agent (Orchestrator)**:
+**IF you are Agent (Orchestrator)**:
 1. **Check ALL open PRs first** - Review for merge readiness or refinement needs
    - Read full PR content: description, comments, file comments, reviews
    - Use `gh pr view {number} --json title,body,comments,reviews,files`
 2. **Commit and push orchestrator work** - Before delegating to cloud agents:
    - Commit any task creation/updates: `git add -A && git commit && git push`
    - Update PR branches if behind: `gh api repos/{owner}/{repo}/pulls/{number}/update-branch -X PUT`
-3. **Auto-delegate to Implementation Agents** - If tools available (runSubagent spawns cloud agents), invoke GPT-5.1-Codex-Max agents directly
+3. **Auto-delegate to Agents** - If tools available (runSubagent spawns cloud agents), invoke agents directly
 4. **Draft PR comments** for incomplete PRs (with @copilot tags and delegation prompts)
 5. **Merge ready PRs** (if all acceptance criteria met)
 6. **Review backlog** using priority scores (see [TaskPrioritySystem.md](../Planning/TaskPrioritySystem.md))
@@ -26,60 +26,24 @@
    - Backlog status summary
 9. **Do NOT wait for user** between delegations - batch everything together
 
-**IF you are Strategic Agent (Planner)**:
+**IF you are Agent (Planner)**:
 1. Continue planning active task
-2. When complete, delegate to Implementation Agent using code block
+2. When complete, delegate to Agent using code block
 3. Then assume Orchestrator role and continue (select next task)
 
-**IF you are Strategic Agent (Reviewer)**:
+**IF you are Agent (Reviewer)**:
 1. Review implementation (run builds, tests, verify deliverables)
 2. Approve/request changes/create follow-on tasks
 3. Then assume Orchestrator role and continue (select next task)
 
-**IF you are Implementation Agent**:
+**IF you are Agent**:
 1. Continue implementing active task deliverables
 2. When complete, create progress report and delegate to Reviewer using code block
 3. If blocked, create blocker report and delegate to Orchestrator using code block
 
 ---
 
-## Model Requirements
-
-- **Strategic Agent roles** (Orchestrator/Planner/Reviewer): **Claude Sonnet 4.5 only**
-- **Implementation Agent**: **GPT-5.1-Codex-Max only**
-
----
-
-## Role Switching (Strategic Agent Only)
-
-**CRITICAL**: Strategic Agent (Claude Sonnet 4.5) may switch only among its own roles (Orchestrator ↔ Planner ↔ Reviewer) when Flow is invoked with delegation to another Strategic role.
-
-**Cannot switch to**: Implementation Agent or Scaffold Agent (model mismatch)
-
-**Behavior**:
-- If current model matches the delegated Strategic role → assume that role immediately and execute.
-- If delegation targets Implementation or Scaffold while on Strategic model → return delegation prompt (do not execute).
-
----
-
-## Model-Role Enforcement
-
-- If you **are** the correct model for the delegated role: read the delegation prompt, assume the role, execute immediately.
-- If you **are not** the correct model: do **not** execute. Return the delegation prompt in a markdown code block for the user to invoke the correct model.
-
-### Model Mismatch Response Template
-
-````markdown
-**Task**: [{TaskPath}]({TaskPath})
-**Role**: {Role} (see [Framework/{Prompt}.prompt.md](../Framework/{Prompt}.prompt.md))
-**Target Audience**: {Agent} ({Model})
-
-{Delegation context}
-````
-
----
-
-## Detailed Workflow Guidelines
+## Role Switching
 
 ### Capture Outstanding Work (Before Switching Context)
 
@@ -116,28 +80,27 @@
 
 ### No Active Task Workflow
 
-**Strategic Agent (Orchestrator role)**:
+**Agent (Orchestrator role)**:
 
 1. Review backlog using priority scores (see [TaskPrioritySystem.md](../Planning/TaskPrioritySystem.md))
 2. Check open PRs and PR drafts to identify tasks already in progress
 3. Search for tasks with `Status: Not Started` or `Status: Planning Complete` that are NOT already delegated in open PRs
 4. Select highest Priority Score task
-5. Delegate to Planner (if needs design) or Implementation Agent (if ready) using code block
+5. Delegate to Planner (if needs design) or Agent (if ready) using code block
 6. Output ALL pending delegations in single response (see "Orchestrator Output Format" section)
 7. Do NOT wait for user between items - batch everything together
 
-**Implementation Agent**:
+**Agent**:
 
 1. Identify next logical task or improvement
 2. Send delegation prompt with recommendation (use code block format)
-3. Strategic Agent can approve (creates .task), decline, or refine without changing focus
+3. Agent can approve (creates .task), decline, or refine without changing focus
 
 Example recommendation:
 
 ````markdown
 **Task**: [Proposed task location]
 **Role**: Planner (see [Strategic.prompt.md](Strategic.prompt.md))
-**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
 
 **Recommendation**: {Brief description of proposed work}
 **Rationale**: {Why this is valuable}
@@ -146,7 +109,7 @@ Example recommendation:
 
 ## Orchestrator Output Format (Copilot Cloud)
 
-When invoked in Copilot Cloud (via `file:Flow.prompt.md`), Strategic Agent (Orchestrator) MUST output ALL pending work in a single comprehensive response:
+When invoked in Copilot Cloud (via `file:Flow.prompt.md`), Agent (Orchestrator) MUST output ALL pending work in a single comprehensive response:
 
 ### Output Structure
 
@@ -188,8 +151,6 @@ When invoked in Copilot Cloud (via `file:Flow.prompt.md`), Strategic Agent (Orch
 
 **Task**: <a>{TaskPath}</a>  
 **Role**: Implementer (see <a>Framework/Implementation.prompt.md</a>)  
-**Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
-
 **Refinements needed before {merge|marking ready for review}**:
 
 1. **Task file** - Mark deliverables complete:
@@ -205,7 +166,6 @@ When invoked in Copilot Cloud (via `file:Flow.prompt.md`), Strategic Agent (Orch
 4. **Reviewer Delegation** - Add delegation block to task file (use 4 backticks):
    - Task: <a>{TaskPath}</a>
    - Role: Reviewer (see <a>Framework/Strategic.prompt.md</a>)
-   - Target Audience: Strategic Agent (Claude Sonnet 4.5)
    - Context: {Summary of completed work}
 
 5. **{Additional items as needed}**
@@ -225,7 +185,6 @@ When invoked in Copilot Cloud (via `file:Flow.prompt.md`), Strategic Agent (Orch
 ````markdown
 **Task**: [{TaskPath}]({TaskPath})
 **Role**: {Role} (see [../Framework/{Prompt}.prompt.md](../Framework/{Prompt}.prompt.md))
-**Target Audience**: {Agent} ({Model})
 
 {Context}
 ````
@@ -247,7 +206,7 @@ When invoked in Copilot Cloud (via `file:Flow.prompt.md`), Strategic Agent (Orch
 - In progress: {count}
 
 **Tasks Delegated**: {count}
-- To Implementation Agent: {count}
+- To Agent: {count}
 - To Planner: {count}
 
 **Backlog Health**:
@@ -288,7 +247,7 @@ For each open PR, **automate preparation** then verify readiness:
    ```
    - Check for @copilot delegation prompts
    - Look for blocker reports or questions
-   - Verify Implementation Agent responses
+   - Verify Agent responses
 
 4. **Check file-level comments**:
    ```bash
@@ -327,7 +286,7 @@ For each open PR, **automate preparation** then verify readiness:
    # Or poll: gh pr view {number} --json statusCheckRollup
    ```
 
-4. **Handle review threads** (delegate to Implementation Agent, do NOT auto-resolve):
+4. **Handle review threads** (delegate to Agent, do NOT auto-resolve):
    ```bash
    # Query unresolved threads with comments
    gh api graphql -f query='query($owner:String!, $repo:String!, $pr:Int!) { repository(owner:$owner, name:$repo) { pullRequest(number:$pr) { reviewThreads(first:20) { nodes { id isResolved comments(first:5) { nodes { id body author { login } } } } } } } }' -f owner={owner} -f repo={repo} -F pr={number}
@@ -335,7 +294,7 @@ For each open PR, **automate preparation** then verify readiness:
    # Post @copilot comment delegating fixes (do NOT resolve threads)
    gh pr comment {number} --body "@copilot Please address review comments: [details]"
    
-   # Only resolve threads AFTER Implementation Agent confirms fixes
+   # Only resolve threads AFTER Agent confirms fixes
    # NEVER merge with unresolved threads
    ```
 
@@ -381,7 +340,7 @@ For each open PR, **automate preparation** then verify readiness:
 - Link the report filename inside the `.task`; keep details in the `.report`
 - For cross-model delegation to Orchestrator, use code block format
 
-## Role Switching (Strategic Agent)
+## Role Switching (Agent)
 
 **During Active Work** (Orchestrator ↔ Planner ↔ Reviewer):
 
@@ -393,42 +352,42 @@ For each open PR, **automate preparation** then verify readiness:
 
 ## After Completing Delegated Work
 
-**Strategic Agent (Planner)** - After delegating to Implementation:
+**Agent (Planner)** - After delegating to Implementation:
 
 - Assume Orchestrator role automatically
 - Proceed to backlog review and task selection
 - No user intervention required
 
-**Strategic Agent (Reviewer)** - After finalizing review:
+**Agent (Reviewer)** - After finalizing review:
 
 - Assume Orchestrator role automatically
 - Proceed to backlog review and task selection
 - No user intervention required
 
-**Strategic Agent (Orchestrator)** - Continuous operation:
+**Agent (Orchestrator)** - Continuous operation:
 
 - **Target Backlog**: Maintain 20 ready tasks at all times
 - If backlog < 15 tasks: Create new enhancement/feature tasks to reach 20
 - If backlog > 25 tasks: Focus on execution, defer new planning
 - **Target PRs**: Maintain 5-10 open PRs (or draft PRs), maximum 10
 - Each PR should handle a single `.task` file
-- If open PRs < 5: Prioritize delegation to Implementation Agent for new tasks
+- If open PRs < 5: Prioritize delegation to Agent for new tasks
 - If open PRs ≥ 10: Pause new delegations, focus on PR review/merge
 - **Comprehensive PR Review**: Check description, comments, file comments, reviews - everything in the PR
 - **Commit/Push Before Delegation**: When cloud agents available, commit and push orchestrator work (task creation, updates) before spawning agents to ensure they have latest context
 - **Update PR Branches**: Before delegating to existing agent work, update PR branches if behind master
-- Select highest-priority task and delegate to Planner or Implementation Agent
+- Select highest-priority task and delegate to Planner or Agent
 - **Task Refinement**: Regularly review "Not Started" tasks for clarity and completeness
-- **Task Delegation**: Continuously delegate refined tasks to Implementation Agent
-- **Automatic Invocation**: If agent invocation tools available (runSubagent spawns cloud agents), directly invoke GPT-5.1-Codex-Max cloud agents instead of outputting code blocks
+- **Task Delegation**: Continuously delegate refined tasks to Agent
+- **Automatic Invocation**: If agent invocation tools available (runSubagent spawns cloud agents), directly invoke agents instead of outputting code blocks
 
-**Implementation Agent** - After completing implementation:
+**Agent** - After completing implementation:
 
 - Commit changes to feature branch (`task/{task-name}`)
 - Push feature branch to origin
 - Create PR referencing task file using the PR template (`gh pr create --base master --head task/{task-name}`)
 - Create `{TaskName}.task.{ReportName}.report` with progress summary
-- Delegate to Strategic Agent (Reviewer role) via code block
+- Delegate to Agent (Reviewer role) via code block
 - Do NOT assume another role (cross-model boundary)
 
 **CRITICAL**: All work must go through Pull Requests. Never commit directly to master.
@@ -437,22 +396,19 @@ For each open PR, **automate preparation** then verify readiness:
 
 **CRITICAL**: See [Delegation.instructions.md](Delegation.instructions.md) for complete format rules.
 
-**To Implementation Agent** (use 4-backtick code block):
+**To Agent** (use 4-backtick code block):
 ````markdown
 **Task**: [Planning/Task.task.template](../../Planning/Task.task.template)
 **Role**: Implementer (see [Implementation.prompt.md](Implementation.prompt.md))
-**Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
 ````
 
 Add 1–2 sentences of context after the block.
 
-**To Strategic Agent (from Implementation Agent)** (use 4-backtick code block when you cannot continue working):
+**To Agent (from Agent)** (use 4-backtick code block when you cannot continue working):
 
 ````markdown
 **Task**: [Contracts/ContractRenderer.task](../../Contracts/ContractRenderer.task)
 **Role**: Reviewer (see [Strategic.prompt.md](Strategic.prompt.md))
-**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
-
 Context: {What changed, verification evidence, blockers if any}
 ````
 

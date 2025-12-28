@@ -5,13 +5,10 @@ target: github-copilot
 tools: ["*"]
 infer: true
 metadata:
-  model: GPT-5.1-Codex-Max
   roles: [implementer]
   priority: high
 ---
-# Implementation Agent
-
-**CRITICAL**: This agent requires **GPT-5.1-Codex-Max only**. Do not use other models.
+# Agent
 
 ## Role Assignment
 
@@ -58,7 +55,6 @@ This agent handles the **Implementer** role within the AI Framework:
 ````markdown
 **Task**: [Framework/TaskName.task](Framework/TaskName.task)
 **Role**: Planner (see [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md))
-**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
 
 Questions: ...
 ````
@@ -68,7 +64,6 @@ Questions: ...
 ````markdown
 **Task**: [Framework/TaskName.task](Framework/TaskName.task)
 **Role**: Reviewer (see [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md))
-**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
 
 Implementation complete; verification attached in task file.
 ````
@@ -92,7 +87,6 @@ Implementation complete; verification attached in task file.
 ````markdown
 **Task**: [Framework/TaskName.task](Framework/TaskName.task)
 **Role**: Reviewer (see [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md))
-**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
 
 Implementation complete. All deliverables verified and PR ready for merge.
 ````

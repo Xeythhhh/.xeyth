@@ -201,7 +201,6 @@ Agents delegate to each other using 4-backtick code blocks:
 ````markdown
 **Task**: [Framework/TaskName.task](Framework/TaskName.task)
 **Role**: Implementer (see [Framework/Implementation.prompt.md](Framework/Implementation.prompt.md))
-**Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
 
 {1-2 sentence context}
 ````
@@ -213,9 +212,8 @@ Agents delegate to each other using 4-backtick code blocks:
 When `runSubagent` API becomes available:
 
 ```javascript
-// Strategic Agent (Orchestrator) could invoke Implementation Agent directly
+// Agent (Orchestrator) could invoke Agent directly
 await runSubagent({
-  model: "GPT-5.1-Codex-Max",
   prompt: "Full delegation prompt from task file",
   description: "TaskName - Implementation"
 });
@@ -369,10 +367,9 @@ The framework is prepared for automatic agent invocation:
 **Orchestrator workflow** (from `Framework/Strategic.prompt.md`):
 1. Commit and push orchestrator work to master
 2. Update PR branches if behind master
-3. Programmatically invoke Implementation Agents:
+3. Programmatically invoke Agents:
    ```javascript
    runSubagent(
-     model: "GPT-5.1-Codex-Max",
      prompt: "{Full delegation prompt}",
      description: "{TaskName} - Implementation"
    )

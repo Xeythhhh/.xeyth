@@ -6,12 +6,12 @@
 
 ## Roles
 
-- **Strategic Agent** (Orchestrator/Planner/Reviewer): select work, design plans, review outcomes
-  - **Model Requirement**: Claude Sonnet 4.5 only
-- **Implementation Agent**: plan review + implementation in one flow
-  - **Model Requirement**: GPT-5.1-Codex-Max only
-- **Scaffold Agent**: boilerplate generation only
-- **Cleanup Agent**: replace placeholders with project values and trim unused sections
+- **Orchestrator**: Select work, maintain backlog, manage PR pipeline
+- **Planner**: Design solutions, research patterns, create implementation plans  
+- **Reviewer**: Verify deliverables, run quality gates, approve/request changes
+- **Implementer**: Review plans, write code, run tests, create PRs
+- **Scaffold**: Generate boilerplate code and project structures
+- **Cleanup**: Replace placeholders with project values
 
 ## Core Rules
 
@@ -59,14 +59,14 @@ Agents operate in **continuous flow mode**:
 1. Complete assigned work
 2. Create progress/blocker reports as `{TaskName}.task.{ReportName}.report` files alongside `.task`
 3. Delegate to next role via code block (cross-model) or role switch (same model)
-4. **Strategic Agent**: After delegation, assume Orchestrator role and select next task
+4. **Agent**: After delegation, assume Orchestrator role and select next task
 5. Repeat until stop condition reached
 
 **Task Generation & Refinement**:
 - Orchestrator continuously creates new tasks to maintain backlog target
 - Tasks created in "Not Started" status with delegation prompts
 - Planner reviews and refines task details before delegation to Implementation
-- Implementation Agent receives refined, actionable tasks
+- Agent receives refined, actionable tasks
 - All task work flows through PRs (never commit directly to master)
 
 **Backlog Management** (Orchestrator):
@@ -74,9 +74,9 @@ Agents operate in **continuous flow mode**:
 - If backlog < 15: Create new enhancement/feature tasks to reach 20
 - If backlog > 25: Focus on execution, defer new planning
 - **PR Target**: Maintain at least 5 open PRs (or draft PRs) handling individual `.task` files
-- If open PRs < 5: Prioritize delegation to Implementation Agent for new tasks
+- If open PRs < 5: Prioritize delegation to Agent for new tasks
 - Regularly refine unfinished tasks for clarity and completeness
-- Continuously delegate refined tasks to Implementation Agent
+- Continuously delegate refined tasks to Agent
 
 **Stop Conditions**:
 - User explicitly requests halt
@@ -85,16 +85,18 @@ Agents operate in **continuous flow mode**:
 
 ## Delegation Format
 
-**CRITICAL**: See [Delegation.instructions.md](Delegation.instructions.md) for complete delegation format rules and examples.
+See [Delegation.instructions.md](Delegation.instructions.md) for complete delegation format rules.
 
-**Key Rules**:
-- Cross-model delegation (Strategic ↔ Implementation): **Use 4-backtick code block**
-- Same-model delegation (Strategic role switching): Regular 3-backtick format
-- Always specify exact model (never `<ModelName>` placeholder)
+**Quick Reference**:
 
-**Model Requirements**:
-- Strategic roles (Orchestrator/Planner/Reviewer): Claude Sonnet 4.5
-- Implementation role: GPT-5.1-Codex-Max
+````markdown
+**Task**: <a href="{TaskPath}">{TaskPath}</a>  
+**Role**: {Role} (see <a href="Framework/{Role}.prompt.md">Framework/{Role}.prompt.md</a>)
+
+{Brief context}
+````
+
+**Role Switching**: When switching roles, update files, re-read task/reports, state switch, continue work. No delegation needed for role switches.
 
 ## Response Footer (standard)
 
@@ -112,7 +114,6 @@ Agents operate in **continuous flow mode**:
 > **Task**: {TaskFile.task}
 > **Role**: `{AssignedRole}`
 > **Agent Identifier**: `{AgentId}`
-> **Target Audience**: `{TargetRole} ({Model})`
 
 ------------------------------------------------
 ```
