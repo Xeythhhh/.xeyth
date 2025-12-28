@@ -192,14 +192,10 @@ internal sealed class ValidateCommandRunner
         var warnings = CountViolations(results, ViolationSeverity.Warning);
         var successes = results.Count - results.Count(r => r.Violations.Count > 0);
 
-        _console.Write(new Rule("[bold]Summary[/]").RuleStyle("grey"));
+        _console.Write(SectionDivider.Create("Summary"));
 
-        var summary = new Table().Border(TableBorder.MinimalHeavyHead);
-        summary.AddColumn("Validated");
-        summary.AddColumn("Errors");
-        summary.AddColumn("Warnings");
-
-        summary.AddRow(
+        var summary = TableBuilder.CreateSummary("Validated", "Errors", "Warnings");
+        summary.AddRowSafe(
             fileCount.ToString(CultureInfo.InvariantCulture),
             errors.ToString(CultureInfo.InvariantCulture),
             warnings.ToString(CultureInfo.InvariantCulture));
@@ -207,10 +203,7 @@ internal sealed class ValidateCommandRunner
         _console.Write(summary);
         _console.WriteLine();
 
-        var chart = new BreakdownChart()
-            .AddItem("Success", successes, ColorScheme.Success)
-            .AddItem("Warnings", warnings, ColorScheme.Warning)
-            .AddItem("Errors", errors, ColorScheme.Error);
+        var chart = ChartBuilder.CreateBreakdownChart(successes, warnings, errors);
 
         _console.Write(chart);
         _console.WriteLine();
