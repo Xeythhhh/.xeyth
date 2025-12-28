@@ -5,7 +5,8 @@ namespace Automation.Cli.Common.Tests.Logging;
 
 /// <summary>
 /// Example demonstrating logger usage in a CLI application.
-/// This is a code example, not an executable test.
+/// This is documentation code, not a runnable test.
+/// Use [Fact(Skip = "Documentation example only")] if running tests with discovery.
 /// </summary>
 public class LoggerUsageExample
 {
