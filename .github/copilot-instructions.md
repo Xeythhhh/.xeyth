@@ -2,12 +2,6 @@
 
 This project uses the AI Framework from the `.xeyth` submodule. See [.xeyth/Framework/copilot-instructions.md](.xeyth/Framework/copilot-instructions.md) for roles, workflows, and conventions.
 
-## Model Requirements
-
-**CRITICAL**: Use the correct model for each role:
-- **Strategic Agents** (Orchestrator/Planner/Reviewer): **Claude Sonnet 4.5 only**
-- **Implementation Agent**: **GPT-5.1-Codex-Max only**
-
 ---
 
 ## Instruction Files

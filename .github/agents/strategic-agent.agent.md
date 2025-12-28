@@ -5,13 +5,10 @@ target: github-copilot
 tools: ["*"]
 infer: true
 metadata:
-  model: Claude Sonnet 4.5
   roles: [orchestrator, planner, reviewer]
   priority: high
 ---
-# Strategic Agent
-
-**CRITICAL**: This agent requires **Claude Sonnet 4.5 only**. Do not use other models.
+# Agent
 
 ## Role Assignment
 
@@ -82,7 +79,6 @@ Use 4-backtick code block for cross-model delegation:
 ````markdown
 **Task**: [Framework/TaskName.task](Framework/TaskName.task)
 **Role**: Implementer (see [Framework/Implementation.prompt.md](Framework/Implementation.prompt.md))
-**Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
 
 {1-2 sentence context}
 ````

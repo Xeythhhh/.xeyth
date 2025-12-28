@@ -1,4 +1,4 @@
-# Strategic Agent Guide
+# Agent Guide
 
 Covers Orchestrator, Planner, Reviewer roles.
 
@@ -9,7 +9,7 @@ Covers Orchestrator, Planner, Reviewer roles.
 2. **Comment refinements on incomplete PRs** with @copilot delegation
 3. **Pick highest-value work** from backlog; maintain 20 ready tasks
 4. **Maintain at least 5 open PRs** (delegate new tasks if < 5)
-5. **Regularly refine unfinished tasks** and delegate to Implementation Agent
+5. **Regularly refine unfinished tasks** and delegate to Agent
 
 - Create or update `.task` files in appropriate slices (e.g., `Framework/`, `Maintenance/`)
 - Delegate to Planner using code block format; include 1–2 sentences of context
@@ -40,7 +40,7 @@ Covers Orchestrator, Planner, Reviewer roles.
 1. Post comment to PR with @copilot tag listing required refinements:
    - **If `gh` CLI available**: Use `gh pr comment {number} --body "{comment}"` to post automatically
    - **If `gh` CLI NOT available**: Draft comment for manual posting
-2. Include delegation prompt in comment for Implementation Agent
+2. Include delegation prompt in comment for Agent
 3. Move to next PR
 
 **Review Thread Handling** (if any unresolved):
@@ -49,7 +49,7 @@ Covers Orchestrator, Planner, Reviewer roles.
    gh api graphql -f query='query($owner:String!, $repo:String!, $pr:Int!) { repository(owner:$owner, name:$repo) { pullRequest(number:$pr) { reviewThreads(first:20) { nodes { id isResolved comments(first:5) { nodes { id body author { login } } } } } } } }' -f owner=Xeythhhh -f repo=.xeyth -F pr={number}
    ```
 
-2. **Post @copilot comment** delegating fixes to Implementation Agent:
+2. **Post @copilot comment** delegating fixes to Agent:
    ```bash
    gh pr comment {number} --body "@copilot Please address the following review comments:
    
@@ -58,19 +58,17 @@ Covers Orchestrator, Planner, Reviewer roles.
    ````markdown
    **Task**: [PR #{number} - Review Comments]
    **Role**: Implementer (see Framework/Implementation.prompt.md)
-   **Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
-   
-   Address Copilot reviewer suggestions on this PR.
+      Address Copilot reviewer suggestions on this PR.
    ````
    
    Comment when complete so threads can be resolved."
    ```
 
-3. **DO NOT resolve threads** until Implementation Agent confirms fixes
+3. **DO NOT resolve threads** until Agent confirms fixes
 4. **DO NOT merge** until all threads addressed and resolved
 
 **If PR IS ready**:
-1. Verify all review threads resolved (Implementation Agent addressed suggestions)
+1. Verify all review threads resolved (Agent addressed suggestions)
 2. Auto-mark as ready: `gh pr ready {number}` (if still draft)
 3. Squash merge PR: `gh pr merge {number} --squash --delete-branch`
 4. Archive task file to `{Slice}/archive/{TaskName}.YYYY-MM-DD.task`
@@ -98,7 +96,7 @@ When reviewing a PR for merge, verify ALL items:
 **GitHub Status**:
 - [ ] CI/CD checks: All green
 - [ ] Merge conflicts: None
-- [ ] Review threads: All resolved (Implementation Agent addressed suggestions)
+- [ ] Review threads: All resolved (Agent addressed suggestions)
 - [ ] Reviews: At least 1 approval (human or Copilot)
 - [ ] Draft status: Not draft
 
@@ -106,7 +104,7 @@ When reviewing a PR for merge, verify ALL items:
 
 ### PR Comment Formatting
 
-When drafting PR comments with delegation prompts for Implementation Agent:
+When drafting PR comments with delegation prompts for Agent:
 
 **Critical**: Avoid nested code blocks - they break GitHub markdown rendering.
 
@@ -116,8 +114,6 @@ When drafting PR comments with delegation prompts for Implementation Agent:
 
 **Task**: <a>Slice/TaskName.task</a>  
 **Role**: Implementer (see <a>Framework/Implementation.prompt.md</a>)  
-**Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
-
 **Refinements needed**:
 
 1. **Task file** - Mark deliverables complete
@@ -126,7 +122,6 @@ When drafting PR comments with delegation prompts for Implementation Agent:
 4. **Reviewer Delegation** - Add delegation block to task file (use 4 backticks):
    - Task: <a>Slice/TaskName.task</a>
    - Role: Reviewer (see <a>Framework/Strategic.prompt.md</a>)
-   - Target Audience: Strategic Agent (Claude Sonnet 4.5)
    - Context: {Brief summary of work completed}
 5. **Draft Status** - Mark PR ready for review when complete
 
@@ -142,7 +137,7 @@ When drafting PR comments with delegation prompts for Implementation Agent:
 **Markdown Backtick Rules**:
 - PR comments use **3 backticks** for outer code block
 - Delegation instructions use **bullet points** (no code block)
-- Implementation Agent will use **4 backticks** when adding to task file (4 backticks allows nesting of 3-backtick code examples within the delegation block)
+- Agent will use **4 backticks** when adding to task file (4 backticks allows nesting of 3-backtick code examples within the delegation block)
 - Always validate: outer backticks > inner backticks
 
 ### Backlog Management
@@ -152,8 +147,8 @@ When drafting PR comments with delegation prompts for Implementation Agent:
 - Overrides: if [Configuration.xeyth](../Configuration.xeyth) exists, use `orchestrator.backlog` values
 - Check PRs: Before delegating, verify task is not already in an open PR or draft (check PR descriptions for task file references)
 - When backlog < minimum → create new tasks; when > maximum → pause creation and prioritize execution
-- Regularly refine unfinished tasks and delegate refined tasks to Implementation Agent
-- If open PRs < 5 → prioritize delegation to Implementation Agent for new task implementation
+- Regularly refine unfinished tasks and delegate refined tasks to Agent
+- If open PRs < 5 → prioritize delegation to Agent for new task implementation
 - If open PRs ≥ 10 → pause new delegations, focus on PR review/merge
 
 ### Automatic Agent Delegation (when tools available)
@@ -175,10 +170,9 @@ When drafting PR comments with delegation prompts for Implementation Agent:
    gh api repos/{owner}/{repo}/pulls/{number}/update-branch -X PUT
    ```
 
-3. **Automatically invoke Implementation Agents** (cloud agents running GPT-5.1-Codex-Max) instead of outputting code blocks:
+3. **Automatically invoke Agents** (cloud agents) instead of outputting code blocks:
    ```
    runSubagent(
-     model: "GPT-5.1-Codex-Max",
      prompt: "{Full delegation prompt from task file}",
      description: "{TaskName} - Implementation"
    )
@@ -214,21 +208,19 @@ When drafting PR comments with delegation prompts for Implementation Agent:
 
 ## Role Switching & Delegation
 
-**Role Switching (within Strategic Agent)**: No delegation prompt needed. Update files, re-read .task file and reports, state "Switching to {Role} role", continue work.
+**Role Switching (within Agent)**: No delegation prompt needed. Update files, re-read .task file and reports, state "Switching to {Role} role", continue work.
 
 **Cross-Model Delegation**: Use code block format (see [Delegation.instructions.md](Delegation.instructions.md)).
 
-### To Implementation Agent (cross-model - **USE CODE BLOCK**):
+### To Agent (cross-model - **USE CODE BLOCK**):
 
 ````markdown
 **Task**: [Planning/Task.task.template](../Planning/Task.task.template)
 **Role**: Implementer (see [Implementation.prompt.md](Implementation.prompt.md))
-**Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
-
 Summary: ...
 ````
 
-### Role Switch Example (within Strategic Agent):
+### Role Switch Example (within Agent):
 
 "Switching to Reviewer role. Re-reading the active task and latest reports..." (no delegation code block needed for same-model role switches)
 

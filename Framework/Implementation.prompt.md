@@ -1,4 +1,4 @@
-# Implementation Agent Guide
+# Agent Guide
 
 Role: Implementer (plan review + execution).
 
@@ -17,22 +17,20 @@ Role: Implementer (plan review + execution).
 11. Update the task Progress Log with decisions and verification evidence
 12. **When all deliverables, checklists, and TODOs are complete and PR is ready for merge**:
     - Post a comment on the PR with @copilot tag
-    - Include delegation prompt for Strategic Agent (Reviewer role) in the comment
+    - Include delegation prompt for Agent (Reviewer role) in the comment
     - Use the delegation format shown in "PR Ready for Review Comment Template" below
 
 **CRITICAL**: All commits must go to feature branches. Pull Requests are required for merging to master.
 
 ## Delegation Patterns
 
-**CRITICAL**: When delegating to Strategic Agent, use 4-backtick code block (see [Delegation.instructions.md](Delegation.instructions.md)).
+**CRITICAL**: When delegating to Agent, use 4-backtick code block (see [Delegation.instructions.md](Delegation.instructions.md)).
 
 - To Planner for clarifications:
 
 ````markdown
 **Task**: [Planning/Task.task.template](../../Planning/Task.task.template)  
 **Role**: Planner (see [Strategic.prompt.md](Strategic.prompt.md))  
-**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
-
 Questions: ...
 ````
 
@@ -41,8 +39,6 @@ Questions: ...
 ````markdown
 **Task**: [Planning/Task.task.template](../../Planning/Task.task.template)  
 **Role**: Reviewer (see [Strategic.prompt.md](Strategic.prompt.md))  
-**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
-
 Implementation complete; verification attached in task file.
 ````
 
@@ -69,8 +65,6 @@ Implementation complete; verification attached in task file.
 ````markdown
 **Task**: [{Slice}/{TaskName}.task]({Slice}/{TaskName}.task)  
 **Role**: Reviewer (see [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md))  
-**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
-
 Implementation complete. All deliverables verified and PR ready for merge.
 ````
 ```
@@ -92,8 +86,6 @@ Implementation complete. All deliverables verified and PR ready for merge.
 ````markdown
 **Task**: [Automation/PlanningCliTool.task](Automation/PlanningCliTool.task)  
 **Role**: Reviewer (see [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md))  
-**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
-
 Implementation complete. All deliverables verified and PR ready for merge.
 ````
 ```
