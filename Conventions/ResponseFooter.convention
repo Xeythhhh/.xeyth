@@ -68,7 +68,7 @@ All agents MUST end their responses with a standardized footer that documents af
 > **Task**: Git/AiSliceMigration.task
 > **Role**: `Implementer`
 > **Agent Identifier**: `Implementation Agent`
-> **Target Audience**: `Strategic Agent (Reviewer) (Claude Sonnet 4.5)`
+> **Target Audience**: `Strategic Agent (Reviewer)`
 
 ------------------------------------------------
 ```
@@ -149,8 +149,8 @@ Role: Implementer, Task: AiSliceMigration.task
 
 ### Affected files
 
-**Added**: {List or None}  
-**Modified**: {List or None}  
+**Added**: {List or None}
+**Modified**: {List or None}
 **Deleted**: {List or None}
 
 ------------------------------------------------

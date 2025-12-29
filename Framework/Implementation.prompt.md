@@ -1,6 +1,6 @@
 # Implementation Agent Guide
 
-Role: Implementer (plan review + execution).
+Role: Implementer (plan review + execution). Model-agnostic in this local branch; a single agent may assume any role.
 
 ## Workflow
 
@@ -29,9 +29,9 @@ Role: Implementer (plan review + execution).
 - To Planner for clarifications:
 
 ````markdown
-**Task**: [Planning/Task.task.template](../../Planning/Task.task.template)  
-**Role**: Planner (see [Strategic.prompt.md](Strategic.prompt.md))  
-**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+**Task**: [Planning/Task.task.template](../../Planning/Task.task.template)
+**Role**: Planner (see [Strategic.prompt.md](Strategic.prompt.md))
+**Target Audience**: Strategic Agent
 
 Questions: ...
 ````
@@ -39,9 +39,9 @@ Questions: ...
 - To Reviewer after implementation:
 
 ````markdown
-**Task**: [Planning/Task.task.template](../../Planning/Task.task.template)  
-**Role**: Reviewer (see [Strategic.prompt.md](Strategic.prompt.md))  
-**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+**Task**: [Planning/Task.task.template](../../Planning/Task.task.template)
+**Role**: Reviewer (see [Strategic.prompt.md](Strategic.prompt.md))
+**Target Audience**: Strategic Agent
 
 Implementation complete; verification attached in task file.
 ````
@@ -67,9 +67,9 @@ Implementation complete; verification attached in task file.
 
 **Delegation**:
 ````markdown
-**Task**: [{Slice}/{TaskName}.task]({Slice}/{TaskName}.task)  
-**Role**: Reviewer (see [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md))  
-**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+**Task**: [{Slice}/{TaskName}.task]({Slice}/{TaskName}.task)
+**Role**: Reviewer (see [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md))
+**Target Audience**: Strategic Agent
 
 Implementation complete. All deliverables verified and PR ready for merge.
 ````
@@ -90,9 +90,9 @@ Implementation complete. All deliverables verified and PR ready for merge.
 
 **Delegation**:
 ````markdown
-**Task**: [Automation/PlanningCliTool.task](Automation/PlanningCliTool.task)  
-**Role**: Reviewer (see [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md))  
-**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+**Task**: [Automation/PlanningCliTool.task](Automation/PlanningCliTool.task)
+**Role**: Reviewer (see [Framework/Strategic.prompt.md](../Framework/Strategic.prompt.md))
+**Target Audience**: Strategic Agent
 
 Implementation complete. All deliverables verified and PR ready for merge.
 ````
@@ -144,7 +144,7 @@ Use the standard footer from `copilot-instructions.md`.
 1. Create blocker report:
    ```markdown
    # {TaskName}.task.DiagnosticBlocker.report
-   
+
    **Blocker Type**: Unresolvable Diagnostics
    **Affected Files**: {list}
    **Diagnostic**: {error/warning message}
@@ -157,7 +157,7 @@ Use the standard footer from `copilot-instructions.md`.
 3. Reference blocker in commit message:
    ```
    fix(feature): implement X with known diagnostics
-   
+
    Note: Contains acceptable warnings in Y.cs (see DiagnosticBlocker.report)
    Rationale: {brief explanation}
    ```

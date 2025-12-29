@@ -5,8 +5,8 @@ A compact, role-based instruction system you can vend as a git submodule under `
 ## What This Provides
 
 - Standard roles:
-  - **Strategic** (Orchestrator/Planner/Reviewer) - Claude Sonnet 4.5 only
-  - **Implementation** - GPT-5.1-Codex-Max only
+  - **Strategic** (Orchestrator/Planner/Reviewer)
+  - **Implementation** (Implementer)
   - **Scaffold** - Boilerplate generation
   - **Cleanup** - Replace placeholders
 - Self-contained task files with delegation prompts
@@ -64,7 +64,7 @@ See [Maintenance/InitializeAiFramework.prompt.md](Maintenance/InitializeAiFramew
 Examples:
 
 - `RefactorPrompts.plan.Tasks.inventory` - Tasks inventory for a plan
-- `APIv2.task.Progress.report` - Progress report for a task  
+- `APIv2.task.Progress.report` - Progress report for a task
 - `Authentication.plan.Decisions.report` - Decision report for a plan
 
 ## Archiving

@@ -7,11 +7,11 @@
 ## Roles
 
 - **Strategic Agent** (Orchestrator/Planner/Reviewer): select work, design plans, review outcomes
-  - **Model Requirement**: Claude Sonnet 4.5 only
 - **Implementation Agent**: plan review + implementation in one flow
-  - **Model Requirement**: GPT-5.1-Codex-Max only
 - **Scaffold Agent**: boilerplate generation only
 - **Cleanup Agent**: replace placeholders with project values and trim unused sections
+
+**Role Flexibility**: A single agent may perform any role; no model restrictions apply in this local configuration.
 
 ## Core Rules
 
@@ -21,7 +21,7 @@
 - Prefer deterministic automation; document anything that affects reproducibility
 - Use `Flow.prompt.md` for continue/progress/blocker actions
 
-**Integration Model**: 
+**Integration Model**:
 - **Generic (this file)**: Roles, workflows, conventions — consumed by all projects
 - **Project-specific** (`.github/copilot-instructions.md` in host repo): Quality gates, tech stack, domain rules
 - **Precedence**: When conflicts arise, project-specific rules override generic defaults
@@ -80,7 +80,7 @@ Agents operate in **continuous flow mode**:
 
 **Stop Conditions**:
 - User explicitly requests halt
-- Blocker requires external/user input  
+- Blocker requires external/user input
 - Backlog empty and no new work identified
 
 ## Delegation Format
@@ -88,13 +88,8 @@ Agents operate in **continuous flow mode**:
 **CRITICAL**: See [Delegation.instructions.md](Delegation.instructions.md) for complete delegation format rules and examples.
 
 **Key Rules**:
-- Cross-model delegation (Strategic ↔ Implementation): **Use 4-backtick code block**
-- Same-model delegation (Strategic role switching): Regular 3-backtick format
-- Always specify exact model (never `<ModelName>` placeholder)
-
-**Model Requirements**:
-- Strategic roles (Orchestrator/Planner/Reviewer): Claude Sonnet 4.5
-- Implementation role: GPT-5.1-Codex-Max
+- Use 4-backtick code blocks for delegation when useful; 3-backtick is fine for same-session role switches
+- Specify role and task; model designation is optional in this local setup
 
 ## Response Footer (standard)
 
@@ -103,8 +98,8 @@ Agents operate in **continuous flow mode**:
 
 ### Affected files
 
-**Added**: {List or None}  
-**Modified**: {List or None}  
+**Added**: {List or None}
+**Modified**: {List or None}
 **Deleted**: {List or None}
 
 ------------------------------------------------

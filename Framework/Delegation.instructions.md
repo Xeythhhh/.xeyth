@@ -4,18 +4,18 @@ applyTo: "**"
 
 # Delegation Format Instructions
 
-**CRITICAL**: When delegating work to another agent (different model or role), use the **code block delegation format**.
+**CRITICAL**: When delegating work to another agent or session, use the **code block delegation format**.
 
 ## When to Use Code Block Delegation
 
 **Use code block when**:
 - Strategic Agent delegating to Implementation Agent
 - Implementation Agent delegating to Strategic Agent
-- Any cross-model delegation (Claude Sonnet 4.5 ↔ GPT-5.1-Codex-Max)
+- Any handoff between sessions
 
 **Do NOT use code block when**:
-- Strategic Agent switching roles within itself (Orchestrator → Planner → Reviewer)
-- Continuing work in same role (Flow.prompt.md)
+- Switching roles within the same session (Orchestrator → Planner → Reviewer)
+- Continuing work in the same role (Flow.prompt.md)
 
 **Role Switching Workflow (Strategic Agent only)**:
 When switching roles within Strategic Agent:
@@ -29,27 +29,26 @@ When switching roles within Strategic Agent:
 
 **Template**:
 ````markdown
-**Task**: [{TaskPath}]({TaskPath})  
-**Role**: {Role} (see [Framework/{Prompt}.prompt.md](../Framework/{Prompt}.prompt.md))  
-**Target Audience**: {Agent} ({Model})
+**Task**: [{TaskPath}]({TaskPath})
+**Role**: {Role} (see [Framework/{Prompt}.prompt.md](../Framework/{Prompt}.prompt.md))
+**Target Audience**: {Agent}
 
 {1-2 sentence context}
 ````
 
 **Critical Rules**:
 1. **Always use 4 backticks** (````markdown ... ````) for delegation blocks
-2. **Always specify exact model** (never use `<ModelName>` placeholder)
-3. **Include full relative paths** to task and prompt files
-4. **Keep context brief** (1-2 sentences max)
+2. Include full relative paths to task and prompt files
+3. Keep context brief (1-2 sentences max)
 
 ## Examples
 
 ### Strategic Agent → Implementation Agent (Plan Review)
 
 ````markdown
-**Task**: [Framework/LegacyIntegration.task](Framework/LegacyIntegration.task)  
-**Role**: Implementer (Plan Review - Iteration 1) (see [Framework/Implementation.prompt.md](Framework/Implementation.prompt.md))  
-**Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
+**Task**: [Framework/LegacyIntegration.task](Framework/LegacyIntegration.task)
+**Role**: Implementer (Plan Review - Iteration 1) (see [Framework/Implementation.prompt.md](Framework/Implementation.prompt.md))
+**Target Audience**: Implementation Agent
 
 Review architecture for integrating legacy patterns - validate approach and provide sign-off.
 ````
@@ -57,9 +56,9 @@ Review architecture for integrating legacy patterns - validate approach and prov
 ### Implementation Agent → Strategic Agent (Planner Validation)
 
 ````markdown
-**Task**: [Framework/LegacyIntegration.task](Framework/LegacyIntegration.task)  
-**Role**: Planner (Validation) - Iteration 1 Response (see [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md))  
-**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+**Task**: [Framework/LegacyIntegration.task](Framework/LegacyIntegration.task)
+**Role**: Planner (Validation) - Iteration 1 Response (see [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md))
+**Target Audience**: Strategic Agent
 
 ## Iteration 1 Review
 
@@ -71,19 +70,16 @@ Review architecture for integrating legacy patterns - validate approach and prov
 ### Implementation Agent → Strategic Agent (Review)
 
 ````markdown
-**Task**: [Contracts/ContractValidation.task](Ai/Contracts/ContractValidation.task)  
-**Role**: Reviewer (see [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md))  
-**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+**Task**: [Contracts/ContractValidation.task](Ai/Contracts/ContractValidation.task)
+**Role**: Reviewer (see [Framework/Strategic.prompt.md](Framework/Strategic.prompt.md))
+**Target Audience**: Strategic Agent
 
 Implementation complete - all deliverables met, tests passing, ready for review.
 ````
 
 ## Model-Role Mapping Reference
 
-| Agent | Model | Roles |
-|-------|-------|-------|
-| Strategic Agent | Claude Sonnet 4.5 | Orchestrator, Planner, Reviewer |
-| Implementation Agent | GPT-5.1-Codex-Max | Implementer (Plan Review + Implementation) |
+For this local branch, roles are model-agnostic. A single agent may assume any role.
 
 ## Pre-Delegation Checklist (Orchestrator Only)
 
@@ -99,9 +95,9 @@ Before delegating a task, verify:
 **Target Audience**: Implementation Agent (<ModelName>)
 ```
 
-✅ **Correct - specify model**:
+✅ **Preferred (model optional)**:
 ```markdown
-**Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
+**Target Audience**: Implementation Agent
 ```
 
 ❌ **Missing code block fences**:

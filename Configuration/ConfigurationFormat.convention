@@ -65,8 +65,8 @@ conventions:
     directoryName: "archive"  # Archive directory name
 
 models:
-  strategic: "Claude Sonnet 4.5"         # Strategic Agent model requirement
-  implementation: "GPT-5.1-Codex-Max"    # Implementation Agent model requirement
+  strategic: null          # Optional; model-agnostic in local/custom
+  implementation: null     # Optional; model-agnostic in local/custom
 ```
 
 ### ❌ Bad Example
@@ -136,28 +136,23 @@ Controls framework conventions (archiving, naming, formatting).
 
 ### models Section
 
-Controls model requirements for agent roles (Strategic vs Implementation).
+Controls model preferences for agent roles. In this local branch, roles are model-agnostic; values are optional.
 
-- `strategic` (string, default: "Claude Sonnet 4.5"): Model requirement for Strategic Agent roles
-  - Roles: Orchestrator, Planner, Reviewer
-  - Optimized for: Planning, architecture, reasoning
-
-- `implementation` (string, default: "GPT-5.1-Codex-Max"): Model requirement for Implementation Agent
-  - Role: Implementer (plan review + code execution)
-  - Optimized for: Code generation, API knowledge, deterministic execution
+- `strategic` (string|null, default: null): Optional model preference for Strategic Agent roles
+- `implementation` (string|null, default: null): Optional model preference for Implementation Agent
 
 ## File Locations
 
 ### Framework Configuration
 
-**Location**: `Configuration/Configuration.xeyth`  
-**Purpose**: Framework defaults that apply to all users  
+**Location**: `Configuration/Configuration.xeyth`
+**Purpose**: Framework defaults that apply to all users
 **Versioning**: Tracked in git, updated with framework releases
 
 ### Project Overrides
 
-**Location**: `{ProjectRoot}/.xeyth/Configuration.xeyth` (when framework used as submodule)  
-**Purpose**: Project-specific overrides that take precedence over framework defaults  
+**Location**: `{ProjectRoot}/.xeyth/Configuration.xeyth` (when framework used as submodule)
+**Purpose**: Project-specific overrides that take precedence over framework defaults
 **Versioning**: Tracked in project repository
 
 ## Loading Behavior

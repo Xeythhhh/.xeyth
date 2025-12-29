@@ -52,17 +52,17 @@ Covers Orchestrator, Planner, Reviewer roles.
 2. **Post @copilot comment** delegating fixes to Implementation Agent:
    ```bash
    gh pr comment {number} --body "@copilot Please address the following review comments:
-   
+
    [List each suggestion with thread ID]
-   
+
    ````markdown
    **Task**: [PR #{number} - Review Comments]
    **Role**: Implementer (see Framework/Implementation.prompt.md)
-   **Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
-   
+   **Target Audience**: Implementation Agent
+
    Address Copilot reviewer suggestions on this PR.
    ````
-   
+
    Comment when complete so threads can be resolved."
    ```
 
@@ -114,9 +114,9 @@ When drafting PR comments with delegation prompts for Implementation Agent:
 ```markdown
 @copilot
 
-**Task**: <a>Slice/TaskName.task</a>  
-**Role**: Implementer (see <a>Framework/Implementation.prompt.md</a>)  
-**Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
+**Task**: <a>Slice/TaskName.task</a>
+**Role**: Implementer (see <a>Framework/Implementation.prompt.md</a>)
+**Target Audience**: Implementation Agent
 
 **Refinements needed**:
 
@@ -126,7 +126,7 @@ When drafting PR comments with delegation prompts for Implementation Agent:
 4. **Reviewer Delegation** - Add delegation block to task file (use 4 backticks):
    - Task: <a>Slice/TaskName.task</a>
    - Role: Reviewer (see <a>Framework/Strategic.prompt.md</a>)
-   - Target Audience: Strategic Agent (Claude Sonnet 4.5)
+   - Target Audience: Strategic Agent
    - Context: {Brief summary of work completed}
 5. **Draft Status** - Mark PR ready for review when complete
 
@@ -158,7 +158,7 @@ When drafting PR comments with delegation prompts for Implementation Agent:
 
 ### Automatic Agent Delegation (when tools available)
 
-**If agent invocation tools are available** (e.g., `runSubagent` which spawns cloud agents with model selection):
+**If agent invocation tools are available** (e.g., `runSubagent` which spawns cloud agents):
 
 1. **Commit and push orchestrator work** before delegation:
    ```bash
@@ -175,15 +175,14 @@ When drafting PR comments with delegation prompts for Implementation Agent:
    gh api repos/{owner}/{repo}/pulls/{number}/update-branch -X PUT
    ```
 
-3. **Automatically invoke Implementation Agents** (cloud agents running GPT-5.1-Codex-Max) instead of outputting code blocks:
-   ```
-   runSubagent(
-     model: "GPT-5.1-Codex-Max",
-     prompt: "{Full delegation prompt from task file}",
-     description: "{TaskName} - Implementation"
-   )
-   ```
-   This spawns a new cloud agent session that works independently on the task.
+3. **Automatically invoke Implementation Agents** (cloud agents) instead of outputting code blocks:
+    ```
+    runSubagent(
+       prompt: "{Full delegation prompt from task file}",
+       description: "{TaskName} - Implementation"
+    )
+    ```
+    This spawns a new cloud agent session that works independently on the task.
 
 4. **Monitor active agents** on each Flow invocation:
    - Check PR status for agent-delegated tasks
@@ -214,22 +213,22 @@ When drafting PR comments with delegation prompts for Implementation Agent:
 
 ## Role Switching & Delegation
 
-**Role Switching (within Strategic Agent)**: No delegation prompt needed. Update files, re-read .task file and reports, state "Switching to {Role} role", continue work.
+**Role Switching**: A single agent may switch among roles. Update files, re-read the active `.task` and reports, state "Switching to {Role} role", continue work.
 
-**Cross-Model Delegation**: Use code block format (see [Delegation.instructions.md](Delegation.instructions.md)).
+**Delegation**: Use code block format (see [Delegation.instructions.md](Delegation.instructions.md)) when handing off to another session/agent; model designation is optional.
 
-### To Implementation Agent (cross-model - **USE CODE BLOCK**):
+### To Implementation Agent (handoff example):
 
 ````markdown
 **Task**: [Planning/Task.task.template](../Planning/Task.task.template)
 **Role**: Implementer (see [Implementation.prompt.md](Implementation.prompt.md))
-**Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
+**Target Audience**: Implementation Agent
 
 Summary: ...
 ````
 
-### Role Switch Example (within Strategic Agent):
+### Role Switch Example:
 
-"Switching to Reviewer role. Re-reading the active task and latest reports..." (no delegation code block needed for same-model role switches)
+"Switching to Reviewer role. Re-reading the active task and latest reports..." (no delegation code block needed when staying in the same session).
 
 Use the standard footer from `copilot-instructions.md` in your responses.

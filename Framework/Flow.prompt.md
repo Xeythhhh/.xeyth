@@ -15,7 +15,7 @@
 2. **Commit and push orchestrator work** - Before delegating to cloud agents:
    - Commit any task creation/updates: `git add -A && git commit && git push`
    - Update PR branches if behind: `gh api repos/{owner}/{repo}/pulls/{number}/update-branch -X PUT`
-3. **Auto-delegate to Implementation Agents** - If tools available (runSubagent spawns cloud agents), invoke GPT-5.1-Codex-Max agents directly
+3. **Auto-delegate to Implementation Agents** - If tools available (runSubagent spawns cloud agents), invoke agents directly
 4. **Draft PR comments** for incomplete PRs (with @copilot tags and delegation prompts)
 5. **Merge ready PRs** (if all acceptance criteria met)
 6. **Review backlog** using priority scores (see [TaskPrioritySystem.md](../Planning/TaskPrioritySystem.md))
@@ -43,41 +43,9 @@
 
 ---
 
-## Model Requirements
+## Role Switching
 
-- **Strategic Agent roles** (Orchestrator/Planner/Reviewer): **Claude Sonnet 4.5 only**
-- **Implementation Agent**: **GPT-5.1-Codex-Max only**
-
----
-
-## Role Switching (Strategic Agent Only)
-
-**CRITICAL**: Strategic Agent (Claude Sonnet 4.5) may switch only among its own roles (Orchestrator ↔ Planner ↔ Reviewer) when Flow is invoked with delegation to another Strategic role.
-
-**Cannot switch to**: Implementation Agent or Scaffold Agent (model mismatch)
-
-**Behavior**:
-- If current model matches the delegated Strategic role → assume that role immediately and execute.
-- If delegation targets Implementation or Scaffold while on Strategic model → return delegation prompt (do not execute).
-
----
-
-## Model-Role Enforcement
-
-- If you **are** the correct model for the delegated role: read the delegation prompt, assume the role, execute immediately.
-- If you **are not** the correct model: do **not** execute. Return the delegation prompt in a markdown code block for the user to invoke the correct model.
-
-### Model Mismatch Response Template
-
-````markdown
-**Task**: [{TaskPath}]({TaskPath})
-**Role**: {Role} (see [Framework/{Prompt}.prompt.md](../Framework/{Prompt}.prompt.md))
-**Target Audience**: {Agent} ({Model})
-
-{Delegation context}
-````
-
----
+Roles are model-agnostic in this local branch. A single agent may switch among Orchestrator, Planner, Reviewer, and Implementer roles as needed. Use delegation blocks when handing off to another session/agent; otherwise state the role switch and continue.
 
 ## Detailed Workflow Guidelines
 
@@ -137,7 +105,7 @@ Example recommendation:
 ````markdown
 **Task**: [Proposed task location]
 **Role**: Planner (see [Strategic.prompt.md](Strategic.prompt.md))
-**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+**Target Audience**: Strategic Agent
 
 **Recommendation**: {Brief description of proposed work}
 **Rationale**: {Why this is valuable}
@@ -186,9 +154,9 @@ When invoked in Copilot Cloud (via `file:Flow.prompt.md`), Strategic Agent (Orch
 
 @copilot
 
-**Task**: <a>{TaskPath}</a>  
-**Role**: Implementer (see <a>Framework/Implementation.prompt.md</a>)  
-**Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
+**Task**: <a>{TaskPath}</a>
+**Role**: Implementer (see <a>Framework/Implementation.prompt.md</a>)
+**Target Audience**: Implementation Agent
 
 **Refinements needed before {merge|marking ready for review}**:
 
@@ -205,7 +173,7 @@ When invoked in Copilot Cloud (via `file:Flow.prompt.md`), Strategic Agent (Orch
 4. **Reviewer Delegation** - Add delegation block to task file (use 4 backticks):
    - Task: <a>{TaskPath}</a>
    - Role: Reviewer (see <a>Framework/Strategic.prompt.md</a>)
-   - Target Audience: Strategic Agent (Claude Sonnet 4.5)
+   - Target Audience: Strategic Agent
    - Context: {Summary of completed work}
 
 5. **{Additional items as needed}**
@@ -225,7 +193,7 @@ When invoked in Copilot Cloud (via `file:Flow.prompt.md`), Strategic Agent (Orch
 ````markdown
 **Task**: [{TaskPath}]({TaskPath})
 **Role**: {Role} (see [../Framework/{Prompt}.prompt.md](../Framework/{Prompt}.prompt.md))
-**Target Audience**: {Agent} ({Model})
+**Target Audience**: {Agent}
 
 {Context}
 ````
@@ -331,10 +299,10 @@ For each open PR, **automate preparation** then verify readiness:
    ```bash
    # Query unresolved threads with comments
    gh api graphql -f query='query($owner:String!, $repo:String!, $pr:Int!) { repository(owner:$owner, name:$repo) { pullRequest(number:$pr) { reviewThreads(first:20) { nodes { id isResolved comments(first:5) { nodes { id body author { login } } } } } } } }' -f owner={owner} -f repo={repo} -F pr={number}
-   
+
    # Post @copilot comment delegating fixes (do NOT resolve threads)
    gh pr comment {number} --body "@copilot Please address review comments: [details]"
-   
+
    # Only resolve threads AFTER Implementation Agent confirms fixes
    # NEVER merge with unresolved threads
    ```
@@ -372,14 +340,14 @@ For each open PR, **automate preparation** then verify readiness:
 - Create `{TaskName}.task.{ReportName}.report` alongside the `.task`
 - Use [Planning/ProgressReport.report.template](../../Planning/ProgressReport.report.template) as the body
 - Link the report filename inside the `.task` Progress Log (do not inline the full report)
-- For cross-model delegation, use code block format
+- For delegation to another session/agent, use code block format
 
 ## Blocker Report
 
 - Create `{TaskName}.task.{ReportName}.report` alongside the `.task`
 - Use [Planning/BlockerReport.report.template](../../Planning/BlockerReport.report.template) as the body
 - Link the report filename inside the `.task`; keep details in the `.report`
-- For cross-model delegation to Orchestrator, use code block format
+- For delegation to Orchestrator, use code block format
 
 ## Role Switching (Strategic Agent)
 
@@ -389,7 +357,7 @@ For each open PR, **automate preparation** then verify readiness:
 2. **Re-read the .task file** and latest reports
 3. State: "Switching to {Role} role" in chat
 4. Continue work as new role
-5. NO delegation prompt needed (same model)
+5. NO delegation prompt needed when switching roles within the same session
 
 ## After Completing Delegated Work
 
@@ -420,7 +388,7 @@ For each open PR, **automate preparation** then verify readiness:
 - Select highest-priority task and delegate to Planner or Implementation Agent
 - **Task Refinement**: Regularly review "Not Started" tasks for clarity and completeness
 - **Task Delegation**: Continuously delegate refined tasks to Implementation Agent
-- **Automatic Invocation**: If agent invocation tools available (runSubagent spawns cloud agents), directly invoke GPT-5.1-Codex-Max cloud agents instead of outputting code blocks
+- **Automatic Invocation**: If agent invocation tools available (runSubagent spawns cloud agents), directly invoke agents instead of outputting code blocks
 
 **Implementation Agent** - After completing implementation:
 
@@ -429,11 +397,11 @@ For each open PR, **automate preparation** then verify readiness:
 - Create PR referencing task file using the PR template (`gh pr create --base master --head task/{task-name}`)
 - Create `{TaskName}.task.{ReportName}.report` with progress summary
 - Delegate to Strategic Agent (Reviewer role) via code block
-- Do NOT assume another role (cross-model boundary)
+- Do NOT assume another role in a different session
 
 **CRITICAL**: All work must go through Pull Requests. Never commit directly to master.
 
-## Delegation Format (Cross-Model)
+## Delegation Format
 
 **CRITICAL**: See [Delegation.instructions.md](Delegation.instructions.md) for complete format rules.
 
@@ -441,7 +409,7 @@ For each open PR, **automate preparation** then verify readiness:
 ````markdown
 **Task**: [Planning/Task.task.template](../../Planning/Task.task.template)
 **Role**: Implementer (see [Implementation.prompt.md](Implementation.prompt.md))
-**Target Audience**: Implementation Agent (GPT-5.1-Codex-Max)
+**Target Audience**: Implementation Agent
 ````
 
 Add 1–2 sentences of context after the block.
@@ -451,7 +419,7 @@ Add 1–2 sentences of context after the block.
 ````markdown
 **Task**: [Contracts/ContractRenderer.task](../../Contracts/ContractRenderer.task)
 **Role**: Reviewer (see [Strategic.prompt.md](Strategic.prompt.md))
-**Target Audience**: Strategic Agent (Claude Sonnet 4.5)
+**Target Audience**: Strategic Agent
 
 Context: {What changed, verification evidence, blockers if any}
 ````
