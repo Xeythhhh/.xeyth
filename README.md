@@ -101,13 +101,13 @@ code .xeyth.code-workspace
 
 ### Roles
 
-- **Strategic Agent** (Claude Sonnet 4.5)
-  - **Orchestrator**: Select work, maintain backlog, create tasks
+ **Strategic Agent** (Orchestrator/Planner/Reviewer)
+ **Implementation Agent** (Implementer)
   - **Planner**: Research, design, architecture decisions
   - **Reviewer**: Verify deliverables, approve/request changes
 
-- **Implementation Agent** (GPT-5.1-Codex-Max)
-  - **Implementer**: Plan review + code execution
+  strategic: null
+  implementation: null
 
 ### Workflows
 
@@ -219,6 +219,6 @@ See [Git/Collaboration.plan](Git/Collaboration.plan) for:
 
 ---
 
-**Status**: Active Development  
-**Visibility**: Private (→ Public later)  
+**Status**: Active Development
+**Visibility**: Private (→ Public later)
 **Version**: Pre-release

@@ -35,8 +35,8 @@ conventions:
     directoryName: "archive"  # Archive directory name
 
 models:
-  strategic: "Claude Sonnet 4.5"         # Strategic Agent model requirement
-  implementation: "GPT-5.1-Codex-Max"    # Implementation Agent model requirement
+  strategic: null          # Optional; model-agnostic in local/custom
+  implementation: null     # Optional; model-agnostic in local/custom
 ```
 
 ## Configuration Sections
@@ -114,24 +114,23 @@ conventions:
 
 ### models
 
-Controls model requirements for agent roles (Strategic vs Implementation).
+Controls model preferences for agent roles. In this local branch roles are model-agnostic; these values may be omitted or set to `null`.
 
 **Properties**:
-- `strategic` (string): Model requirement for Strategic Agent roles
-  - Default: "Claude Sonnet 4.5"
-  - Roles: Orchestrator, Planner, Reviewer
-  - Optimized for: Planning, architecture, reasoning
 
-- `implementation` (string): Model requirement for Implementation Agent
-  - Default: "GPT-5.1-Codex-Max"
+- `strategic` (string|null): Optional model preference for Strategic Agent roles
+  - Default: null (model-agnostic)
+  - Roles: Orchestrator, Planner, Reviewer
+
+- `implementation` (string|null): Optional model preference for Implementation Agent
+  - Default: null (model-agnostic)
   - Role: Implementer (plan review + code execution)
-  - Optimized for: Code generation, API knowledge, deterministic execution
 
 **Example**:
 ```yaml
 models:
-  strategic: "Claude Sonnet 4.5"
-  implementation: "GPT-5.1-Codex-Max"
+  strategic: null
+  implementation: null
 ```
 
 ## Loading Behavior
@@ -277,4 +276,3 @@ Future configuration sections:
 - [Configuration.xeyth.template](Configuration.xeyth.template) - Template file
 - [Framework/copilot-instructions.md](../Framework/copilot-instructions.md) - References configuration
 - xeyth-config CLI tool - Configuration management (planned)
-

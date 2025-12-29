@@ -20,5 +20,5 @@ conventions:
     directoryName: "{archive}"  # Archive directory name
 
 models:
-  strategic: "{Claude Sonnet 4.5}"         # Strategic Agent model requirement
-  implementation: "{GPT-5.1-Codex-Max}"    # Implementation Agent model requirement
+  strategic: null         # Optional; model-agnostic in local/custom
+  implementation: null    # Optional; model-agnostic in local/custom

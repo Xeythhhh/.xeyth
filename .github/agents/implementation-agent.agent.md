@@ -5,13 +5,13 @@ target: github-copilot
 tools: ["*"]
 infer: true
 metadata:
-  model: GPT-5.1-Codex-Max
+  model: null  # model-agnostic in local/custom
   roles: [implementer]
   priority: high
 ---
 # Implementation Agent
 
-**CRITICAL**: This agent requires **GPT-5.1-Codex-Max only**. Do not use other models.
+**Note**: In this local/custom branch, roles are model-agnostic; any model may be used.
 
 ## Role Assignment
 

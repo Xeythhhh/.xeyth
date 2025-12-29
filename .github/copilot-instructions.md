@@ -4,9 +4,7 @@ This project uses the AI Framework from the `.xeyth` submodule. See [.xeyth/Fram
 
 ## Model Requirements
 
-**CRITICAL**: Use the correct model for each role:
-- **Strategic Agents** (Orchestrator/Planner/Reviewer): **Claude Sonnet 4.5 only**
-- **Implementation Agent**: **GPT-5.1-Codex-Max only**
+For this local branch, roles are model-agnostic: a single agent may assume any role. Model designation is optional.
 
 ---
 
@@ -24,8 +22,8 @@ See workspace settings (`chat.instructionsFiles.locations`) for auto-loading con
 
 ## Project Context
 
-**Project**: AI Framework (`.xeyth`)  
-**Purpose**: Lightweight, reusable AI instruction framework distributed as a Git submodule  
+**Project**: AI Framework (`.xeyth`)
+**Purpose**: Lightweight, reusable AI instruction framework distributed as a Git submodule
 **Primary Environment**: Git submodule, VS Code workspace
 
 ## Quality Gates
@@ -42,7 +40,7 @@ See workspace settings (`chat.instructionsFiles.locations`) for auto-loading con
 - **Language**: C# with latest language features (.NET 10)
 - **Build System**: Nuke build automation + dotnet CLI
 - **Architecture**: Vertical slice architecture
-- **Testing**: 
+- **Testing**:
   - xUnit for unit tests
   - Verify for snapshot tests
   - Integration tests

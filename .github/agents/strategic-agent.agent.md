@@ -5,13 +5,13 @@ target: github-copilot
 tools: ["*"]
 infer: true
 metadata:
-  model: Claude Sonnet 4.5
+  model: null  # model-agnostic in local/custom
   roles: [orchestrator, planner, reviewer]
   priority: high
 ---
 # Strategic Agent
 
-**CRITICAL**: This agent requires **Claude Sonnet 4.5 only**. Do not use other models.
+**Note**: In this local/custom branch, roles are model-agnostic; any model may be used.
 
 ## Role Assignment
 
