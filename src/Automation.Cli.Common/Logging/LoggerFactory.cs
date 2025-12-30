@@ -17,7 +17,7 @@ public static class LoggerFactory
 
     /// <summary>
     /// Creates a logger with verbosity level parsed from command line arguments.
-    /// Supports: --quiet, --verbose, --debug flags.
+    /// Supports: --quiet (-q), --verbose (-v), and --debug flags.
     /// </summary>
     public static ILogger CreateFromArgs(IAnsiConsole console, string[] args)
     {
@@ -27,9 +27,15 @@ public static class LoggerFactory
 
     /// <summary>
     /// Parses verbosity level from command line arguments.
+    /// Precedence when multiple flags are provided: Quiet > Debug > Verbose > Normal (default).
     /// </summary>
     public static VerbosityLevel ParseVerbosityFromArgs(string[] args)
     {
+        if (args is null)
+        {
+            throw new ArgumentNullException(nameof(args));
+        }
+
         if (args.Contains("--quiet") || args.Contains("-q"))
         {
             return VerbosityLevel.Quiet;

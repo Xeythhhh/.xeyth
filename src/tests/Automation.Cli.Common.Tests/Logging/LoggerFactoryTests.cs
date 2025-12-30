@@ -97,6 +97,13 @@ public sealed class LoggerFactoryTests
     }
 
     [Fact]
+    public void ParseVerbosityFromArgs_ThrowsWhenArgsIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            LoggerFactory.ParseVerbosityFromArgs(null!));
+    }
+
+    [Fact]
     public void ParseVerbosityFromArgs_ReturnsNormalWhenNoFlags()
     {
         var args = new[] { "command" };

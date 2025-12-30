@@ -3,6 +3,8 @@ using Automation.Cli.Common.Logging;
 
 namespace Automation.Cli.Common.Tests.Logging;
 
+// Disable parallel execution for this test class to avoid environment variable conflicts
+[Collection("EnvironmentVariableTests")]
 public sealed class DiagnosticContextTests
 {
     [Fact]

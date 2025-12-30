@@ -34,6 +34,7 @@ var console = ConsoleEnvironment.CreateConsole();
 var logger = LoggerFactory.CreateFromArgs(console, args);
 
 // Supports: --quiet, -q, --verbose, -v, --debug
+// Precedence when multiple flags are provided: Quiet > Debug > Verbose > Normal (default)
 // Example: xeyth-planning list --verbose
 ```
 
@@ -47,7 +48,7 @@ logger.Debug("Diagnostic context", context.ToJson());
 
 // Log formatted string
 logger.Debug(context.ToString());
-// Output: xeyth-planning v1.0.0 @ 2024-12-28T14:20:00.000Z [CWD: /workspace]
+// Output: xeyth-planning v1.0.0 @ 2025-12-30T10:35:00.000Z [CWD: /workspace]
 ```
 
 ## Verbosity Level Behavior
