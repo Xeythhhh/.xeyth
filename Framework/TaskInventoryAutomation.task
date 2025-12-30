@@ -38,16 +38,16 @@ Task inventories (.plan.Tasks.inventory, Plans.inventory) are currently maintain
 
 ### Deliverables
 
-- [ ] **D1**: Research report on task discovery patterns
-- [ ] **D2**: CLI command design (add-task, remove-task, sync-inventory, validate)
-- [ ] **D3**: Architecture decisions (standalone vs xeyth-planning integration)
-- [ ] **D4**: Validation rules documented
-- [ ] **D5**: Implementation plan ready for delegation
+- [x] **D1**: Research report on task discovery patterns
+- [x] **D2**: CLI command design (sync, validate, report commands)
+- [x] **D3**: Architecture decisions (integrate into xeyth-planning)
+- [x] **D4**: Validation rules documented
+- [x] **D5**: Implementation plan ready for delegation
 
 ### Verification Steps
 
-- [ ] Plan complete and approved by Planner
-- [ ] Ready for Implementation Agent delegation
+- [x] Plan complete and approved by Planner
+- [x] Ready for Implementation Agent delegation
 
 ---
 
@@ -55,7 +55,7 @@ Task inventories (.plan.Tasks.inventory, Plans.inventory) are currently maintain
 
 ---
 
-Status: Not Started
+Status: Planning Complete
 Owner: Strategic Agent (Planner)
 Priority: Medium
 Effort: Medium
@@ -68,8 +68,198 @@ Automate task inventory management to reduce manual overhead and ensure consiste
 ## Task Context
 
 - Current state: Manual updates to .plan.Tasks.inventory and Plans.inventory files
-- Desired state: CLI tool automates discovery, assignment, archival updates, and validation
+- Desired state: CLI tool automates discovery, validation, and reporting
+
+## Research Findings
+
+### Current Inventory System Analysis
+
+**Inventory Files**:
+- `Planning/Plans.inventory` - Master list of all .plan files
+- `{Slice}/{Plan}.plan.Tasks.inventory` - Task lists per plan
+- Format: Markdown with "Active Tasks" and "Archived Tasks" sections
+
+**Existing Patterns**:
+- Manual file path entries (relative paths)
+- No automated discovery or validation
+- No enforcement of consistency (orphaned tasks, missing entries)
+
+### Task Discovery Patterns
+
+**Requirement**: Recursively find all .task files in workspace, exclude archive/
+
+**Pattern**: Glob search `**/*.task` excluding `**/archive/**`
+
+**Metadata Extraction**: Parse Status, Priority, Effort from task files for filtering
+
+### Inventory Management Needs
+
+1. **Sync**: Auto-update inventories when tasks are created/archived
+2. **Validate**: Check consistency (all listed tasks exist, no orphans)
+3. **Report**: Generate distribution reports (tasks per plan, status breakdown)
+
+## Architecture Decisions
+
+### AD-1: Integrate into xeyth-planning CLI
+
+**Decision**: Add inventory commands to existing xeyth-planning tool
+
+**Rationale**:
+- Avoids tool proliferation (one CLI for all task management)
+- Reuses task discovery and parsing infrastructure
+- Natural command grouping: task operations + inventory operations
+
+**Commands**:
+- `xeyth-planning sync` - Update inventories based on filesystem
+- `xeyth-planning validate` - Check inventory consistency
+- `xeyth-planning report` - Generate inventory reports
+
+### AD-2: Read-Only Validation, Manual Sync
+
+**Decision**: Validate command is read-only; sync requires explicit invocation
+
+**Rationale**:
+- Prevents accidental overwrites
+- Allows review before committing changes
+- Follows principle of least surprise
+
+**Behavior**:
+- `validate` - Report inconsistencies, exit non-zero if issues found
+- `sync` - Update .inventory files, require confirmation flag
+
+### AD-3: Inventory Format Preservation
+
+**Decision**: Preserve existing markdown format and manual ordering
+
+**Rationale**:
+- Human-readable diffs in Git
+- Allows manual curation (task ordering, grouping)
+- Backward compatible with existing files
+
+**Sync Behavior**:
+- Read existing inventory, parse sections
+- Add missing tasks to Active section
+- Move archived tasks to Archived section
+- Preserve manual ordering within sections
+
+### AD-4: Orphan Detection and Reporting
+
+**Decision**: Report orphaned tasks (not in any inventory) but don't auto-add
+
+**Rationale**:
+- Tasks may intentionally lack plan assignment (ad-hoc work)
+- Orchestrator should decide plan assignment
+- Validation surfaces the decision point
+
+**Output**:
+```
+Orphaned tasks (not in any inventory):
+- Framework/TaskX.task
+- Git/TaskY.task
+```
+
+## Task Deliverables
+
+### D1: Research Report ✅
+
+See "Research Findings" and "Architecture Decisions" above.
+
+### D2: CLI Command Design ✅
+
+**Command**: `xeyth-planning sync`
+
+**Purpose**: Update inventory files based on filesystem state
+
+**Options**:
+- `--dry-run` - Show changes without writing
+- `--plan <name>` - Sync specific plan only (default: all plans)
+
+**Behavior**:
+1. Discover all .task files (exclude archive/)
+2. Parse each task for Status metadata
+3. Read existing .plan.Tasks.inventory files
+4. Add missing active tasks to Active section
+5. Move archived tasks from Active to Archived section
+6. Write updated inventory files
+7. Report changes made
+
+**Command**: `xeyth-planning validate`
+
+**Purpose**: Check inventory consistency
+
+**Options**:
+- `--verbose` - Show all tasks checked
+- `--plan <name>` - Validate specific plan only
+
+**Validation Rules**:
+1. All tasks in inventories exist on filesystem
+2. All tasks in inventories have correct archive status
+3. No duplicate entries across inventories
+4. Plans.inventory references all .plan files
+
+**Output**: Report errors, warnings, orphaned tasks; exit non-zero if issues
+
+**Command**: `xeyth-planning report`
+
+**Purpose**: Generate inventory statistics
+
+**Options**:
+- `--format <table|json>` - Output format
+- `--plan <name>` - Report for specific plan
+
+**Output**:
+- Task count per plan
+- Status breakdown (Not Started, In Progress, Complete)
+- Priority distribution
+- Orphaned task list
+
+### D3: Architecture Decisions ✅
+
+See "Architecture Decisions" section above (AD-1 through AD-4).
+
+### D4: Validation Rules ✅
+
+1. **Existence Check**: All inventory entries must reference existing files
+2. **Archive Status Check**: Tasks in archive/ folders must be in Archived section
+3. **Uniqueness Check**: No task appears in multiple inventories
+4. **Plan Reference Check**: Plans.inventory must list all .plan files
+5. **Orphan Detection**: Report tasks not in any inventory (warning, not error)
+
+### D5: Implementation Plan ✅
+
+**Phase 1**: Inventory File Parser
+- Service: `InventoryFileService.cs`
+- Methods: `ReadInventory()`, `WriteInventory()`, `ParseSections()`
+- Format: Markdown with Active/Archived sections
+
+**Phase 2**: Sync Command
+- Command: `SyncCommand.cs`
+- Service: `InventorySyncService.cs`
+- Logic: Discover tasks → Match to inventories → Update files
+
+**Phase 3**: Validate Command
+- Command: `ValidateCommand.cs`
+- Service: `InventoryValidationService.cs`
+- Logic: Check existence, archive status, uniqueness, orphans
+
+**Phase 4**: Report Command
+- Command: `ReportCommand.cs`
+- Service: `InventoryReportService.cs`
+- Logic: Aggregate statistics, format output
+
+**Phase 5**: Tests
+- Unit tests for services (inventory parsing, validation rules)
+- Integration tests (sync updates files correctly, validate catches issues)
+
+## Success Criteria
+
+- [x] Research complete (inventory format analyzed, patterns identified)
+- [x] Commands designed (sync, validate, report with options)
+- [x] Architecture decided (integrate into xeyth-planning, read-only validation)
+- [x] Validation rules defined (5 rules documented)
+- [x] Implementation plan ready (5 phases, service architecture)
 
 ## Progress Log
 
 - 2025-12-26: Task created by Orchestrator for backlog maintenance
+- 2025-12-30: Planning complete - researched inventory system, designed commands (sync/validate/report), documented architecture decisions and validation rules
