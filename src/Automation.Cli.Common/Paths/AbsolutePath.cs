@@ -1,8 +1,12 @@
 using System.Runtime.InteropServices;
+using Automation.Cli.Common;
 
-namespace Automation.Planning.Paths;
+namespace Xeyth.Common.IO.Paths;
 
-internal readonly record struct AbsolutePath
+/// <summary>
+/// Normalizes and validates absolute filesystem paths and provides helpers for workspace-bound checks.
+/// </summary>
+public readonly record struct AbsolutePath
 {
     private readonly string _value;
 
@@ -10,13 +14,13 @@ internal readonly record struct AbsolutePath
     {
         if (string.IsNullOrWhiteSpace(value))
         {
-            throw new ArgumentException("Path is required", nameof(value));
+            throw new ArgumentException(ErrorMessages.RequiredValue("Path"));
         }
 
         var full = Path.GetFullPath(value);
         if (!Path.IsPathRooted(full))
         {
-            throw new ArgumentException("Path must be absolute", nameof(value));
+            throw new ArgumentException(ErrorMessages.PathMustBeAbsolute(value));
         }
 
         _value = NormalizeSeparators(full);
@@ -30,7 +34,7 @@ internal readonly record struct AbsolutePath
     {
         if (string.IsNullOrWhiteSpace(relative))
         {
-            throw new ArgumentException("Relative path is required", nameof(relative));
+            throw new ArgumentException(ErrorMessages.RequiredValue("Relative path"));
         }
 
         var combined = Path.Combine(_value, relative);

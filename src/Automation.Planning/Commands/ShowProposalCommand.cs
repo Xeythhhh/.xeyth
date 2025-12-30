@@ -91,7 +91,9 @@ internal sealed class ShowProposalCommand : PlanningCommandBase
         {
             if (args.Length == 0)
             {
-                throw new ArgumentException("Proposal name is required");
+                throw new ArgumentException(ErrorMessages.MissingRequiredArgument(
+                    "proposal name",
+                    "xeyth-planning show-proposal <name>"));
             }
 
             var name = args[0];
@@ -108,7 +110,9 @@ internal sealed class ShowProposalCommand : PlanningCommandBase
                         root = queue.Dequeue();
                         break;
                     default:
-                        throw new ArgumentException($"Unknown option: {token}");
+                        throw new ArgumentException(ErrorMessages.UnknownOption(
+                            token,
+                            new[] { "--root" }));
                 }
             }
 

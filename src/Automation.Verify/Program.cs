@@ -1,5 +1,6 @@
 using System.Reflection;
 using Automation.Cli.Common;
+using Xeyth.Common.IO.Paths;
 using Spectre.Console;
 
 namespace Automation.Verify;
@@ -78,9 +79,9 @@ internal sealed class CommandDispatcher
     {
         var options = SetupOptions.Parse(args);
         var tool = ResolveTool(options.Tool);
-        var targetDirectory = Path.GetFullPath(options.TargetDirectory ?? Directory.GetCurrentDirectory());
+        var targetDirectory = ResolveTargetDirectory(options.TargetDirectory);
 
-        var result = VerifyConfigurator.Configure(targetDirectory, tool);
+        var result = VerifyConfigurator.Configure(targetDirectory.Value, tool);
         _reporter.Success(
             message: $"Created {result.ConfigPath}",
             detail: $"Diff tool order: {string.Join(", ", tool.ToolOrder)}");
@@ -112,7 +113,7 @@ internal sealed class CommandDispatcher
     private int RunValidate(string[] args)
     {
         var options = ValidateOptions.Parse(args);
-        var targetDirectory = Path.GetFullPath(options.TargetDirectory ?? Directory.GetCurrentDirectory());
+        var targetDirectory = ResolveTargetDirectory(options.TargetDirectory);
         var result = StatusSpinner.Run(_console, "Validating DiffEngine.json...", () => VerifyValidator.Validate(targetDirectory));
 
         if (result.IsValid)
@@ -136,7 +137,23 @@ internal sealed class CommandDispatcher
     {
         return value is "help" or "--help" or "-h";
     }
-}
+
+    internal static AbsolutePath ResolveTargetDirectory(string? targetDirectory)
+    {
+        var workspaceRoot = AbsolutePath.From(Directory.GetCurrentDirectory());
+        var resolved = AbsolutePath.From(targetDirectory ?? workspaceRoot.Value);
+
+        if (!resolved.IsUnder(workspaceRoot))
+        {
+            throw new InvalidOperationException(ErrorMessages.PathMustBeWithinWorkspace(
+                resolved.Value,
+                workspaceRoot.Value,
+                "Use --path to specify a directory within the workspace."));
+        }
+
+        return resolved;
+    }
+    }
 
 internal sealed record SetupOptions(DiffTool? Tool, string? TargetDirectory)
 {
@@ -157,7 +174,8 @@ internal sealed record SetupOptions(DiffTool? Tool, string? TargetDirectory)
                     var requested = queue.Dequeue();
                     if (!DiffTool.TryParse(requested, out tool))
                     {
-                        throw new ArgumentException($"Unknown diff tool: {requested}");
+                        var validTools = DiffTool.All.Select(t => t.DisplayName);
+                        throw new ArgumentException(ErrorMessages.InvalidValue(token, requested, validTools));
                     }
 
                     break;
@@ -170,7 +188,9 @@ internal sealed record SetupOptions(DiffTool? Tool, string? TargetDirectory)
                     break;
 
                 default:
-                    throw new ArgumentException($"Unknown option: {token}");
+                    throw new ArgumentException(ErrorMessages.UnknownOption(
+                        token,
+                        new[] { "--tool", "-t", "--path", "-p", "--target" }));
             }
         }
 
@@ -181,7 +201,13 @@ internal sealed record SetupOptions(DiffTool? Tool, string? TargetDirectory)
     {
         if (queue.Count == 0)
         {
-            throw new ArgumentException($"Missing value for {token}");
+            var valueType = token switch
+            {
+                "--tool" or "-t" => "tool",
+                "--path" or "-p" or "--target" => "path",
+                _ => "value"
+            };
+            throw new ArgumentException(ErrorMessages.MissingValue(token, valueType));
         }
     }
 }
@@ -205,7 +231,9 @@ internal sealed record ValidateOptions(string? TargetDirectory)
                     targetDirectory = queue.Dequeue();
                     break;
                 default:
-                    throw new ArgumentException($"Unknown option: {token}");
+                    throw new ArgumentException(ErrorMessages.UnknownOption(
+                        token,
+                        new[] { "--path", "-p", "--target" }));
             }
         }
 

@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Automation.Cli.Common;
+using Xeyth.Common.IO.Paths;
 using Contracts.Core.Rendering;
 using Contracts.Core.Services;
 using Spectre.Console;
@@ -119,8 +120,16 @@ public static class CliApp
             return ParseResult.WithError(ex.Message);
         }
 
-        var resolvedPath = Path.GetFullPath(targetPath ?? Directory.GetCurrentDirectory());
-        var options = new ValidateOptions(resolvedPath, contractName, strict);
+        var workspaceRoot = AbsolutePath.From(Directory.GetCurrentDirectory());
+        var requestedPath = targetPath ?? ".";
+        var absoluteTarget = AbsolutePath.From(requestedPath);
+
+        if (!absoluteTarget.IsUnder(workspaceRoot))
+        {
+            return ParseResult.WithError($"Path must be within workspace root: {workspaceRoot}");
+        }
+
+        var options = new ValidateOptions(absoluteTarget.Value, contractName, strict);
         return ParseResult.ValidateCommand(options);
     }
 
@@ -232,7 +241,7 @@ public static class CliApp
     {
         if (queue.Count == 0)
         {
-            throw new ArgumentException($"Missing value for {token}");
+            throw new ArgumentException(ErrorMessages.MissingValue(token));
         }
     }
 
@@ -269,4 +278,3 @@ internal sealed record ParseResult(bool Success, bool ShowHelp, ValidateOptions?
     public static ParseResult Help() => new(false, true, null, null, null);
     public static ParseResult WithError(string error) => new(false, false, null, null, error);
 }
-

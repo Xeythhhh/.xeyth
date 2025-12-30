@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Xeyth.Common.IO.Paths;
 
 namespace Automation.Verify;
 
@@ -11,8 +12,13 @@ internal static class VerifyValidator
             return ValidationResult.Failure("Target directory is required.");
         }
 
-        var configPath = Path.Combine(Path.GetFullPath(targetDirectory), ".verify", "DiffEngine.json");
-        if (!File.Exists(configPath))
+        return Validate(AbsolutePath.From(targetDirectory));
+    }
+
+    internal static ValidationResult Validate(AbsolutePath targetDirectory)
+    {
+        var configPath = targetDirectory.Combine(".verify").Combine("DiffEngine.json");
+        if (!File.Exists(configPath.Value))
         {
             return ValidationResult.Failure("DiffEngine.json not found. Run 'xeyth-verify setup' first.");
         }
@@ -20,7 +26,7 @@ internal static class VerifyValidator
         DiffEngineConfiguration? config;
         try
         {
-            var json = File.ReadAllText(configPath);
+            var json = File.ReadAllText(configPath.Value);
             config = JsonSerializer.Deserialize<DiffEngineConfiguration>(json);
         }
         catch (JsonException ex)

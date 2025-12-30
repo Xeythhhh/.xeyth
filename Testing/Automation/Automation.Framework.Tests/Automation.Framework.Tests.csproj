@@ -16,6 +16,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Automation.Cli.Common\Automation.Cli.Common.csproj" />
+    <ProjectReference Include="..\..\..\src\Automation.Framework\Automation.Framework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
 

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Automation.Cli.Common;
+using Xeyth.Common.IO.Paths;
 using Contracts.Core.Models;
 using Contracts.Core.Services;
 using Microsoft.Extensions.FileSystemGlobbing;
@@ -34,24 +35,24 @@ internal sealed class ValidateCommandRunner
 
     internal async Task<int> RunAsync(ValidateOptions options, CancellationToken cancellationToken = default)
     {
-        var targetPath = options.TargetPath;
-        var isFile = File.Exists(targetPath);
-        var isDirectory = Directory.Exists(targetPath);
+        var targetPath = AbsolutePath.From(options.TargetPath);
+        var isFile = File.Exists(targetPath.Value);
+        var isDirectory = Directory.Exists(targetPath.Value);
 
         if (!isFile && !isDirectory)
         {
-            _console.MarkupLine($"[red]Path not found[/]: {Markup.Escape(targetPath)}");
+            _console.MarkupLine($"[red]Path not found[/]: {Markup.Escape(targetPath.Value)}");
             return 2;
         }
 
-        var rootPath = isFile ? Path.GetDirectoryName(targetPath)! : targetPath;
+        var rootPath = isFile ? AbsolutePath.From(Path.GetDirectoryName(targetPath.Value)!) : targetPath;
         var contracts = await StatusSpinner.RunAsync(
             _console,
             "Discovering contracts...",
-            () => _discovery.DiscoverContractsAsync(rootPath, cancellationToken));
+            () => _discovery.DiscoverContractsAsync(rootPath.Value, cancellationToken));
         if (contracts.Count == 0)
         {
-            _console.MarkupLine($"[red]No contracts found[/] under {Markup.Escape(rootPath)}");
+            _console.MarkupLine($"[red]No contracts found[/] under {Markup.Escape(rootPath.Value)}");
             return 2;
         }
 
@@ -63,20 +64,20 @@ internal sealed class ValidateCommandRunner
         }
 
         var files = isFile
-            ? new List<string> { targetPath }
+            ? new List<string> { targetPath.Value }
             : ResolveFiles(rootPath, scopedContracts);
 
         if (files.Count == 0)
         {
-            _console.MarkupLine($"[yellow]No files matched the selected contracts[/] in {Markup.Escape(rootPath)}.");
+            _console.MarkupLine($"[yellow]No files matched the selected contracts[/] in {Markup.Escape(rootPath.Value)}.");
             return 0;
         }
 
-        var results = await ValidateFilesAsync(files, scopedContracts, rootPath, cancellationToken);
+        var results = await ValidateFilesAsync(files, scopedContracts, rootPath.Value, cancellationToken);
 
         foreach (var result in results)
         {
-            RenderResult(result, rootPath);
+            RenderResult(result, rootPath.Value);
         }
 
         RenderSummary(files.Count, results, options.Strict);
@@ -111,7 +112,7 @@ internal sealed class ValidateCommandRunner
             || string.Equals(sourceName + ".metadata", requested, StringComparison.OrdinalIgnoreCase);
     }
 
-    private IReadOnlyList<string> ResolveFiles(string rootPath, IReadOnlyList<ContractMetadata> contracts)
+    private IReadOnlyList<string> ResolveFiles(AbsolutePath rootPath, IReadOnlyList<ContractMetadata> contracts)
     {
         var matcher = new Matcher(StringComparison.OrdinalIgnoreCase);
 
@@ -130,13 +131,14 @@ internal sealed class ValidateCommandRunner
             }
         }
 
-        var matches = matcher.Execute(new DirectoryInfoWrapper(new DirectoryInfo(rootPath)));
+        var matches = matcher.Execute(new DirectoryInfoWrapper(new DirectoryInfo(rootPath.Value)));
 
         return matches.Files
-            .Select(match => Path.GetFullPath(Path.Combine(rootPath, match.Path)))
-            .Where(File.Exists)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
+            .Select(match => AbsolutePath.From(Path.Combine(rootPath.Value, match.Path)))
+            .Where(path => path.IsUnder(rootPath) && File.Exists(path.Value))
+            .Distinct()
+            .OrderBy(path => path.Value, StringComparer.OrdinalIgnoreCase)
+            .Select(path => path.Value)
             .ToList();
     }
 
