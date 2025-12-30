@@ -5,7 +5,7 @@ Covers Orchestrator, Planner, Reviewer roles.
 ## Orchestrator
 
 **Priority Order** (execute in this sequence):
-1. **Review and merge ready PRs** (see PR Management below)
+1. **Review and merge ready PRs** (resolve satisfied PR conversations to unblock merge; see PR Management below)
 2. **Comment refinements on incomplete PRs** with @copilot delegation
 3. **Pick highest-value work** from backlog; maintain 20 ready tasks
 4. **Maintain at least 5 open PRs** (delegate new tasks if < 5)
@@ -24,9 +24,9 @@ Covers Orchestrator, Planner, Reviewer roles.
    - Check if workflows need approval: `gh pr checks {number}`
    - Update branch if behind: `gh pr view {number} --json mergeStateStatus`
    - Wait for CI checks to complete: `gh pr checks {number} --watch` (or poll)
-   - **Resolve review threads**: Query unresolved threads and auto-resolve (see below)
+   - **Resolve review threads**: Query unresolved threads; when changes are confirmed and acceptance criteria are met, resolve the thread to unblock merge (see below)
    - Auto-mark ready when all checks pass: `gh pr ready {number}`
-3. For each PR, verify:
+3. For each PR, verify (and resolve satisfied PR conversations):
    - ✅ All deliverables checked in task file
    - ✅ Progress Log updated with completion entry
    - ✅ Reviewer delegation block present in task file
@@ -70,7 +70,7 @@ Covers Orchestrator, Planner, Reviewer roles.
 4. **DO NOT merge** until all threads addressed and resolved
 
 **If PR IS ready**:
-1. Verify all review threads resolved (Implementation Agent addressed suggestions)
+1. Resolve any remaining PR conversations that are satisfied (Implementation Agent addressed suggestions)
 2. Auto-mark as ready: `gh pr ready {number}` (if still draft)
 3. Squash merge PR: `gh pr merge {number} --squash --delete-branch`
 4. Archive task file to `{Slice}/archive/{TaskName}.YYYY-MM-DD.task`
